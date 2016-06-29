@@ -7,32 +7,40 @@
     <title>WW2100 Key Findings</title>           
 
     <!--===============  Modules and plugins ===============-->
-
+<link rel="stylesheet" href="lib/jquery-ui-1.11.4/jquery-ui.min.css">
     <!-- d3 handles SVG manipulation data linking -->
     <script src="lib/d3/d3.js"></script>
 
 	<!-- jQuery and jQueryUI for GUI interactions -->
-	<link rel="stylesheet" href="lib/jquery-ui-1.11.4/jquery-ui.min.css">
-	<script src="lib/jquery-3.0.0.js"></script>
-	<script src="lib/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+	
+	<!-- jqueryui doesn't work right with these links, don't know why -->
+	<!-- <script src="lib/jquery-3.0.0.js"></script>
+	<script src="lib/jquery-ui-1.11.4/jquery-ui.min.js"></script> -->
+
+	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    
+    
+    <link rel="stylesheet" href="style/style.css" />
 
     <!-- Leaflet provides the map and tile service -->
     <link rel="stylesheet" href="lib/leaflet/leaflet.css"/>
     <script src="lib/leaflet/leaflet.js"></script>
 	<script src="lib/leaflet-providers.js"></script> <!-- Easy basemap get -->
-	
-	<link rel="stylesheet" href="style/style.css" />
-	
-
 </head>
 
 <body>
-	
-    <!-- This div holds the leaflet map -->
-    <div id="map"></div>
-    
-    
+
+	<div id="map"></div>
+	<div id="uiContainer">
+		<label>Select Data Layer</label>
+		<select name="layerSelect" id="layerSelect" class="uiElement">
+
+		</select>
+	</div>
+		
+
     <script src="scripts/main.js"></script>
-    
+    <script src="scripts/GUI.js"></script>
 </body>
 </html>
