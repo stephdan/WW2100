@@ -11,20 +11,41 @@ body, html {
 	z-index:1;
 }
 
-#uiContainer {
-	position: absolute;
-	width: 190px;
-	height: 100px;
-	padding: 10px;
-	background-color: rgba(255,255,255,1);
-	right: 10px;
-	top: 10px;
+.uiBox {
+	background-color: rgb(255,255,255);
+	background-color: rgba(255,255,255,0.85);
 	z-index: 2;
 	border-style: solid;
 	border-width: 1px;
 	border-radius: 3px;
 	border-color: rgb(200,200,200);
+	box-shadow: 3px 3px 5px rgb(100,100,100);
 	box-shadow: 3px 3px 5px rgba(100,100,100,0.5);
+	padding: 10px;
+	font-family: Verdana, Geneva, sans-serif;
+}
+
+#dataSelectUIContainer {
+	position: absolute;
+	width: 190px;
+	height: 100px;
+	right: 10px;
+	top: 10px;
+}
+
+#legendContainer {
+	position: fixed;
+	left: 10px;
+	bottom: 10px;
+	z-index: 2;
+}
+
+#legendItemContainer {
+	width: auto;
+}
+
+.legendTitle {
+	margin: 5px;
 }
 
 label {
@@ -40,4 +61,5 @@ select {
 	width: 100%;
 	/*display: inline-block;*/
 }
+
 

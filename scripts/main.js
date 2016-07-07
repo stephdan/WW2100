@@ -5,8 +5,6 @@
 	var App = {};
 	window.App = App;
 	
-	
-	
 	/**
 	 * Adds the leaflet basemap to the page. 
 	 */
@@ -38,7 +36,6 @@
 		
 		// Add a data layer to the map 
 		App.addDataLayerToMap("LULC2010_ref");
-		
 	};
 	
 	// TODO Uses d3 for the import, but this might not be the best way.
@@ -90,34 +87,64 @@
 		}
 	};
 	
+	
+	var landcoverColors = [
+		// new order
+		"rgb(125, 95, 149)", // Urban
+		"rgb(252, 241, 185)", // Unforested
+		"rgb(92,144,2)", // subtropical mixed forest (ftm)
+		"rgb(127,178,57)", // temperate warm mixed forest (fdw)
+		"rgb(161, 211, 113)", // cool mixed forest (fvg)
+		"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
+		"rgb(90, 189,173)", // temperate needleleaf
+		"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
+		"rgb(206,238,255)" // subalpine forest (fmh)
+	];
+	
+	var landcoverLabels = [
+		"Urban",
+		"Unforested",
+		"Subtropical Mixed Forest",
+		"Temperate Warm Mixed Forest",
+		"Cool Mixed Forest",
+		"Maritime Needleleaf Forest",
+		"Temperate Needleleaf",
+		"Moist Temperate Needleleaf Forest",
+		"Subalpine Forest"
+	];
+	
 	// This will have to respond in different ways depending on the data.
 	function styleLandcover(styledMap) {
 
 		// TODO Create if statements that check to see if the layer has 
 		// specific properties. So if it has LULC_A, do the thing for that, 
 		// if it has some other thing, do the thing for that.
-
 	    styledMap.setStyle(function (feature) {
-	        switch (feature.properties.LULC_A) {
-	            case 1: // developed
-	                return {color: "rgb(229, 86, 78)"};
-	            case 2: // agriculture
-	                return {color: "rgb(231, 200, 75)"};
-	            case 3:  // other vegetation
-	                return {color: "rgb(133, 199, 126)"};
-	            case 4: // forest
-	                return {color: "rgb(56, 129, 78)"};
-	            case 5: // water
-	                return {color: "rgb(100, 179, 213)"};
-	            case 6: // wetlands
-	                return {color: "rgb(200, 230, 248)"};
-	            case 7: // barren
-	                return {color: "rgb(150, 150, 150)"};
-	            case 8:  // other vegetation
-	                return {color: "rgb(133, 199, 126)"};
-                case 9: // snow/ice
-	                return {color: "rgb(255, 0, 0)"};
+	        switch (feature.properties.lcCombined) {
+	        	case 50: //urban
+	                return {color: landcoverColors[0]};
+	            case -99: //unforested
+	                return {color: landcoverColors[1]};
+	            case 8: // subtropical mixed forest
+	           		return {color: landcoverColors[2]};
+	            case 1: // temperate warm mixed forest (fdw)
+	            	return {color: landcoverColors[3]};
+	            case 5: //cool mixed
+	                return {color: landcoverColors[4]};	
+	            case 2:  //subalpine
+	                return {color: landcoverColors[8]};
+	            case 3: //moist temp needle
+	                return {color: landcoverColors[7]};
+	            case 4: // C3 shrubland (fto)
+	            	return {color: landcoverColors[1]};
+	            case 6: //maritime needle
+	                return {color: landcoverColors[5]};
+	            case 7: // temperate needleleaf woodland (fuc)
+	            	return {color: landcoverColors[6]};
+	            case 9: //temperate needleleaf forest
+	                return {color: landcoverColors[6]};
 	        }
+	        console.log("unknown case: " + feature.properties.lcCombined);
 	    });
 	}
 	
@@ -149,8 +176,65 @@
 		//testData: "data/geometry/json/testData/Ref2010.json",
 		LULC2010_ref: "data/geometry/json/lulc/Ref2010_LULC.json",
 		LULC2050_ref: "data/geometry/json/lulc/Ref2050_LULC.json",
-		LULC2100_ref: "data/geometry/json/lulc/Ref2100_LULC.json",
-		urban_ref_2100 : "data/geometry/json/urbanAreas/Ref_2100_urban_dissolved_NAD83.geojson"
+		LULC2100_ref: "data/geometry/json/lulc/Ref2100_LULC.json"
+	};
+	
+	App.configureLegend = function(legendData) {
+		var legendItemContainer,
+			legendItem,
+			labelSizePx = 12,
+			rectWidth = 20,
+			rectHeight = 12,
+			rectSpacer = 4,
+			maxLabelWidth = 0,
+			labelSpacer = 10;
+		
+		// Creates the svg to stick legend items in, sets the width and height
+		legendItemContainer = d3.select("#legendItemContainer")
+			.append("svg")
+			.attr("height", function() {
+				var l = legendData.colors.length;
+				return (l * rectHeight + (l - 1) * rectSpacer) + 2;
+			})
+			.attr("width", function() {
+				//return "100%"
+			});
+			
+		legendItem = legendItemContainer.selectAll("g")
+			.data(legendData.colors)
+			.enter().append("g");
+			
+		legendItem.append("rect")
+			.attr("width", rectWidth)
+			.attr("height", rectHeight)
+			.attr("fill", "white")
+			.attr("y", function(d, i) {
+				return (rectHeight + rectSpacer) * i;
+			})
+			.attr("x", 2)
+			.attr("fill", function(d, i) {
+				return d;
+			});
+		
+		legendItem.append("text")
+			.style("font-size", labelSizePx + "px")
+			.style("font-family", "Tahoma, Geneva, sans-serif")
+			.text(function(d, i) {
+				return legendData.labels[i];
+			})
+			.attr("x", rectWidth + labelSpacer)
+			.attr("y", function(d, i) {
+				return (rectHeight/2 + (labelSizePx/2 - 1))+ ((rectHeight + rectSpacer) * i);
+			})
+			.each(function(d) {
+				maxLabelWidth = this.getBBox().width > maxLabelWidth ? this.getBBox().width : maxLabelWidth;
+			});
+		
+		legendItemContainer.attr("width", function() {
+				return maxLabelWidth + rectWidth + labelSpacer;
+			});
+		
+		$("#legendContainer label").html(legendData.title);
 	};
 	
 	/**
@@ -159,6 +243,7 @@
 	App.init = function () {
 		App.addMap();
 		App.GUI.init();
+		App.configureLegend({title: "Landcover and Forest Type", colors: landcoverColors, labels: landcoverLabels});
 	};
 	
 }());

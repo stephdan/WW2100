@@ -7,7 +7,7 @@
     <title>WW2100 Key Findings</title>           
 
     <!--===============  Modules and plugins ===============-->
-<link rel="stylesheet" href="lib/jquery-ui-1.11.4/jquery-ui.min.css">
+	<link rel="stylesheet" href="lib/jquery-ui-1.11.4/jquery-ui.min.css">
     <!-- d3 handles SVG manipulation data linking -->
     <script src="lib/d3/d3.js"></script>
 
@@ -32,13 +32,17 @@
 <body>
 
 	<div id="map"></div>
-	<div id="uiContainer">
+	<div id="dataSelectUIContainer" class="uiBox">
 		<label>Select Data Layer</label>
 		<select name="layerSelect" id="layerSelect" class="uiElement">
 
 		</select>
 	</div>
-		
+	
+	<div id="legendContainer" class="uiBox">
+		<label>Legend Title</label>
+		<div id="legendItemContainer"></div>
+	</div>
 
     <script src="scripts/main.js"></script>
     <script src="scripts/GUI.js"></script>
