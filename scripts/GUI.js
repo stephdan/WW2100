@@ -3,18 +3,48 @@
 //$("#layerSelect option[value='Pecan']").remove();
 // end NOTES -------------------------------------------
 
-App.GUI = (function(){
+App.GUI = (function($){
 
 "use strict";
 var layerSelectMenu,
+	dataTypeSelectMenu,
+	timePeriodSelectMenu,
+	scenarioSelectMenu,
 	my = {};
 
-// Create layer select dropdown.
-layerSelectMenu = $("#layerSelect").selectmenu().on( "selectmenuselect", function( event, ui ) {
-	App.addDataLayerToMap(ui.item.value);
+
+dataTypeSelectMenu = $("#dataTypeSelect").selectmenu().on("selectmenuselect", function(event, ui) {
+	// TODO update the options in the 
+	// timePeriodSelectMenu and scenarioSelectMenu
+	my.loadDataByGUI();
 });
 
+timePeriodSelectMenu = $("#timePeriodSelect").selectmenu().on("selectmenuselect", function(event, ui) {
+	my.loadDataByGUI();
+});
+
+scenarioSelectMenu = $("#scenarioSelect").selectmenu().on("selectmenuselect", function(event, ui) {
+	my.loadDataByGUI();
+});
+
+my.loadDataByGUI = function() {
+	var type = dataTypeSelectMenu.val(),
+		date = timePeriodSelectMenu.val(), // TODO this will probably not be a dropdown later
+		scenario = scenarioSelectMenu.val();
+		
+	if(type === "landcover") {
+		App.addLandcoverLayer(date, scenario);
+	}
+	
+	if(type === "snowfall") {
+		console.log("Gonna load a snowfall layer now!");
+		App.addSnowfallLayer(date, scenario);
+	}
+	
+};
+
 // Populates the layerSelectMenu with options based on available data layers.
+// TODO Obsolete, but useful for reference.
 function updateLayerSelectMenu() {
 	var layer,
 		options = [];
@@ -36,9 +66,9 @@ my.updateLayerSelectMenu = function() {
 };
 
 my.init = function() {
-	updateLayerSelectMenu();
+	//updateLayerSelectMenu();
 };
 
 return my;
 
-}());
+}($));

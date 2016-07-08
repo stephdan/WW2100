@@ -32,11 +32,33 @@
 <body>
 
 	<div id="map"></div>
+	
 	<div id="dataSelectUIContainer" class="uiBox">
-		<label>Select Data Layer</label>
-		<select name="layerSelect" id="layerSelect" class="uiElement">
-
-		</select>
+		
+		<div class="selectorContainer">
+			<label>Select Data Type</label>
+			<select name="dataTypeSelect" id="dataTypeSelect" class="uiElement">
+				<option value="landcover">Land Cover</option>
+				<option value="snowfall">Snowfall</option>
+			</select>
+		</div>
+		
+		<div class="selectorContainer">
+			<label>Select Time Period</label>
+			<select name="timePeriodSelect" id="timePeriodSelect" class="uiElement">
+				<option value="early">Early</option>
+				<option value="mid">Mid</option>
+				<option value="late">Late</option>
+			</select>
+		</div>
+		
+		<div class="selectorContainer">
+			<label>Select Scenario</label>
+			<select name="scenarioSelect" id="scenarioSelect" class="uiElement">
+				<option value="ref">Reference</option>
+			</select>
+		</div>
+		
 	</div>
 	
 	<div id="legendContainer" class="uiBox">

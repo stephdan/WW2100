@@ -2,8 +2,21 @@
 	"use strict";
 	
 	// Establish a global namespace
-	var App = {};
+	var App = {},
+		jsonLayer;
+		
+	// Assign global variable
 	window.App = App;
+	
+	var snowDataPath ="data/snowdata/fakeData_midref.csv";
+	var snowData;
+	d3.csv(snowDataPath, function(d) {
+		console.log(d);
+		snowData = d.map(function(v) {
+			return v.value;
+		});
+		console.log(snowData);
+	})
 	
 	/**
 	 * Adds the leaflet basemap to the page. 
@@ -35,58 +48,106 @@
 		App.mapLayers = {};
 		
 		// Add a data layer to the map 
-		App.addDataLayerToMap("LULC2010_ref");
+		//App.addDataLayerToMap("LULC2010_ref");
 	};
 	
-	// TODO Uses d3 for the import, but this might not be the best way.
-	/**
-	 * Add a specified existing data layer to the map.
-	 */
-	App.addDataLayerToMap = function(layerToAdd) {
+	App.addLandcoverLayer = function(date, scenario) {
 		
-		// Don't add this layer if it's already on the map.
-		if(App.mapLayers.hasOwnProperty(layerToAdd)) {
-			console.log(layerToAdd + " layer is already on the map");
-			return;
-		}
-		
-		// If layerToAdd is an available layer, add it. Otherwise, Error
-		if(App.dataLayers.hasOwnProperty(layerToAdd)) {
+		var dataPaths = {
+				early: {ref:"data/geometry/json/lulc/Ref2010_LULC.json"},
+				mid: {ref:"data/geometry/json/lulc/Ref2050_LULC.json"},
+				late: {ref: "data/geometry/json/lulc/Ref2100_LULC.json"}
+			},
+			layerToAdd = "lulc" + date + scenario;
 			
-			// Use d3 to fetch the json. Could also use something else.
-			d3.json(App.dataLayers[layerToAdd], function(error, importedJson){
-				if (error) {
-					return console.warn(error);
-				}
+		d3.json(dataPaths[date][scenario], function(error, importedJson) {
+			if(error) {
+				throw new Error("Problem reading csv " + dataPaths[date][scenario]);
+			}
+			
+			// Turn the geoJson into a leaflet layer
+			jsonLayer = L.geoJson(importedJson, {
+				// A low smooth factor prevents gaps between simplified
+				// polygons, but decreases performance.
+				// raise up to 1 to increase performance, while adding 
+				// weird gaps between polygons. 
+				style: styleLandcoverLayer,
+				smoothFactor: 0,
 				
-				// Turn the geoJson into a leaflet layer
-				var jsonLayer = L.geoJson(importedJson, {
-					// A low smooth factor prevents gaps between simplified
-					// polygons, but decreases performance.
-					// raise up to 1 to increase performance, while adding 
-					// weird gaps between polygons. 
-					smoothFactor: 0 
-				});
-				
-				// Remove the stroke, add some transparency
-				jsonLayer.setStyle({stroke: false, fillOpacity:0.8});
-				
-				// TODO this will have to function differently depending
-				// on what the layer is. 
-				styleLandcover(jsonLayer);
-				
-				// Removes current map layer. Done here so the change
-				// happens fast. TODO There might be a reason to have more
-				// than one layer added sometime. 
-				App.clearMapLayers();
-				App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
-				console.log(importedJson);
+				// This adds event listeners to each feature
+				// onEachFeature: onEachFeature
 			});
+			App.clearMapLayers();
+			// layerToAdd is just a string that happens to be a key in the
+			// mapLayers object. 
+			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
+			console.log(importedJson);
+		});
+		
+		// TODO Configure legend here, move required legend info into this
+		// function.
+		App.configureLegend({title: "Landcover and Forest Type", colors: landcoverColors, labels: landcoverLabels});
+	};
+	
+	App.addSnowfallLayer = function(date, scenario) {
+		var dataPaths = {
+				early: {ref: "data/geometry/json/snow/catch_shaper.json"},
+				mid: {ref: "data/geometry/json/snow/catch_shaper.json"},
+				late: {ref: "data/geometry/json/snow/catch_shaper.json"}
+			},
+			layerToAdd = "snowFall" + date + scenario;
+			
+		d3.json(dataPaths[date][scenario], function(error, importedJson) {
+			if(error) {
+				throw new Error("Problem reading csv " + dataPaths[date][scenario]);
+			}
+			
+			// Turn the geoJson into a leaflet layer
+			jsonLayer = L.geoJson(importedJson, {
+				// A low smooth factor prevents gaps between simplified
+				// polygons, but decreases performance.
+				// raise up to 1 to increase performance, while adding 
+				// weird gaps between polygons. 
+				style: styleSnowfallLayer,
+				smoothFactor: 0,
+				
+				// This adds event listeners to each feature
+				onEachFeature: onEachFeature
+			});
+			App.clearMapLayers();
+			// layerToAdd is just a string that happens to be a key in the
+			// mapLayers object. 
+			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
+			console.log(importedJson);
+		});
+		App.configureLegend({title: "Snowfall (type?)", colors: snowfallColors, labels: snowfallLabels});
+	}
+	
+	// Remove the specified data layer from the map. 
+	App.removeDataLayerFromMap = function(layerToRemove) {
+		if(App.mapLayers.hasOwnProperty(layerToRemove)) {
+			App.map.removeLayer(App.mapLayers[layerToRemove]);
+			delete App.mapLayers[layerToRemove];
 		} else {
-			throw new Error(layerToAdd + " is not an available layer.");
+			console.log(layerToRemove + " layer does not exist");
 		}
 	};
 	
+	function styleLandcoverLayer(feature) {
+		return {
+			fillColor: getLandcoverColor(feature),
+			stroke: false,
+			fillOpacity: 0.8
+		}
+	}
+	
+	function styleSnowfallLayer(feature) {
+		return {
+			fillColor: getSnowfallColor(feature),
+			stroke: false,
+			fillOpacity: 0.8
+		}
+	}
 	
 	var landcoverColors = [
 		// new order
@@ -113,51 +174,89 @@
 		"Subalpine Forest"
 	];
 	
-	// This will have to respond in different ways depending on the data.
-	function styleLandcover(styledMap) {
-
-		// TODO Create if statements that check to see if the layer has 
-		// specific properties. So if it has LULC_A, do the thing for that, 
-		// if it has some other thing, do the thing for that.
-	    styledMap.setStyle(function (feature) {
-	        switch (feature.properties.lcCombined) {
-	        	case 50: //urban
-	                return {color: landcoverColors[0]};
-	            case -99: //unforested
-	                return {color: landcoverColors[1]};
-	            case 8: // subtropical mixed forest
-	           		return {color: landcoverColors[2]};
-	            case 1: // temperate warm mixed forest (fdw)
-	            	return {color: landcoverColors[3]};
-	            case 5: //cool mixed
-	                return {color: landcoverColors[4]};	
-	            case 2:  //subalpine
-	                return {color: landcoverColors[8]};
-	            case 3: //moist temp needle
-	                return {color: landcoverColors[7]};
-	            case 4: // C3 shrubland (fto)
-	            	return {color: landcoverColors[1]};
-	            case 6: //maritime needle
-	                return {color: landcoverColors[5]};
-	            case 7: // temperate needleleaf woodland (fuc)
-	            	return {color: landcoverColors[6]};
-	            case 9: //temperate needleleaf forest
-	                return {color: landcoverColors[6]};
-	        }
-	        console.log("unknown case: " + feature.properties.lcCombined);
-	    });
+	var snowfallColors = [
+		"rgb(255,255,255)",
+		"rgb(216,236,248)",
+		"rgb(181,205,242)",
+		"rgb(151,179,236)",
+		"rgb(125,146,220)",
+		"rgb(115,108,188)",
+		"rgb(105,70,156)"
+	];
+	
+	var snowfallLabels = [
+		"Less than 0.1",
+		"0.1 to 5.0",
+		"5.1 to 10.0",
+		"10.1 to 50.0",
+		"50.1 to 100.0",
+		"100.1 to 500.0",
+		"500.1 to 2000.0"
+	];
+	
+	function getLandcoverColor(feature) {
+		switch (feature.properties.lcCombined) {
+			case 50: //urban
+			    return landcoverColors[0];
+			case -99: //unforested
+			    return landcoverColors[1];
+			case 8: // subtropical mixed forest
+				return landcoverColors[2];
+			case 1: // temperate warm mixed forest (fdw)
+				return landcoverColors[3];
+			case 5: //cool mixed
+			    return landcoverColors[4];	
+			case 2:  //subalpine
+			    return landcoverColors[8];
+			case 3: //moist temp needle
+			    return landcoverColors[7];
+			case 4: // C3 shrubland (fto)
+				return landcoverColors[1];
+			case 6: //maritime needle
+			    return landcoverColors[5];
+			case 7: // temperate needleleaf woodland (fuc)
+				return landcoverColors[6];
+			case 9: //temperate needleleaf forest
+			    return landcoverColors[6];
+        }
+        console.log("unknown case: " + feature.properties.lcCombined);
+        return "rgb(100,100,100)"
 	}
 	
-	// Remove the specified data layer from the map. 
-	App.removeDataLayerFromMap = function(layerToRemove) {
-		if(App.mapLayers.hasOwnProperty(layerToRemove)) {
-			App.map.removeLayer(App.mapLayers[layerToRemove]);
-			delete App.mapLayers[layerToRemove];
-		} else {
-			console.log(layerToRemove + " layer does not exist");
+	function getSnowfallColor(feature) {
+		// Get the snowfall value of that catchment
+		var catchID = feature.properties.CATCHID,
+			snowfall = Number(snowData[catchID - 1]);
+		
+		if(isNaN(snowfall)) {
+			console.log("snowfall is NaN!");
+			return "rgb(100,100,100)"
 		}
-	};
+		
+		if(snowfall < 0.1) {
+			return snowfallColors[0];
+		}
+		if(snowfall <= 5.0) {
+			return snowfallColors[1];
+		}
+		if(snowfall <= 10.0) {
+			return snowfallColors[2];
+		}
+		if(snowfall <= 50.0) {
+			return snowfallColors[3];
+		}
+		if(snowfall <= 100.0) {
+			return snowfallColors[4];
+		}
+		if(snowfall <= 500.0) {
+			return snowfallColors[5];
+		}
+		if(snowfall > 500.0) {
+			return snowfallColors[6];
+		}
+	}
 	
+	// Removes all json layers from the leaflet map.
 	App.clearMapLayers = function() {
 		// Loop through the App.mapLayers, removing each one from the map.
 		var layer;
@@ -170,13 +269,11 @@
 	};
 	
 	App.dataLayers = {
-		//OregonWashington : "data/geometry/json/OregonWashington.json",
-		//states : "data/geometry/json/cb_2015_us_state_20m.json",
-		
-		//testData: "data/geometry/json/testData/Ref2010.json",
 		LULC2010_ref: "data/geometry/json/lulc/Ref2010_LULC.json",
 		LULC2050_ref: "data/geometry/json/lulc/Ref2050_LULC.json",
-		LULC2100_ref: "data/geometry/json/lulc/Ref2100_LULC.json"
+		LULC2100_ref: "data/geometry/json/lulc/Ref2100_LULC.json",
+		catchments: "data/geometry/json/snow/catch.geojson",
+		catchments_shaper: "data/geometry/json/snow/catch_shaper.json"
 	};
 	
 	App.configureLegend = function(legendData) {
@@ -184,10 +281,12 @@
 			legendItem,
 			labelSizePx = 12,
 			rectWidth = 20,
-			rectHeight = 12,
+			rectHeight = 13,
 			rectSpacer = 4,
 			maxLabelWidth = 0,
 			labelSpacer = 10;
+		
+		d3.select("#legendItemContainer svg").remove();
 		
 		// Creates the svg to stick legend items in, sets the width and height
 		legendItemContainer = d3.select("#legendItemContainer")
@@ -208,6 +307,8 @@
 			.attr("width", rectWidth)
 			.attr("height", rectHeight)
 			.attr("fill", "white")
+			.attr("stroke", "rgb(200,200,200)")
+			.attr("stroke-width", 0.25)
 			.attr("y", function(d, i) {
 				return (rectHeight + rectSpacer) * i;
 			})
@@ -236,17 +337,50 @@
 		
 		$("#legendContainer label").html(legendData.title);
 	};
+
+// Event listeners -------------------------------------------------------------
+
+	function onEachFeature(feature, layer) {
+	    layer.on({
+	        mouseover: highlightFeature,
+	        mouseout: resetHighlight
+	    });
+	}
+
+	function highlightFeature(e) {
+	    var layer = e.target;
+		console.log(snowData[layer.feature.properties.CATCHID-1]);
+	    layer.setStyle({
+	    	stroke: 1,
+	        color: '#666'
+	    });
 	
+	    if (!L.Browser.ie && !L.Browser.opera) {
+	        layer.bringToFront();
+	    }
+	}
+	
+	function resetHighlight(e) {
+	    jsonLayer.resetStyle(e.target);
+	}
+	
+	
+// END Event listeners ---------------------------------------------------------
+
+
 	/**
 	 * This stuff happens when the app starts.
 	 */
 	App.init = function () {
 		App.addMap();
 		App.GUI.init();
-		App.configureLegend({title: "Landcover and Forest Type", colors: landcoverColors, labels: landcoverLabels});
+		App.GUI.loadDataByGUI();
 	};
 	
-}());
+}()); // END App------------------------------------------------
+
+
+
 
 // Launch the app
 $(document).ready(function() {

@@ -28,9 +28,13 @@ body, html {
 #dataSelectUIContainer {
 	position: absolute;
 	width: 190px;
-	height: 100px;
+	height: auto;
 	right: 10px;
 	top: 10px;
+}
+
+.selectorContainer {
+	margin-bottom: 10px;
 }
 
 #legendContainer {
