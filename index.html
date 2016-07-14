@@ -8,6 +8,8 @@
 
     <!--===============  Modules and plugins ===============-->
 	<link rel="stylesheet" href="lib/jquery-ui-1.11.4/jquery-ui.min.css">
+	<link rel="stylesheet" href="lib/bootstrap-3.3.6-dist/css/bootstrap.css">
+	
     <!-- d3 handles SVG manipulation data linking -->
     <script src="lib/d3/d3.js"></script>
 
@@ -19,7 +21,7 @@
 
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    
+    <script src="lib/bootstrap-3.3.6-dist/js/bootstrap.js"></script>
     
     <link rel="stylesheet" href="style/style.css" />
 
@@ -37,15 +39,16 @@
 		
 		<div class="selectorContainer">
 			<label>Select Data Type</label>
-			<select name="dataTypeSelect" id="dataTypeSelect" class="uiElement">
+			<select name="dataTypeSelect" id="dataTypeSelect" class="form-control">
 				<option value="landcover">Land Cover</option>
 				<option value="snowfall">Snowfall</option>
+				<option value="devLandVal">Developed Land Value</option>
 			</select>
 		</div>
 		
 		<div class="selectorContainer">
 			<label>Select Time Period</label>
-			<select name="timePeriodSelect" id="timePeriodSelect" class="uiElement">
+			<select name="timePeriodSelect" id="timePeriodSelect" class="form-control">
 				<option value="early">Early</option>
 				<option value="mid">Mid</option>
 				<option value="late">Late</option>
@@ -54,13 +57,113 @@
 		
 		<div class="selectorContainer">
 			<label>Select Scenario</label>
-			<select name="scenarioSelect" id="scenarioSelect" class="uiElement">
+			<select name="scenarioSelect" id="scenarioSelect" class="form-control">
 				<option value="ref">Reference</option>
 			</select>
 		</div>
 		
+		
+		
+		
+		
+	</div>
+
+	<!-- Example Modals for Reference -->
+	<div class="container">
+	  <!-- Modal -->
+	  <div class="modal fade" id="snowfallModal" role="dialog">
+	    <div class="modal-dialog">
+	      <!-- Modal content-->
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	          <h4 class="modal-title">Snow Information</h4>
+	        </div>
+	        <div class="modal-body">
+	          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+	          	sed do eiusmod tempor incididunt ut labore et dolore magna 
+	          	aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
+	          	ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis 
+	          	aute irure dolor in reprehenderit in voluptate velit esse cillum 
+	          	dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
+	          	cupidatat non proident, sunt in culpa qui officia deserunt 
+	          	mollit anim id est laborum.</p>
+	        </div>
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
 	</div>
 	
+	<!-- Example Modals for Reference -->
+	<div class="container">
+	  <!-- Modal -->
+	  <div class="modal fade" id="devLandValModal" role="dialog">
+	    <div class="modal-dialog">
+	      <!-- Modal content-->
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	          <h4 class="modal-title">Developed Land Value Information</h4>
+	        </div>
+	        <div class="modal-body">
+	          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+	          	sed do eiusmod tempor incididunt ut labore et dolore magna 
+	          	aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
+	          	ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis 
+	          	aute irure dolor in reprehenderit in voluptate velit esse cillum 
+	          	dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
+	          	cupidatat non proident, sunt in culpa qui officia deserunt 
+	          	mollit anim id est laborum.</p>
+	        </div>
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<!-- Example Modals for Reference -->
+	<div class="container">
+	  <!-- Modal -->
+	  <div class="modal fade" id="landcoverModal" role="dialog">
+	    <div class="modal-dialog">
+	      <!-- Modal content-->
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	          <h4 class="modal-title">Landcover Information</h4>
+	        </div>
+	        <div class="modal-body">
+	          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+	          	sed do eiusmod tempor incididunt ut labore et dolore magna 
+	          	aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
+	          	ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis 
+	          	aute irure dolor in reprehenderit in voluptate velit esse cillum 
+	          	dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
+	          	cupidatat non proident, sunt in culpa qui officia deserunt 
+	          	mollit anim id est laborum.</p>
+	        </div>
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<div id="info" data-toggle="modal" data-target="#landcoverModal">
+		<svg id="infoIcon" width="10" height="33">
+			<circle cx="4.5" cy="7" r="3"/>
+			<rect x="0" y="13" width="7" height="3"></rect>
+			<rect x="3" y="15" width="4" height="10"></rect>
+			<rect x="0" y="24" width="10" height="3"></rect>
+		</svg>
+	</div>
+
 	<div id="legendContainer" class="uiBox">
 		<label>Legend Title</label>
 		<div id="legendItemContainer"></div>

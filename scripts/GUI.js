@@ -10,20 +10,34 @@ var layerSelectMenu,
 	dataTypeSelectMenu,
 	timePeriodSelectMenu,
 	scenarioSelectMenu,
+	testSelectMenu,
 	my = {};
 
 
-dataTypeSelectMenu = $("#dataTypeSelect").selectmenu().on("selectmenuselect", function(event, ui) {
+
+
+dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
 	// timePeriodSelectMenu and scenarioSelectMenu
+	var type = $(this).val();
+	// Change the data-target attribute of the info button modal guy maybe.
+	if(type === "landcover") {
+		$("#info").attr("data-target", "#landcoverModal");
+	} else if (type === "snowfall"){
+		$("#info").attr("data-target", "#snowfallModal");
+	} else if (type === "devLandVal") {
+		$("#info").attr("data-target", "#devLandValModal");
+	}
+	
+	
 	my.loadDataByGUI();
 });
 
-timePeriodSelectMenu = $("#timePeriodSelect").selectmenu().on("selectmenuselect", function(event, ui) {
+timePeriodSelectMenu = $("#timePeriodSelect").on("change", function(event, ui) {
 	my.loadDataByGUI();
 });
 
-scenarioSelectMenu = $("#scenarioSelect").selectmenu().on("selectmenuselect", function(event, ui) {
+scenarioSelectMenu = $("#scenarioSelect").on("change", function(event, ui) {
 	my.loadDataByGUI();
 });
 
@@ -33,12 +47,18 @@ my.loadDataByGUI = function() {
 		scenario = scenarioSelectMenu.val();
 		
 	if(type === "landcover") {
+		console.log("selected landcover!");
 		App.addLandcoverLayer(date, scenario);
 	}
 	
 	if(type === "snowfall") {
-		console.log("Gonna load a snowfall layer now!");
+		console.log("selected snowfall!");
 		App.addSnowfallLayer(date, scenario);
+	}
+	
+	if(type === "devLandVal") {
+		console.log("selected developed land value!");
+		App.addDevelopedLandValueLayer(date, scenario);
 	}
 	
 };
@@ -64,6 +84,14 @@ function updateLayerSelectMenu() {
 my.updateLayerSelectMenu = function() {
 	updateLayerSelectMenu();
 };
+
+$("#info").mouseenter(function() {
+	$(this).css("background-color", "rgb(235,235,235)");
+	//$(this).attr("data-target", "#trashModal");
+}).mouseleave(function() {
+	$(this).css("background-color", "");
+	//$(this).find("circle, rect, text").attr("fill", "#3182bd");
+});
 
 my.init = function() {
 	//updateLayerSelectMenu();

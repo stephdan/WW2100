@@ -11,11 +11,9 @@
 	var snowDataPath ="data/snowdata/fakeData_midref.csv";
 	var snowData;
 	d3.csv(snowDataPath, function(d) {
-		console.log(d);
 		snowData = d.map(function(v) {
 			return v.value;
 		});
-		console.log(snowData);
 	})
 	
 	/**
@@ -121,7 +119,38 @@
 			console.log(importedJson);
 		});
 		App.configureLegend({title: "Snowfall (type?)", colors: snowfallColors, labels: snowfallLabels});
-	}
+	};
+	
+	App.addDevelopedLandValueLayer = function(date, scenario) {
+		var dataPaths = {
+				early: {ref:"data/geometry/json/devLandVal/ref2010_developed.json"},
+				mid: {ref:"data/geometry/json/devLandVal/ref2050_developed.json"}
+			},
+			layerToAdd = "devLandVal" + date + scenario;
+			
+		d3.json(dataPaths[date][scenario], function(error, importedJson) {
+			if(error) {
+				throw new Error("Problem reading csv " + dataPaths[date][scenario]);
+			}
+			
+			// Turn the geoJson into a leaflet layer
+			jsonLayer = L.geoJson(importedJson, {
+				// A low smooth factor prevents gaps between simplified
+				// polygons, but decreases performance.
+				// raise up to 1 to increase performance, while adding 
+				// weird gaps between polygons. 
+				style: styleDevelopedLandValueLayer,
+				smoothFactor: 0,
+				
+			});
+			App.clearMapLayers();
+			// layerToAdd is just a string that happens to be a key in the
+			// mapLayers object. 
+			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
+			console.log(importedJson);
+		});
+		App.configureLegend({title: "Developed Land Value <br/>$ per Acre", colors: developedLandValueColors, labels: developedLandValueLabels});
+	};
 	
 	// Remove the specified data layer from the map. 
 	App.removeDataLayerFromMap = function(layerToRemove) {
@@ -144,6 +173,14 @@
 	function styleSnowfallLayer(feature) {
 		return {
 			fillColor: getSnowfallColor(feature),
+			stroke: false,
+			fillOpacity: 0.8
+		}
+	}
+	
+	function styleDevelopedLandValueLayer(feature) {
+		return {
+			fillColor: getDevelopedLandValueColors(feature),
 			stroke: false,
 			fillOpacity: 0.8
 		}
@@ -192,6 +229,22 @@
 		"50.1 to 100.0",
 		"100.1 to 500.0",
 		"500.1 to 2000.0"
+	];
+	
+	var developedLandValueColors = [
+		"rgb(254, 255,121)",
+		"rgb(215, 194,94)",
+		"rgb(175, 136,67)",
+		"rgb(137, 80,42)",
+		"rgb(101, 16,19)"
+	];
+	
+	var developedLandValueLabels = [
+		"Less than 250,000",
+		"250,001 - 500,000",
+		"500,001 - 750,000",
+		"750,001 - 1,000,000",
+		"More than 1,000,000"
 	];
 	
 	function getLandcoverColor(feature) {
@@ -253,6 +306,32 @@
 		}
 		if(snowfall > 500.0) {
 			return snowfallColors[6];
+		}
+	}
+	
+	function getDevelopedLandValueColors(feature) {
+		// Get the snowfall value of that catchment
+		var landValue = Number(feature.properties.DEV_VAL);
+		
+		if(isNaN(landValue)) {
+			console.log("Developed Land Value is NaN!");
+			return "rgb(100,100,100)"
+		}
+		
+		if(landValue < 250000) {
+			return developedLandValueColors[0];
+		}
+		if(landValue <= 500000) {
+			return developedLandValueColors[1];
+		}
+		if(landValue <= 750000) {
+			return developedLandValueColors[2];
+		}
+		if(landValue <= 1000000) {
+			return developedLandValueColors[3];
+		}
+		if(landValue > 1000000) {
+			return developedLandValueColors[4];
 		}
 	}
 	
@@ -338,7 +417,9 @@
 		$("#legendContainer label").html(legendData.title);
 	};
 
-// Event listeners -------------------------------------------------------------
+// Event listeners for snow layer pointer interations --------------------------
+
+	//TODO these may not be needed
 
 	function onEachFeature(feature, layer) {
 	    layer.on({
@@ -367,7 +448,6 @@
 	
 // END Event listeners ---------------------------------------------------------
 
-
 	/**
 	 * This stuff happens when the app starts.
 	 */
@@ -378,9 +458,6 @@
 	};
 	
 }()); // END App------------------------------------------------
-
-
-
 
 // Launch the app
 $(document).ready(function() {
