@@ -390,7 +390,7 @@
 				});
 	}
 	
-	App.addCitiesToMap = function(cityJSON) {
+	App.addCitiesToMap = function(citiesJSON) {
 		// check to make sure cities isn't already added
 		if(App.referenceLayers.cities) {
 			console.log("cities is already added!");
@@ -398,8 +398,8 @@
 		}
 		
 		var labels = [], labelsLayer, 
-			citiesLayer = L.geoJson(cityJSON, {
-			pointToLayer: function(feature, latlng) {
+			citiesLayer = L.geoJson(citiesJSON, {
+				pointToLayer: function(feature, latlng) {
 				return L.circleMarker(latlng, cityMarkerOptions);
 			},
 			
@@ -413,7 +413,29 @@
 		});
 		App.referenceLayers.cities = L.layerGroup(labels).addTo(App.map);
 		//App.mapLayers.cities = citiesLayer.addTo(App.map);
+	};
+	
+	
+	
+	App.addStreamsToMap = function(streamsJSON) {
 		
+		var streamsStyle = {
+		    "color": "rgb(88,147,169)",
+		    "weight": 2,
+		    "opacity": 1
+		};
+		
+		// check to make sure cities isn't already added
+		if(App.referenceLayers.streams) {
+			console.log("streams is already added!");
+			return;
+		}
+		
+		var streamsLayer = L.geoJson(streamsJSON, {
+			style: streamsStyle
+		});
+		
+		App.referenceLayers.streams = streamsLayer.addTo(App.map);
 	};
 	
 	App.addReferenceLayers = function() {
@@ -422,9 +444,11 @@
 			App.importReferenceLayers(function(error, data) {
 				if (error) {throw error;}
 				
-				var cityJSON = data[0];
-	
-				App.addCitiesToMap(cityJSON);
+				var citiesJSON = data[0],
+					streamsJSON = data[1];
+				
+				App.addCitiesToMap(citiesJSON);
+				App.addStreamsToMap(streamsJSON);
 			});
 		}
 	};
@@ -445,11 +469,13 @@
 	// than always importing this data.
 	App.importReferenceLayers = function(callback) {
 		var dataPaths = {
-			cities: "data/geometry/baseLayers/cities_oregon.json"
+			cities: "data/geometry/baseLayers/cities_oregon.json",
+			streams: "data/geometry/baseLayers/streams.json"
 		};
 		
 		d3_queue.queue(1)
 			.defer(d3.json, dataPaths.cities)
+			.defer(d3.json, dataPaths.streams)
 			.awaitAll(callback);
 	};
 	

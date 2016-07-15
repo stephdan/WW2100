@@ -159,24 +159,26 @@
 
 	<!-- END MODALS -->
 	
-	<!-- Button for showing modals -->
-	<div id="info" data-toggle="modal" data-target="#landcoverModal">
-		<!-- The i is totally just 3 svg rectangles and a circle 
-			arranged in an i shape -->
-		<svg id="infoIcon" width="10" height="33">
-			<circle cx="4.5" cy="7" r="3"/>
-			<rect x="0" y="13" width="7" height="3"></rect>
-			<rect x="3" y="15" width="4" height="10"></rect>
-			<rect x="0" y="24" width="10" height="3"></rect>
-		</svg>
+	
+	<div id="legendAndInfoButtonContainer">
+		<!-- Container for the legend -->
+		<div id="legendContainer" class="uiBox">
+			<label>Legend Title</label>
+			<div id="legendItemContainer"></div>
+		</div>
+		<!-- Button for showing modals -->
+		<div id="info" data-toggle="modal" data-target="#landcoverModal">
+			<!-- The i is totally just 3 svg rectangles and a circle 
+				arranged in an i shape -->
+			<svg id="infoIcon" width="10" height="33">
+				<circle cx="4.5" cy="7" r="3"/>
+				<rect x="0" y="13" width="7" height="3"></rect>
+				<rect x="3" y="15" width="4" height="10"></rect>
+				<rect x="0" y="24" width="10" height="3"></rect>
+			</svg>
+		</div>
 	</div>
-
-	<!-- Container for the legend -->
-	<div id="legendContainer" class="uiBox">
-		<label>Legend Title</label>
-		<div id="legendItemContainer"></div>
-	</div>
-
+	
 	<!-- Main scripts, they initialize the App -->
     <script src="scripts/main.js"></script>
     <script src="scripts/GUI.js"></script>
