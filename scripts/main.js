@@ -30,7 +30,11 @@
 	App.addMap = function() {
 		
 		// Create the leaflet map
-		App.map = L.map("map").setView([44.5, -122.7], 8);
+		App.map = L.map("map", {
+			maxBounds: L.latLngBounds([55, -135], [35,-110]),
+			minZoom: 7,
+			maxZoom: 11
+		}).setView([44.5, -122.7], 9);
 		
 		// A selection of basemaps to choose from using the very handy 
 		// leaflet-oroviders.js
