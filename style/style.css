@@ -3,6 +3,11 @@ body, html {
 	margin: 0;
 }
 
+.textLabelclass{
+  white-space:nowrap;
+  color: yellow;
+}
+
 #map {
 	width: 100%;
 	height: 100%;

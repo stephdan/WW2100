@@ -14,8 +14,6 @@ var layerSelectMenu,
 	my = {};
 
 
-
-
 dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
 	// timePeriodSelectMenu and scenarioSelectMenu
@@ -28,8 +26,6 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	} else if (type === "devLandVal") {
 		$("#info").attr("data-target", "#devLandValModal");
 	}
-	
-	
 	my.loadDataByGUI();
 });
 
@@ -42,25 +38,14 @@ scenarioSelectMenu = $("#scenarioSelect").on("change", function(event, ui) {
 });
 
 my.loadDataByGUI = function() {
-	var type = dataTypeSelectMenu.val(),
-		date = timePeriodSelectMenu.val(), // TODO this will probably not be a dropdown later
-		scenario = scenarioSelectMenu.val();
+	var settings = {};
+	
+	settings.type = dataTypeSelectMenu.val();
+	settings.date = timePeriodSelectMenu.val(); // TODO this will probably not be a dropdown later
+	settings.scenario = scenarioSelectMenu.val();
+	
+	App.addWW2100DataLayer(settings);
 		
-	if(type === "landcover") {
-		console.log("selected landcover!");
-		App.addLandcoverLayer(date, scenario);
-	}
-	
-	if(type === "snowfall") {
-		console.log("selected snowfall!");
-		App.addSnowfallLayer(date, scenario);
-	}
-	
-	if(type === "devLandVal") {
-		console.log("selected developed land value!");
-		App.addDevelopedLandValueLayer(date, scenario);
-	}
-	
 };
 
 // Populates the layerSelectMenu with options based on available data layers.
@@ -85,12 +70,23 @@ my.updateLayerSelectMenu = function() {
 	updateLayerSelectMenu();
 };
 
+// This sets up the behavior of the info button
 $("#info").mouseenter(function() {
 	$(this).css("background-color", "rgb(235,235,235)");
-	//$(this).attr("data-target", "#trashModal");
 }).mouseleave(function() {
 	$(this).css("background-color", "");
-	//$(this).find("circle, rect, text").attr("fill", "#3182bd");
+});
+
+// Checkboxes for adding/removing reference layers
+$("#citiesLayerCheckbox").on("click", function() {
+	// Is the box checked or not?
+	var isChecked = $(this).prop("checked");
+	App.settings.showReferenceLayers = isChecked;
+	if(isChecked) {
+		App.addReferenceLayers();
+	} else {
+		App.clearReferenceLayers();
+	}
 });
 
 my.init = function() {

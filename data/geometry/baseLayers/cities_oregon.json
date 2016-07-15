@@ -1,5 +1,4 @@
 {"type":"FeatureCollection","features":[
-{"type":"Feature","geometry":{"type":"Point","coordinates":[-122.97803389676324,44.05194805813534]},"properties":{"name":"Springfield","latitude":44.0519480581,"longitude":-122.978033897}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-123.84250309435794,45.455247415237295]},"properties":{"name":"Tillamook","latitude":45.4552474152,"longitude":-123.842503094}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-116.96188948755963,44.02662660631239]},"properties":{"name":"Ontario","latitude":44.0266266063,"longitude":-116.961889488}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-118.08660119817603,45.32468690905199]},"properties":{"name":"La Grande","latitude":45.3246869091,"longitude":-118.086601198}},

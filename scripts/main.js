@@ -3,18 +3,26 @@
 	
 	// Establish a global namespace
 	var App = {},
-		jsonLayer;
+		jsonLayer; //TODO this is kindof a random place to put this
 		
 	// Assign global variable
 	window.App = App;
 	
+	// TODO these snowData things should be stored elsewhere
 	var snowDataPath ="data/snowdata/fakeData_midref.csv";
 	var snowData;
+	
 	d3.csv(snowDataPath, function(d) {
 		snowData = d.map(function(v) {
 			return v.value;
 		});
-	})
+	});
+	
+	
+	App.settings = {
+		showReferenceLayers: true
+	};
+	
 	
 	/**
 	 * Adds the leaflet basemap to the page. 
@@ -45,8 +53,23 @@
 		// Make a place to store data layers
 		App.mapLayers = {};
 		
-		// Add a data layer to the map 
-		//App.addDataLayerToMap("LULC2010_ref");
+	};
+	
+	App.addWW2100DataLayer = function(settings) {
+		if(settings.type === "landcover") {
+			console.log("selected landcover!");
+			App.addLandcoverLayer(settings.date, settings.scenario);
+		}
+		
+		if(settings.type === "snowfall") {
+			console.log("selected snowfall!");
+			App.addSnowfallLayer(settings.date, settings.scenario);
+		}
+		
+		if(settings.type === "devLandVal") {
+			console.log("selected developed land value!");
+			App.addDevelopedLandValueLayer(settings.date, settings.scenario);
+		}
 	};
 	
 	App.addLandcoverLayer = function(date, scenario) {
@@ -80,6 +103,7 @@
 			// mapLayers object. 
 			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
 			console.log(importedJson);
+			App.addReferenceLayers();
 		});
 		
 		// TODO Configure legend here, move required legend info into this
@@ -117,6 +141,7 @@
 			// mapLayers object. 
 			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
 			console.log(importedJson);
+			App.addReferenceLayers();
 		});
 		App.configureLegend({title: "Snowfall (type?)", colors: snowfallColors, labels: snowfallLabels});
 	};
@@ -140,14 +165,14 @@
 				// raise up to 1 to increase performance, while adding 
 				// weird gaps between polygons. 
 				style: styleDevelopedLandValueLayer,
-				smoothFactor: 0,
-				
+				smoothFactor: 0
 			});
 			App.clearMapLayers();
 			// layerToAdd is just a string that happens to be a key in the
 			// mapLayers object. 
 			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
 			console.log(importedJson);
+			App.addReferenceLayers();
 		});
 		App.configureLegend({title: "Developed Land Value <br/>$ per Acre", colors: developedLandValueColors, labels: developedLandValueLabels});
 	};
@@ -334,6 +359,99 @@
 			return developedLandValueColors[4];
 		}
 	}
+	
+	var cityMarkerOptions = {
+	    radius: 4,
+	    fillColor: "red",
+	    color: "red",
+	    weight: 1,
+	    opacity: 1,
+	    fillOpacity: 1
+	};
+	
+	function createLabelIcon(labelClass,labelText){
+		
+		var html,
+			svgCircle,
+			svgText;
+			
+		svgText = "<text x='13' y='12' font-size='12'>" + 
+				  labelText + "</text>";
+		
+		svgCircle = "<circle cx='5' cy='15' fill='black' r='3'>";
+		
+		//html = "<div><svg><circle cx='5' cy='5' fill='black' r='5'>"  + svgText + "</svg></div>";
+		html = "<div><svg width='100' height='20'>"  + svgText  + svgCircle + "</svg></div>";
+		
+		return L.divIcon({ 
+					iconAnchor: [6, 16], 
+					className: labelClass,
+					html: html
+				});
+	}
+	
+	App.addCitiesToMap = function(cityJSON) {
+		// check to make sure cities isn't already added
+		if(App.referenceLayers.cities) {
+			console.log("cities is already added!");
+			return;
+		}
+		
+		var labels = [], labelsLayer, 
+			citiesLayer = L.geoJson(cityJSON, {
+			pointToLayer: function(feature, latlng) {
+				return L.circleMarker(latlng, cityMarkerOptions);
+			},
+			
+			onEachFeature: function(feature, layer) {
+				var lat = feature.properties.latitude,
+					lng = feature.properties.longitude,
+					name = feature.properties.name;
+
+				labels.push( L.marker([lat,lng], {icon:createLabelIcon("textLabelclass", name)}));  //.addTo(App.map);
+			}
+		});
+		App.referenceLayers.cities = L.layerGroup(labels).addTo(App.map);
+		//App.mapLayers.cities = citiesLayer.addTo(App.map);
+		
+	};
+	
+	App.addReferenceLayers = function() {
+		App.clearReferenceLayers();
+		if(App.settings.showReferenceLayers) {
+			App.importReferenceLayers(function(error, data) {
+				if (error) {throw error;}
+				
+				var cityJSON = data[0];
+	
+				App.addCitiesToMap(cityJSON);
+			});
+		}
+	};
+	
+	App.clearReferenceLayers = function() {
+		// Loop through the App.referenceLayers, removing each one from the map.
+		var layer;
+		for(layer in App.referenceLayers) {
+			if(App.referenceLayers.hasOwnProperty(layer)) {
+				App.map.removeLayer(App.referenceLayers[layer]);
+			}
+		}
+		App.referenceLayers = {};
+	};
+	
+	// Uses d3_queue to synchronously import json files. 
+	// TODO Could import json when App inits and just load that json, rather
+	// than always importing this data.
+	App.importReferenceLayers = function(callback) {
+		var dataPaths = {
+			cities: "data/geometry/baseLayers/cities_oregon.json"
+		};
+		
+		d3_queue.queue(1)
+			.defer(d3.json, dataPaths.cities)
+			.awaitAll(callback);
+	};
 	
 	// Removes all json layers from the leaflet map.
 	App.clearMapLayers = function() {
