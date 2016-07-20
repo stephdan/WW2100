@@ -8,9 +8,77 @@
 	// Assign global variable
 	window.App = App;
 	
-	// TODO these snowData things should be stored elsewhere
+	// TODO these snowData things should be stored elsewhere, but not sure where
+	// just yet. It will depend on how this whole snow deal gets structured. 
 	var snowDataPath ="data/snowdata/fakeData_midref.csv";
 	var snowData;
+	var selectedDataType;
+	
+	var legendColors = {
+		landcover: [// new order
+			"rgb(125, 95, 149)", // Urban
+			"rgb(252, 241, 185)", // Unforested
+			"rgb(92,144,2)", // subtropical mixed forest (ftm)
+			"rgb(127,178,57)", // temperate warm mixed forest (fdw)
+			"rgb(161, 211, 113)", // cool mixed forest (fvg)
+			"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
+			"rgb(90, 189,173)", // temperate needleleaf
+			"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
+			"rgb(206,238,255)" // subalpine forest (fmh)
+		],
+		snowfall: [
+			"rgb(255,255,255)",
+			"rgb(216,236,248)",
+			"rgb(181,205,242)",
+			"rgb(151,179,236)",
+			"rgb(125,146,220)",
+			"rgb(115,108,188)",
+			"rgb(105,70,156)"
+		],
+		devLandVal: [
+			"rgb(254, 255,121)",
+			"rgb(215, 194,94)",
+			"rgb(175, 136,67)",
+			"rgb(137, 80,42)",
+			"rgb(101, 16,19)"
+		]
+	}
+	var legendLabels = {
+		landcover: [
+			"Urban",
+			"Unforested",
+			"Subtropical Mixed Forest",
+			"Temperate Warm Mixed Forest",
+			"Cool Mixed Forest",
+			"Maritime Needleleaf Forest",
+			"Temperate Needleleaf",
+			"Moist Temperate Needleleaf Forest",
+			"Subalpine Forest"
+		],
+		snowfall: [
+			"Less than 0.1",
+			"0.1 to 5.0",
+			"5.1 to 10.0",
+			"10.1 to 50.0",
+			"50.1 to 100.0",
+			"100.1 to 500.0",
+			"500.1 to 2000.0"
+		],
+		devLandVal: [
+			"Less than 250,000",
+			"250,001 - 500,000",
+			"500,001 - 750,000",
+			"750,001 - 1,000,000",
+			"More than 1,000,000"
+		]
+	}
+	var legendTitles = {
+		landcover: "Landcover and Forest Type",
+		snowfall: "Snowfall (type?)",
+		devLandVal: "Developed Land Value <br/>$ per Acre",
+		agLandVal: "Agricultural Land Value <br/>$ per Acre"
+	}
+	
 	
 	d3.csv(snowDataPath, function(d) {
 		snowData = d.map(function(v) {
@@ -28,7 +96,6 @@
 	 * Adds the leaflet basemap to the page. 
 	 */
 	App.addMap = function() {
-		
 		// Create the leaflet map
 		App.map = L.map("map", {
 			maxBounds: L.latLngBounds([55, -135], [35,-110]),
@@ -56,38 +123,67 @@
 		
 		// Make a place to store data layers
 		App.mapLayers = {};
-		
 	};
+
 	
 	App.addWW2100DataLayer = function(settings) {
-		if(settings.type === "landcover") {
-			console.log("selected landcover!");
-			App.addLandcoverLayer(settings.date, settings.scenario);
-		}
+		var allDataPaths = {
+				landcover: {
+					ref: {
+						early: "data/geometry/json/lulc/Ref2010_lulc.json",
+						mid: "data/geometry/json/lulc/Ref2050_lulc.json",
+						late: "data/geometry/json/lulc/Ref2100_lulc.json"
+					},
+					econExtreme: {
+						early: "data/geometry/json/lulc/EconExtreme2010_lulc.json",
+						mid: "data/geometry/json/lulc/EconExtreme2050_lulc.json",
+						late: "data/geometry/json/lulc/EconExtreme2100_lulc.json"
+					}
+				},
+				snowfall: {
+					ref: {
+						early: "data/geometry/json/snow/catch_shaper.json",
+						mid: "data/geometry/json/snow/catch_shaper.json",
+						late: "data/geometry/json/snow/catch_shaper.json"
+					},
+					econExtreme: {
+						early: "",
+						mid: "",
+						late: ""
+					}
+				},
+				agLandVal: {
+					ref: {
+						early: "",
+						mid: "",
+						late: ""
+					},
+					econExtreme: {
+						early: "",
+						mid: "",
+						late: ""
+					}
+				},
+				devLandVal: {
+					ref: {
+						early: "data/geometry/json/devLandVal/ref2010_developed.json",
+						mid: "data/geometry/json/devLandVal/ref2050_developed.json",
+						late: "data/geometry/json/devLandVal/ref2100_developed.json"
+					},
+					econExtreme: {
+						early: "",
+						mid: "",
+						late: ""
+					}
+				}
+		},
+		layerToAdd = settings.type + settings.date + settings.scenario;
 		
-		if(settings.type === "snowfall") {
-			console.log("selected snowfall!");
-			App.addSnowfallLayer(settings.date, settings.scenario);
-		}
+		selectedDataType = settings.type;
 		
-		if(settings.type === "devLandVal") {
-			console.log("selected developed land value!");
-			App.addDevelopedLandValueLayer(settings.date, settings.scenario);
-		}
-	};
-	
-	App.addLandcoverLayer = function(date, scenario) {
-		
-		var dataPaths = {
-				early: {ref:"data/geometry/json/lulc/Ref2010_LULC.json"},
-				mid: {ref:"data/geometry/json/lulc/Ref2050_LULC.json"},
-				late: {ref: "data/geometry/json/lulc/Ref2100_LULC.json"}
-			},
-			layerToAdd = "lulc" + date + scenario;
-			
-		d3.json(dataPaths[date][scenario], function(error, importedJson) {
+		d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
 			if(error) {
-				throw new Error("Problem reading csv " + dataPaths[date][scenario]);
+				throw new Error("Problem reading csv " + allDataPaths[settings.type][settings.scenario][settings.date]);
 			}
 			
 			// Turn the geoJson into a leaflet layer
@@ -96,45 +192,7 @@
 				// polygons, but decreases performance.
 				// raise up to 1 to increase performance, while adding 
 				// weird gaps between polygons. 
-				style: styleLandcoverLayer,
-				smoothFactor: 0,
-				
-				// This adds event listeners to each feature
-				// onEachFeature: onEachFeature
-			});
-			App.clearMapLayers();
-			// layerToAdd is just a string that happens to be a key in the
-			// mapLayers object. 
-			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
-			console.log(importedJson);
-			App.addReferenceLayers();
-		});
-		
-		// TODO Configure legend here, move required legend info into this
-		// function.
-		App.configureLegend({title: "Landcover and Forest Type", colors: landcoverColors, labels: landcoverLabels});
-	};
-	
-	App.addSnowfallLayer = function(date, scenario) {
-		var dataPaths = {
-				early: {ref: "data/geometry/json/snow/catch_shaper.json"},
-				mid: {ref: "data/geometry/json/snow/catch_shaper.json"},
-				late: {ref: "data/geometry/json/snow/catch_shaper.json"}
-			},
-			layerToAdd = "snowFall" + date + scenario;
-			
-		d3.json(dataPaths[date][scenario], function(error, importedJson) {
-			if(error) {
-				throw new Error("Problem reading csv " + dataPaths[date][scenario]);
-			}
-			
-			// Turn the geoJson into a leaflet layer
-			jsonLayer = L.geoJson(importedJson, {
-				// A low smooth factor prevents gaps between simplified
-				// polygons, but decreases performance.
-				// raise up to 1 to increase performance, while adding 
-				// weird gaps between polygons. 
-				style: styleSnowfallLayer,
+				style: styleWW2100Layer,
 				smoothFactor: 0,
 				
 				// This adds event listeners to each feature
@@ -147,38 +205,13 @@
 			console.log(importedJson);
 			App.addReferenceLayers();
 		});
-		App.configureLegend({title: "Snowfall (type?)", colors: snowfallColors, labels: snowfallLabels});
-	};
-	
-	App.addDevelopedLandValueLayer = function(date, scenario) {
-		var dataPaths = {
-				early: {ref:"data/geometry/json/devLandVal/ref2010_developed.json"},
-				mid: {ref:"data/geometry/json/devLandVal/ref2050_developed.json"}
-			},
-			layerToAdd = "devLandVal" + date + scenario;
-			
-		d3.json(dataPaths[date][scenario], function(error, importedJson) {
-			if(error) {
-				throw new Error("Problem reading csv " + dataPaths[date][scenario]);
-			}
-			
-			// Turn the geoJson into a leaflet layer
-			jsonLayer = L.geoJson(importedJson, {
-				// A low smooth factor prevents gaps between simplified
-				// polygons, but decreases performance.
-				// raise up to 1 to increase performance, while adding 
-				// weird gaps between polygons. 
-				style: styleDevelopedLandValueLayer,
-				smoothFactor: 0
-			});
-			App.clearMapLayers();
-			// layerToAdd is just a string that happens to be a key in the
-			// mapLayers object. 
-			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
-			console.log(importedJson);
-			App.addReferenceLayers();
-		});
-		App.configureLegend({title: "Developed Land Value <br/>$ per Acre", colors: developedLandValueColors, labels: developedLandValueLabels});
+		
+		// TODO Configure legend here, move required legend info into this
+		// function.
+		App.configureLegend({
+			title: legendTitles[settings.type], 
+			colors: legendColors[settings.type], 
+			labels: legendLabels[settings.type]});
 	};
 	
 	// Remove the specified data layer from the map. 
@@ -191,6 +224,31 @@
 		}
 	};
 	
+	
+	function styleWW2100Layer(feature){
+		if(selectedDataType === "landcover") {
+			return {
+				fillColor: getLandcoverColor(feature),
+				stroke: false,
+				fillOpacity: 0.8
+			};
+		}
+		if(selectedDataType === "snowfall") {
+			return {
+				fillColor: getSnowfallColor(feature),
+				stroke: false,
+				fillOpacity: 0.8
+			};
+		}
+		if(selectedDataType === "devLandVal") {
+			return {
+				fillColor: getDevelopedLandValueColors(feature),
+				stroke: false,
+				fillOpacity: 0.8
+			};
+		}
+	}
+	
 	function styleLandcoverLayer(feature) {
 		return {
 			fillColor: getLandcoverColor(feature),
@@ -198,7 +256,6 @@
 			fillOpacity: 0.8
 		}
 	}
-	
 	function styleSnowfallLayer(feature) {
 		return {
 			fillColor: getSnowfallColor(feature),
@@ -206,7 +263,6 @@
 			fillOpacity: 0.8
 		}
 	}
-	
 	function styleDevelopedLandValueLayer(feature) {
 		return {
 			fillColor: getDevelopedLandValueColors(feature),
@@ -214,92 +270,31 @@
 			fillOpacity: 0.8
 		}
 	}
-	
-	var landcoverColors = [
-		// new order
-		"rgb(125, 95, 149)", // Urban
-		"rgb(252, 241, 185)", // Unforested
-		"rgb(92,144,2)", // subtropical mixed forest (ftm)
-		"rgb(127,178,57)", // temperate warm mixed forest (fdw)
-		"rgb(161, 211, 113)", // cool mixed forest (fvg)
-		"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
-		"rgb(90, 189,173)", // temperate needleleaf
-		"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
-		"rgb(206,238,255)" // subalpine forest (fmh)
-	];
-	
-	var landcoverLabels = [
-		"Urban",
-		"Unforested",
-		"Subtropical Mixed Forest",
-		"Temperate Warm Mixed Forest",
-		"Cool Mixed Forest",
-		"Maritime Needleleaf Forest",
-		"Temperate Needleleaf",
-		"Moist Temperate Needleleaf Forest",
-		"Subalpine Forest"
-	];
-	
-	var snowfallColors = [
-		"rgb(255,255,255)",
-		"rgb(216,236,248)",
-		"rgb(181,205,242)",
-		"rgb(151,179,236)",
-		"rgb(125,146,220)",
-		"rgb(115,108,188)",
-		"rgb(105,70,156)"
-	];
-	
-	var snowfallLabels = [
-		"Less than 0.1",
-		"0.1 to 5.0",
-		"5.1 to 10.0",
-		"10.1 to 50.0",
-		"50.1 to 100.0",
-		"100.1 to 500.0",
-		"500.1 to 2000.0"
-	];
-	
-	var developedLandValueColors = [
-		"rgb(254, 255,121)",
-		"rgb(215, 194,94)",
-		"rgb(175, 136,67)",
-		"rgb(137, 80,42)",
-		"rgb(101, 16,19)"
-	];
-	
-	var developedLandValueLabels = [
-		"Less than 250,000",
-		"250,001 - 500,000",
-		"500,001 - 750,000",
-		"750,001 - 1,000,000",
-		"More than 1,000,000"
-	];
-	
 	function getLandcoverColor(feature) {
+		var colors = legendColors.landcover;
 		switch (feature.properties.lcCombined) {
 			case 50: //urban
-			    return landcoverColors[0];
+			    return colors[0];
 			case -99: //unforested
-			    return landcoverColors[1];
+			    return colors[1];
 			case 8: // subtropical mixed forest
-				return landcoverColors[2];
+				return colors[2];
 			case 1: // temperate warm mixed forest (fdw)
-				return landcoverColors[3];
+				return colors[3];
 			case 5: //cool mixed
-			    return landcoverColors[4];	
+			    return colors[4];	
 			case 2:  //subalpine
-			    return landcoverColors[8];
+			    return colors[8];
 			case 3: //moist temp needle
-			    return landcoverColors[7];
+			    return colors[7];
 			case 4: // C3 shrubland (fto)
-				return landcoverColors[1];
+				return colors[1];
 			case 6: //maritime needle
-			    return landcoverColors[5];
+			    return colors[5];
 			case 7: // temperate needleleaf woodland (fuc)
-				return landcoverColors[6];
+				return colors[6];
 			case 9: //temperate needleleaf forest
-			    return landcoverColors[6];
+			    return colors[6];
         }
         console.log("unknown case: " + feature.properties.lcCombined);
         return "rgb(100,100,100)"
@@ -308,7 +303,8 @@
 	function getSnowfallColor(feature) {
 		// Get the snowfall value of that catchment
 		var catchID = feature.properties.CATCHID,
-			snowfall = Number(snowData[catchID - 1]);
+			snowfall = Number(snowData[catchID - 1]),
+			colors = legendColors.snowfall;
 		
 		if(isNaN(snowfall)) {
 			console.log("snowfall is NaN!");
@@ -316,31 +312,32 @@
 		}
 		
 		if(snowfall < 0.1) {
-			return snowfallColors[0];
+			return colors[0];
 		}
 		if(snowfall <= 5.0) {
-			return snowfallColors[1];
+			return colors[1];
 		}
 		if(snowfall <= 10.0) {
-			return snowfallColors[2];
+			return colors[2];
 		}
 		if(snowfall <= 50.0) {
-			return snowfallColors[3];
+			return colors[3];
 		}
 		if(snowfall <= 100.0) {
-			return snowfallColors[4];
+			return colors[4];
 		}
 		if(snowfall <= 500.0) {
-			return snowfallColors[5];
+			return colors[5];
 		}
 		if(snowfall > 500.0) {
-			return snowfallColors[6];
+			return colors[6];
 		}
 	}
 	
 	function getDevelopedLandValueColors(feature) {
 		// Get the snowfall value of that catchment
-		var landValue = Number(feature.properties.DEV_VAL);
+		var landValue = Number(feature.properties.DEV_VAL),
+			colors = legendColors.devLandVal;
 		
 		if(isNaN(landValue)) {
 			console.log("Developed Land Value is NaN!");
@@ -348,19 +345,19 @@
 		}
 		
 		if(landValue < 250000) {
-			return developedLandValueColors[0];
+			return colors[0];
 		}
 		if(landValue <= 500000) {
-			return developedLandValueColors[1];
+			return colors[1];
 		}
 		if(landValue <= 750000) {
-			return developedLandValueColors[2];
+			return colors[2];
 		}
 		if(landValue <= 1000000) {
-			return developedLandValueColors[3];
+			return colors[3];
 		}
 		if(landValue > 1000000) {
-			return developedLandValueColors[4];
+			return colors[4];
 		}
 	}
 	
@@ -569,21 +566,13 @@
 
 	//TODO these may not be needed
 
-	function onEachFeature(feature, layer) {
-	    layer.on({
-	        mouseover: highlightFeature,
-	        mouseout: resetHighlight
-	    });
-	}
-
 	function highlightFeature(e) {
 	    var layer = e.target;
 		console.log(snowData[layer.feature.properties.CATCHID-1]);
 	    layer.setStyle({
-	    	stroke: 1,
+			stroke: 1,
 	        color: '#666'
 	    });
-	
 	    if (!L.Browser.ie && !L.Browser.opera) {
 	        layer.bringToFront();
 	    }
@@ -592,6 +581,17 @@
 	function resetHighlight(e) {
 	    jsonLayer.resetStyle(e.target);
 	}
+
+	function onEachFeature(feature, layer) {
+		if(selectedDataType==="snowfall") {
+			layer.on({
+		        mouseover: highlightFeature,
+		        mouseout: resetHighlight
+		    });
+		}
+	}
+
+	
 	
 	
 // END Event listeners ---------------------------------------------------------

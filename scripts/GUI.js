@@ -18,7 +18,8 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
 	// timePeriodSelectMenu and scenarioSelectMenu
 	var type = $(this).val();
-	// Change the data-target attribute of the info button modal guy maybe.
+	// Change the data-target attribute of the info button. This way information
+	// about this layer will be shown when the info button is clicked. 
 	if(type === "landcover") {
 		$("#info").attr("data-target", "#landcoverModal");
 	} else if (type === "snowfall"){
