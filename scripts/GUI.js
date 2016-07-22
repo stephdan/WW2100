@@ -6,47 +6,79 @@
 App.GUI = (function($){
 
 "use strict";
+
 var layerSelectMenu,
 	dataTypeSelectMenu,
-	timePeriodSelectMenu,
 	scenarioSelectMenu,
 	testSelectMenu,
-	my = {};
+	my = {},
+	selectedScenario = "ref";
 
 
 dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
 	// timePeriodSelectMenu and scenarioSelectMenu
-	var type = $(this).val();
+	var type = $(this).val(),
+		showTheseButtons,
+		hideTheseButtons;
 	// Change the data-target attribute of the info button. This way information
 	// about this layer will be shown when the info button is clicked. 
 	if(type === "landcover") {
-		$("#info").attr("data-target", "#landcoverModal");
+		$("#info").attr("data-target", "#landcoverModal");		
 	} else if (type === "snowfall"){
 		$("#info").attr("data-target", "#snowfallModal");
 	} else if (type === "devLandVal") {
 		$("#info").attr("data-target", "#devLandValModal");
 	}
+	my.showHideScenarioButtons(type);
 	my.loadDataByGUI();
 });
 
-timePeriodSelectMenu = $("#timePeriodSelect").on("change", function(event, ui) {
+$("#timeRange").on("change", function() {
 	my.loadDataByGUI();
 });
 
-scenarioSelectMenu = $("#scenarioSelect").on("change", function(event, ui) {
-	my.loadDataByGUI();
+// scenarioSelectMenu = $("#scenarioSelect").on("change", function(event, ui) {
+	// my.loadDataByGUI();
+// });
+
+$("#baseLayerSelect").on("change", function(event, ui) {
+	App.setBaseLayer($(this).val());
+});
+
+$("#refButtonLabel").on("click", function() {
+	if(selectedScenario !== "ref" && $("#timeRange").val() !== "1") {
+		selectedScenario = "ref";
+		my.loadDataByGUI();
+	}
+});
+
+$("#econExtremeButtonLabel").on("click", function() {
+	if(selectedScenario !== "econExtreme" && $("#timeRange").val() !== "1") {
+		selectedScenario = "econExtreme";
+		my.loadDataByGUI();
+	}
+});
+
+$("#opacitySlider").on("input", function() {
+	App.setDataLayerOpacity($(this).val());
 });
 
 my.loadDataByGUI = function() {
-	var settings = {};
+	var settings = {},
+		timeRangeSliderValue = $("#timeRange").val();
 	
 	settings.type = dataTypeSelectMenu.val();
-	settings.date = timePeriodSelectMenu.val(); // TODO this will probably not be a dropdown later
-	settings.scenario = scenarioSelectMenu.val();
+	settings.scenario = selectedScenario;
 	
+	if(timeRangeSliderValue === "1") {
+		settings.date = "early";
+	} else if (timeRangeSliderValue === "2") {
+		settings.date = "mid";
+	} else {
+		settings.date = "late";
+	}
 	App.addWW2100DataLayer(settings);
-		
 };
 
 // Populates the layerSelectMenu with options based on available data layers.
@@ -89,6 +121,37 @@ $("#citiesLayerCheckbox").on("click", function() {
 		App.clearReferenceLayers();
 	}
 });
+
+my.hideButtonById = function(buttonId) {
+	var button = $("#" + buttonId);	
+	button.hide();	
+};
+
+my.showButtonById = function(buttonId) {
+	var button = $("#" + buttonId);	
+	button.show();	
+};
+
+my.showHideScenarioButtons = function(type) {
+	// Show and hide buttons based on the current scenario
+	$(".scenarioButton").each(function(i) {
+		if($(this).hasClass(type)) {
+			$(this).show();
+		} else {
+			$(this).hide();
+		}
+	});
+};
+
+my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
+	var i;
+	for(i = 0; i < showThese.length; i += 1) {
+		my.showButtonById(showTheseButtons[i]);
+	}
+	for(i = 0; i < hideThese.length; i += 1) {
+		my.hideButtonById(hideTheseButtons[i]);
+	}
+};
 
 my.init = function() {
 	//updateLayerSelectMenu();

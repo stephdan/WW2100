@@ -38,34 +38,68 @@
 	<div id="dataSelectUIContainer" class="uiBox">
 		
 		<div class="selectorContainer">
-			<label>Select Data Type</label>
+			<label>Data Selection</label>
 			<select name="dataTypeSelect" id="dataTypeSelect" class="form-control">
 				<option value="landcover">Land Cover</option>
 				<option value="snowfall">Snowfall</option>
 				<option value="devLandVal">Developed Land Value</option>
+				<option value="agLandVal">Agricultural Land Value</option>
 			</select>
 		</div>
 		
-		<div class="selectorContainer">
-			<label>Select Time Period</label>
-			<select name="timePeriodSelect" id="timePeriodSelect" class="form-control">
-				<option value="early">Early</option>
-				<option value="mid">Mid</option>
-				<option value="late">Late</option>
-			</select>
+		<div class="sliderContainer">
+			<div class="stepLabels" style="text-align: center">
+				<span style="float: left">2010</span>
+				<span>2050</span>
+				<span style="float: right">2099</span>
+			</div>
+			<input type="range" id="timeRange" min="1" max="3" step="1" 
+			 value="1" list="steplist"/>
+			<datalist id="steplist">
+				<option>1</option>
+			    <option>2</option>
+			    <option>3</option>
+			</datalist>
 		</div>
 		
-		<div class="selectorContainer">
-			<label>Select Scenario</label>
-			<select name="scenarioSelect" id="scenarioSelect" class="form-control">
-				<option value="ref">Reference</option>
-				<option value="econExtreme">Econ Extreme</option>
-			</select>
+		<div data-toggle="buttons">
+			
+			<label class="btn btn-primary scenarioButton landcover snowfall agLandVal devLandVal active" id="refButtonLabel">
+				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
+				Reference
+			</label>
+			
+			<label class="btn btn-primary scenarioButton landcover snowfall agLandVal devLandVal" id="econExtremeButtonLabel">
+				<input type="radio" name="options" id="option2" autocomplete="off"> 
+				Econ Extreme
+			</label>
+			
 		</div>
 
 		<div class="checkbox">
 			<label><input type="checkbox" id="citiesLayerCheckbox" checked value="">Reference Layers</label>
 		</div>
+		
+		<div class="sliderContainer">
+			<label>Opacity</label>
+			<input type="range" id="opacitySlider"/ min="0", max="1" value="100" step="0.01">
+		</div>
+		
+		<div class="selectorContainer">
+			<label>Base Layer</label>
+			<select name="baseLayerSelect" id="baseLayerSelect" class="form-control">
+				<option class="basemap" value="Esri_WorldTerrain">Esri_WorldTerrain</option>
+				<option class="basemap" value="ESRI_grayBasemap">ESRI_grayBasemap</option>
+				<option class="basemap" value="OpenStreetMap_Mapnik">OpenStreetMap_Mapnik</option>
+				<option class="basemap" value="OpenStreetMap_HOT">OpenStreetMap_HOT</option>
+				<option class="basemap" value="Esri_WorldImagery">Esri_WorldImagery</option>
+				<option class="basemap" value="Esri_NatGeoWorldMap">Esri_NatGeoWorldMap</option>
+				<option class="basemap" value="Stamen_Toner">Stamen_Toner</option>
+				<option class="basemap" value="Stamen_TonerLite">Stamen_TonerLite</option>
+				<option class="basemap" value="Stamen_TerrainBackground">Stamen_TerrainBackground</option>
+			</select>
+		</div>
+		
 		
 	</div>
 
@@ -181,6 +215,7 @@
 	</div>
 	
 	<!-- Main scripts, they initialize the App -->
+	<script src="scripts/ColorUtils.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/GUI.js"></script>
 </body>

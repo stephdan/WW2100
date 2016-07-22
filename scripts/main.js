@@ -4,7 +4,11 @@
 	// Establish a global namespace
 	var App = {},
 		jsonLayer; //TODO this is kindof a random place to put this
-		
+	
+	App.getJsonLayer = function() {
+		return jsonLayer;
+	};
+	
 	// Assign global variable
 	window.App = App;
 	
@@ -14,35 +18,43 @@
 	var snowData;
 	var selectedDataType;
 	
-	var legendColors = {
-		landcover: [// new order
-			"rgb(125, 95, 149)", // Urban
-			"rgb(252, 241, 185)", // Unforested
-			"rgb(92,144,2)", // subtropical mixed forest (ftm)
-			"rgb(127,178,57)", // temperate warm mixed forest (fdw)
-			"rgb(161, 211, 113)", // cool mixed forest (fvg)
-			"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
-			"rgb(90, 189,173)", // temperate needleleaf
-			"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
-			"rgb(206,238,255)" // subalpine forest (fmh)
-		],
-		snowfall: [
-			"rgb(255,255,255)",
-			"rgb(216,236,248)",
-			"rgb(181,205,242)",
-			"rgb(151,179,236)",
-			"rgb(125,146,220)",
-			"rgb(115,108,188)",
-			"rgb(105,70,156)"
-		],
-		devLandVal: [
-			"rgb(254, 255,121)",
-			"rgb(215, 194,94)",
-			"rgb(175, 136,67)",
-			"rgb(137, 80,42)",
-			"rgb(101, 16,19)"
-		]
+	App.getWW2100LegendColors = function(dataType) {
+		switch(dataType) {
+			case "landcover":
+				return [
+					"rgb(125, 95, 149)", // Urban
+					"rgb(252, 241, 185)", // Unforested
+					"rgb(92,144,2)", // subtropical mixed forest (ftm)
+					"rgb(127,178,57)", // temperate warm mixed forest (fdw)
+					"rgb(161, 211, 113)", // cool mixed forest (fvg)
+					"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
+					"rgb(90, 189,173)", // temperate needleleaf
+					"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
+					"rgb(206,238,255)" // subalpine forest (fmh)
+				];
+			case "snowfall":
+				return ColorUtils.getColorRamp(
+					[255,255,255], 
+					[105, 70,156], 
+					7, "string"
+				);
+			case "devLandVal":
+				return ColorUtils.getColorRamp(
+					[237,248,233], 
+					[0,109,44], 
+					5, 
+					"string"
+				);
+			case "agLandVal":
+				return ColorUtils.getColorRamp(
+					[237,248,233], 
+					[0,109,44], 
+					6, 
+					"string"
+				); 
+		}
 	}
+	
 	var legendLabels = {
 		landcover: [
 			"Urban",
@@ -70,8 +82,17 @@
 			"500,001 - 750,000",
 			"750,001 - 1,000,000",
 			"More than 1,000,000"
+		],
+		agLandVal: [
+			"Less than 500",
+			"501 to 1,000",
+			"1,001 to 1,500",
+			"1,501 to 2,000",
+			"2,001 to 2,500",
+			"More than 2,500"
 		]
 	}
+	
 	var legendTitles = {
 		landcover: "Landcover and Forest Type",
 		snowfall: "Snowfall (type?)",
@@ -88,9 +109,14 @@
 	
 	
 	App.settings = {
-		showReferenceLayers: true
+		showReferenceLayers: true,
+		dataLayerOpacity: 0.8
 	};
 	
+	App.setDataLayerOpacity = function(opacity) {
+		App.settings.dataLayerOpacity = opacity;
+		jsonLayer.setStyle({fillOpacity: opacity});
+	};
 	
 	/**
 	 * Adds the leaflet basemap to the page. 
@@ -107,24 +133,31 @@
 		// leaflet-oroviders.js
 		// TODO These options are not needed UNLESS users will have the ability
 		// to change the basemap.
-		var basemapLayers = {
+		App.basemapLayers = {
+				Esri_WorldTerrain: L.tileLayer.provider('Esri.WorldTerrain'),
 				ESRI_grayBasemap: L.tileLayer.provider('Esri.WorldGrayCanvas'),
 				OpenStreetMap_Mapnik: L.tileLayer.provider('OpenStreetMap.Mapnik'),
 				OpenStreetMap_HOT: L.tileLayer.provider('OpenStreetMap.HOT'),
 				Esri_WorldImagery: L.tileLayer.provider('Esri.WorldImagery'),
-				Esri_WorldTerrain: L.tileLayer.provider('Esri.WorldTerrain'),
 				Esri_NatGeoWorldMap: L.tileLayer.provider('Esri.NatGeoWorldMap'),
+				Stamen_Toner: L.tileLayer.provider('Stamen.Toner'),
 				Stamen_TonerLite: L.tileLayer.provider('Stamen.TonerLite'),
 				Stamen_TerrainBackground: L.tileLayer.provider('Stamen.TerrainBackground')
 			};
 		
 		// Add a basemap 
-		basemapLayers.Esri_WorldTerrain.addTo(App.map);		
-		
+		App.basemapLayers.Esri_WorldTerrain.addTo(App.map);		
+		App.currentBasemap = App.basemapLayers.Esri_WorldTerrain;
 		// Make a place to store data layers
 		App.mapLayers = {};
 	};
 
+	App.setBaseLayer = function(layerName) {
+		var newLayer = App.basemapLayers[layerName];
+		App.map.removeLayer(App.currentBasemap);
+		newLayer.addTo(App.map);
+		App.currentBasemap = newLayer;
+	};
 	
 	App.addWW2100DataLayer = function(settings) {
 		var allDataPaths = {
@@ -143,8 +176,8 @@
 				snowfall: {
 					ref: {
 						early: "data/geometry/json/snow/catch_shaper.json",
-						mid: "data/geometry/json/snow/catch_shaper.json",
-						late: "data/geometry/json/snow/catch_shaper.json"
+						mid: "",
+						late: ""
 					},
 					econExtreme: {
 						early: "",
@@ -154,12 +187,12 @@
 				},
 				agLandVal: {
 					ref: {
-						early: "",
-						mid: "",
-						late: ""
+						early: "data/geometry/json/agLandVal/ref2010_ag.json",
+						mid: "data/geometry/json/agLandVal/ref2050_ag_mapShaper.json",
+						late: "data/geometry/json/agLandVal/ref2100_ag_mapShaper.json",
 					},
 					econExtreme: {
-						early: "",
+						early: "data/geometry/json/agLandVal/econExtreme2010_ag.json",
 						mid: "",
 						late: ""
 					}
@@ -183,6 +216,7 @@
 		
 		d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
 			if(error) {
+				alert("There is currently no data for this setting. Soon to come!"); 
 				throw new Error("Problem reading csv " + allDataPaths[settings.type][settings.scenario][settings.date]);
 			}
 			
@@ -210,7 +244,7 @@
 		// function.
 		App.configureLegend({
 			title: legendTitles[settings.type], 
-			colors: legendColors[settings.type], 
+			colors: App.getWW2100LegendColors(settings.type), 
 			labels: legendLabels[settings.type]});
 	};
 	
@@ -226,52 +260,30 @@
 	
 	
 	function styleWW2100Layer(feature){
-		if(selectedDataType === "landcover") {
-			return {
-				fillColor: getLandcoverColor(feature),
-				stroke: false,
-				fillOpacity: 0.8
-			};
+		var fillColor,
+			// The next two may never change, so could be hardcoded below later
+			stroke = false,
+			fillOpacity = 0.8;		
+		
+		switch(selectedDataType){
+			case "landcover": fillColor = getLandcoverColor(feature);
+				break;
+			case "snowfall": fillColor = getSnowfallColor(feature);
+				break;
+			case "devLandVal": fillColor = getDevelopedLandValueColors(feature);
+				break;
+			case "agLandVal": fillColor = getAgriculturalLandValueColors(feature);
+				break;
 		}
-		if(selectedDataType === "snowfall") {
-			return {
-				fillColor: getSnowfallColor(feature),
-				stroke: false,
-				fillOpacity: 0.8
-			};
-		}
-		if(selectedDataType === "devLandVal") {
-			return {
-				fillColor: getDevelopedLandValueColors(feature),
-				stroke: false,
-				fillOpacity: 0.8
-			};
-		}
+		return {
+			fillColor: fillColor,
+			stroke: stroke,
+			fillOpacity: fillOpacity
+		};
 	}
 	
-	function styleLandcoverLayer(feature) {
-		return {
-			fillColor: getLandcoverColor(feature),
-			stroke: false,
-			fillOpacity: 0.8
-		}
-	}
-	function styleSnowfallLayer(feature) {
-		return {
-			fillColor: getSnowfallColor(feature),
-			stroke: false,
-			fillOpacity: 0.8
-		}
-	}
-	function styleDevelopedLandValueLayer(feature) {
-		return {
-			fillColor: getDevelopedLandValueColors(feature),
-			stroke: false,
-			fillOpacity: 0.8
-		}
-	}
 	function getLandcoverColor(feature) {
-		var colors = legendColors.landcover;
+		var colors = App.getWW2100LegendColors("landcover");
 		switch (feature.properties.lcCombined) {
 			case 50: //urban
 			    return colors[0];
@@ -297,20 +309,19 @@
 			    return colors[6];
         }
         console.log("unknown case: " + feature.properties.lcCombined);
-        return "rgb(100,100,100)"
+        return "rgb(100,100,100)";
 	}
 	
 	function getSnowfallColor(feature) {
 		// Get the snowfall value of that catchment
 		var catchID = feature.properties.CATCHID,
 			snowfall = Number(snowData[catchID - 1]),
-			colors = legendColors.snowfall;
+			colors = App.getWW2100LegendColors("snowfall");
 		
 		if(isNaN(snowfall)) {
 			console.log("snowfall is NaN!");
 			return "rgb(100,100,100)"
 		}
-		
 		if(snowfall < 0.1) {
 			return colors[0];
 		}
@@ -337,7 +348,7 @@
 	function getDevelopedLandValueColors(feature) {
 		// Get the snowfall value of that catchment
 		var landValue = Number(feature.properties.DEV_VAL),
-			colors = legendColors.devLandVal;
+			colors = App.getWW2100LegendColors("devLandVal");
 		
 		if(isNaN(landValue)) {
 			console.log("Developed Land Value is NaN!");
@@ -358,6 +369,25 @@
 		}
 		if(landValue > 1000000) {
 			return colors[4];
+		}
+	}
+	
+	function getAgriculturalLandValueColors(feature) {
+		// Get the snowfall value of that catchment
+		var landValue = Number(feature.properties.AG_VALCAT),
+			colors = App.getWW2100LegendColors("agLandVal");
+		
+		if(isNaN(landValue)) {
+			console.log("Developed Land Value is NaN!");
+			return "rgb(100,100,100)"
+		}
+		switch (landValue) {
+			case 1: return colors[0];
+			case 2: return colors[1];
+			case 3: return colors[2];
+			case 4: return colors[3];
+			case 5: return colors[4];	
+			case 6: return colors[5];
 		}
 	}
 	
