@@ -47,14 +47,14 @@ $("#baseLayerSelect").on("change", function(event, ui) {
 });
 
 $("#refButtonLabel").on("click", function() {
-	if(selectedScenario !== "ref" && $("#timeRange").val() !== "1") {
+	if(selectedScenario !== "ref") {
 		selectedScenario = "ref";
 		my.loadDataByGUI();
 	}
 });
 
 $("#econExtremeButtonLabel").on("click", function() {
-	if(selectedScenario !== "econExtreme" && $("#timeRange").val() !== "1") {
+	if(selectedScenario !== "econExtreme") {
 		selectedScenario = "econExtreme";
 		my.loadDataByGUI();
 	}
@@ -79,28 +79,6 @@ my.loadDataByGUI = function() {
 		settings.date = "late";
 	}
 	App.addWW2100DataLayer(settings);
-};
-
-// Populates the layerSelectMenu with options based on available data layers.
-// TODO Obsolete, but useful for reference.
-function updateLayerSelectMenu() {
-	var layer,
-		options = [];
-	// removes all options from a selectmenu
-	$('#layerSelect').find('option').remove().end();
-	for(layer in App.dataLayers) {
-		if(App.dataLayers.hasOwnProperty(layer)) {
-			options.push("<option value='" + layer + "'>" + layer + "</option>");
-		}
-	}
-	// Drops new html into the selectmenu
-	layerSelectMenu.append(options.join(""));
-	// refreshes selectmenu so it shows new options. 
-	$("#layerSelect").selectmenu("refresh");
-}
-
-my.updateLayerSelectMenu = function() {
-	updateLayerSelectMenu();
 };
 
 // This sets up the behavior of the info button

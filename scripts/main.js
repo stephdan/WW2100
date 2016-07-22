@@ -3,7 +3,8 @@
 	
 	// Establish a global namespace
 	var App = {},
-		jsonLayer; //TODO this is kindof a random place to put this
+		jsonLayer, //TODO this is kindof a random place to put this
+		cachedJsonLayers = {};
 	
 	App.getJsonLayer = function() {
 		return jsonLayer;
@@ -14,14 +15,24 @@
 	
 	// TODO these snowData things should be stored elsewhere, but not sure where
 	// just yet. It will depend on how this whole snow deal gets structured. 
-	var snowDataPath ="data/snowdata/fakeData_midref.csv";
+	var snowDataPath ="data/snowData/fakeData_midref.csv";
 	var snowData;
 	var selectedDataType;
 	
-	App.getWW2100LegendColors = function(dataType) {
-		switch(dataType) {
-			case "landcover":
-				return [
+	
+	App.clearMainDataLayer = function(){
+		App.map.removeLayer(jsonLayer);
+	};
+	
+	App.addMainDataLayer = function() {
+		jsonLayer.addTo(App.map);
+	};
+	
+	App.initColorsPalates = function(){
+		
+		App.colorPalates = {};
+		
+		App.colorPalates.landcover = [
 					"rgb(125, 95, 149)", // Urban
 					"rgb(252, 241, 185)", // Unforested
 					"rgb(92,144,2)", // subtropical mixed forest (ftm)
@@ -32,29 +43,28 @@
 					"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
 					"rgb(206,238,255)" // subalpine forest (fmh)
 				];
-			case "snowfall":
-				return ColorUtils.getColorRamp(
+		
+		App.colorPalates.snowfall = ColorUtils.getColorRamp(
 					[255,255,255], 
 					[105, 70,156], 
 					7, "string"
 				);
-			case "devLandVal":
-				return ColorUtils.getColorRamp(
+		
+		App.colorPalates.devLandVal = ColorUtils.getColorRamp(
 					[237,248,233], 
 					[0,109,44], 
 					5, 
 					"string"
 				);
-			case "agLandVal":
-				return ColorUtils.getColorRamp(
+		
+		App.colorPalates.agLandVal = ColorUtils.getColorRamp(
 					[237,248,233], 
 					[0,109,44], 
 					6, 
 					"string"
 				); 
-		}
-	}
-	
+	};
+		
 	var legendLabels = {
 		landcover: [
 			"Urban",
@@ -110,7 +120,8 @@
 	
 	App.settings = {
 		showReferenceLayers: true,
-		dataLayerOpacity: 0.8
+		dataLayerOpacity: 0.8,
+		currentDataSettings: ""
 	};
 	
 	App.setDataLayerOpacity = function(opacity) {
@@ -150,6 +161,7 @@
 		App.currentBasemap = App.basemapLayers.Esri_WorldTerrain;
 		// Make a place to store data layers
 		App.mapLayers = {};
+		
 	};
 
 	App.setBaseLayer = function(layerName) {
@@ -160,6 +172,9 @@
 	};
 	
 	App.addWW2100DataLayer = function(settings) {
+		
+		$("#loading").removeClass("hidden");
+		
 		var allDataPaths = {
 				landcover: {
 					ref: {
@@ -210,41 +225,80 @@
 					}
 				}
 		},
-		layerToAdd = settings.type + settings.date + settings.scenario;
+		
+		layerToAdd = settings.type + settings.date + settings.scenario,
+		layer;
+		
+		// If the layer is already loaded, do nothing.
+		for(layer in App.mapLayers) {
+			if(App.mapLayers.hasOwnProperty(layer)) {
+				if(layer === layerToAdd) {
+					return;
+				}
+			}
+		}
+		
+		console.log("loading " + layerToAdd);
 		
 		selectedDataType = settings.type;
 		
-		d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
-			if(error) {
-				alert("There is currently no data for this setting. Soon to come!"); 
-				throw new Error("Problem reading csv " + allDataPaths[settings.type][settings.scenario][settings.date]);
-			}
+		// if the layer is already cached, add it to the map
+		if(cachedJsonLayers.hasOwnProperty(layerToAdd)) {
+			console.log("layer is cached!");
+			console.log(cachedJsonLayers);
 			
-			// Turn the geoJson into a leaflet layer
-			jsonLayer = L.geoJson(importedJson, {
-				// A low smooth factor prevents gaps between simplified
-				// polygons, but decreases performance.
-				// raise up to 1 to increase performance, while adding 
-				// weird gaps between polygons. 
-				style: styleWW2100Layer,
-				smoothFactor: 0,
+			// A slight pause to allow the loading message to display
+			setTimeout(function() {
+				App.clearMapLayers();
+				jsonLayer = cachedJsonLayers[layerToAdd];
+				// set the opacity, in case it has changed since this layer was
+				// last shown
+				App.setDataLayerOpacity(App.settings.dataLayerOpacity);
+				App.mapLayers[layerToAdd] = cachedJsonLayers[layerToAdd].addTo(App.map);
+				App.addReferenceLayers();
+				$("#loading").addClass("hidden");
+			}, 10);
+			
+			
+		} else {
+			console.log("layer is NOT cached.");
+			console.log(cachedJsonLayers);
+			// create the layer, cache it, add it to the map
+			d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
+				if(error) {
+					alert("There is currently no data for this setting. Soon to come!"); 
+					$("#loading").addClass("hidden");
+					App.clearMapLayers();
+					App.addReferenceLayers();
+					throw new Error("Problem reading csv");
+				}
 				
-				// This adds event listeners to each feature
-				onEachFeature: onEachFeature
-			});
-			App.clearMapLayers();
-			// layerToAdd is just a string that happens to be a key in the
-			// mapLayers object. 
-			App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
-			console.log(importedJson);
-			App.addReferenceLayers();
-		});
-		
-		// TODO Configure legend here, move required legend info into this
-		// function.
+				// Turn the geoJson into a leaflet layer
+				jsonLayer = L.geoJson(importedJson, {
+					// A low smooth factor prevents gaps between simplified
+					// polygons, but decreases performance.
+					// raise up to 1 to increase performance, while adding 
+					// weird gaps between polygons. 
+					style: styleWW2100Layer,
+					smoothFactor: 0,
+					
+					// This adds event listeners to each feature
+					onEachFeature: onEachFeature
+				});
+				cachedJsonLayers[layerToAdd] = jsonLayer;
+				App.clearMapLayers();
+				// layerToAdd is just a string that happens to be a key in the
+				// mapLayers object. 
+				App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
+				App.addReferenceLayers();
+				$("#loading").addClass("hidden");
+				App.settings.currentDataSettings = settings;
+			});	
+		}
+		// Configure legend here
 		App.configureLegend({
 			title: legendTitles[settings.type], 
-			colors: App.getWW2100LegendColors(settings.type), 
+			colors: App.colorPalates[settings.type], 
 			labels: legendLabels[settings.type]});
 	};
 	
@@ -278,12 +332,12 @@
 		return {
 			fillColor: fillColor,
 			stroke: stroke,
-			fillOpacity: fillOpacity
+			fillOpacity: App.settings.dataLayerOpacity
 		};
 	}
 	
 	function getLandcoverColor(feature) {
-		var colors = App.getWW2100LegendColors("landcover");
+		var colors = App.colorPalates.landcover;
 		switch (feature.properties.lcCombined) {
 			case 50: //urban
 			    return colors[0];
@@ -316,7 +370,7 @@
 		// Get the snowfall value of that catchment
 		var catchID = feature.properties.CATCHID,
 			snowfall = Number(snowData[catchID - 1]),
-			colors = App.getWW2100LegendColors("snowfall");
+			colors = App.colorPalates.snowfall;
 		
 		if(isNaN(snowfall)) {
 			console.log("snowfall is NaN!");
@@ -348,7 +402,7 @@
 	function getDevelopedLandValueColors(feature) {
 		// Get the snowfall value of that catchment
 		var landValue = Number(feature.properties.DEV_VAL),
-			colors = App.getWW2100LegendColors("devLandVal");
+			colors = App.colorPalates.devLandVal;
 		
 		if(isNaN(landValue)) {
 			console.log("Developed Land Value is NaN!");
@@ -375,7 +429,7 @@
 	function getAgriculturalLandValueColors(feature) {
 		// Get the snowfall value of that catchment
 		var landValue = Number(feature.properties.AG_VALCAT),
-			colors = App.getWW2100LegendColors("agLandVal");
+			colors = App.colorPalates.agLandVal;
 		
 		if(isNaN(landValue)) {
 			console.log("Developed Land Value is NaN!");
@@ -632,6 +686,7 @@
 	App.init = function () {
 		App.addMap();
 		App.GUI.init();
+		App.initColorsPalates();
 		App.GUI.loadDataByGUI();
 	};
 	
@@ -641,4 +696,5 @@
 $(document).ready(function() {
 	"use strict";
 	App.init();
+	
 });

@@ -47,6 +47,18 @@ body, html {
 	z-index: 2;
 }
 
+#loading {
+	position: absolute;
+	top: 20px;
+	right: 50px;
+	width: 250px;
+	background-color: white;
+	margin: 0 auto;
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
 #legendContainer {
 	display: inline-block;
 }
