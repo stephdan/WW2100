@@ -105,24 +105,6 @@ body, html {
 	height: auto;
 }
 
-/*.climateScenarioBtn,
-.climateScenarioBtn.active,
-.climateScenarioBtn.active.focus,
-.climateScenarioBtn.active:focus,
-.climateScenarioBtn.active:hover,
-.climateScenarioBtn:active,
-.climateScenarioBtn:active:hover,
-.climateScenarioBtn:active.focus,
-.climateScenarioBtn:active:focus,
-.climateScenarioBtn.focus,
-.climateScenarioBtn.focus:hover,
-.climateScenarioBtn:focus,
-.climateScenarioBtn:hover {
-	background: black;
-	border-color: black;
-}*/
-
-
 label {
 	display: block;
 	font-family: Verdana, Geneva, sans-serif;
@@ -137,7 +119,21 @@ select {
 	/*display: inline-block;*/
 }
 
+#streamsIcon {
+	width: 20px;
+	height: 2.5px;
+	background-color: rgb(88,147,169);
+	display: inline-block;
+	position: relative;
+	bottom: 3px;
+}
 
+#citiesIcon {
+	width: 20px;
+	height: 10px;
+	display: inline-block;
+	position: relative;
+}
 
 .selectpicker {
 	width: 50px;
