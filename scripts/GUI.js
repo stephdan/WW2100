@@ -90,14 +90,14 @@ $("#info").mouseenter(function() {
 
 // Checkboxes for adding/removing reference layers
 $("#citiesLayerCheckbox").on("click", function() {
-	// Is the box checked or not?
-	var isChecked = $(this).prop("checked");
-	App.settings.showReferenceLayers = isChecked;
-	if(isChecked) {
-		App.addReferenceLayers();
-	} else {
-		App.clearReferenceLayers();
-	}
+	App.settings.showCities = $(this).prop("checked");
+	App.addReferenceLayers();
+});
+
+// Checkboxes for adding/removing reference layers
+$("#streamsLayerCheckbox").on("click", function() {
+	App.settings.showStreams = $(this).prop("checked");
+	App.addReferenceLayers();
 });
 
 my.hideButtonById = function(buttonId) {

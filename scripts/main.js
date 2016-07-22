@@ -6,6 +6,15 @@
 		jsonLayer, //TODO this is kindof a random place to put this
 		cachedJsonLayers = {};
 	
+	App.settings = {
+		showReferenceLayers: true,
+		showCities: true,
+		showStreams: true,
+		dataLayerOpacity: 0.8,
+		currentDataSettings: ""
+	};
+	
+	
 	App.getJsonLayer = function() {
 		return jsonLayer;
 	};
@@ -117,13 +126,6 @@
 		});
 	});
 	
-	
-	App.settings = {
-		showReferenceLayers: true,
-		dataLayerOpacity: 0.8,
-		currentDataSettings: ""
-	};
-	
 	App.setDataLayerOpacity = function(opacity) {
 		App.settings.dataLayerOpacity = opacity;
 		jsonLayer.setStyle({fillOpacity: opacity});
@@ -161,7 +163,6 @@
 		App.currentBasemap = App.basemapLayers.Esri_WorldTerrain;
 		// Make a place to store data layers
 		App.mapLayers = {};
-		
 	};
 
 	App.setBaseLayer = function(layerName) {
@@ -246,13 +247,13 @@
 		if(cachedJsonLayers.hasOwnProperty(layerToAdd)) {
 			console.log("layer is cached!");
 			console.log(cachedJsonLayers);
-			
 			// A slight pause to allow the loading message to display
+			// Usually this happens when importing json files, but that doesn't
+			// happen in this case because the json is cached
 			setTimeout(function() {
 				App.clearMapLayers();
 				jsonLayer = cachedJsonLayers[layerToAdd];
-				// set the opacity, in case it has changed since this layer was
-				// last shown
+				// set the opacity in case it has changed
 				App.setDataLayerOpacity(App.settings.dataLayerOpacity);
 				App.mapLayers[layerToAdd] = cachedJsonLayers[layerToAdd].addTo(App.map);
 				App.addReferenceLayers();
@@ -445,14 +446,7 @@
 		}
 	}
 	
-	var cityMarkerOptions = {
-	    radius: 4,
-	    fillColor: "red",
-	    color: "red",
-	    weight: 1,
-	    opacity: 1,
-	    fillOpacity: 1
-	};
+
 	
 	function createLabelIcon(labelClass,labelText){
 		
@@ -475,13 +469,15 @@
 				});
 	}
 	
-	App.addCitiesToMap = function(citiesJSON) {
-		// check to make sure cities isn't already added
-		if(App.referenceLayers.cities) {
-			console.log("cities is already added!");
-			return;
-		}
-		
+	App.makeCitiesReferenceLayer = function(citiesJSON){
+		var cityMarkerOptions = {
+		    radius: 4,
+		    fillColor: "red",
+		    color: "red",
+		    weight: 1,
+		    opacity: 1,
+		    fillOpacity: 1
+		};
 		var labels = [], labelsLayer, 
 			citiesLayer = L.geoJson(citiesJSON, {
 				pointToLayer: function(feature, latlng) {
@@ -496,45 +492,29 @@
 				labels.push( L.marker([lat,lng], {icon:createLabelIcon("textLabelclass", name)}));  //.addTo(App.map);
 			}
 		});
-		App.referenceLayers.cities = L.layerGroup(labels).addTo(App.map);
-		//App.mapLayers.cities = citiesLayer.addTo(App.map);
+		App.referenceLayers.cities = L.layerGroup(labels);
 	};
-	
-	
-	
-	App.addStreamsToMap = function(streamsJSON) {
 		
+	App.makeStreamsReferenceLayer = function(streamsJSON) {
 		var streamsStyle = {
 		    "color": "rgb(88,147,169)",
 		    "weight": 2,
 		    "opacity": 1
 		};
-		
-		// check to make sure cities isn't already added
-		if(App.referenceLayers.streams) {
-			console.log("streams is already added!");
-			return;
-		}
-		
 		var streamsLayer = L.geoJson(streamsJSON, {
 			style: streamsStyle
 		});
-		
-		App.referenceLayers.streams = streamsLayer.addTo(App.map);
+		App.referenceLayers.streams = streamsLayer;
 	};
 	
 	App.addReferenceLayers = function() {
 		App.clearReferenceLayers();
-		if(App.settings.showReferenceLayers) {
-			App.importReferenceLayers(function(error, data) {
-				if (error) {throw error;}
-				
-				var citiesJSON = data[0],
-					streamsJSON = data[1];
-				
-				App.addCitiesToMap(citiesJSON);
-				App.addStreamsToMap(streamsJSON);
-			});
+
+		if(App.settings.showStreams) {
+			App.referenceLayers.streams.addTo(App.map);
+		}
+		if(App.settings.showCities) {
+			App.referenceLayers.cities.addTo(App.map);
 		}
 	};
 	
@@ -546,7 +526,6 @@
 				App.map.removeLayer(App.referenceLayers[layer]);
 			}
 		}
-		App.referenceLayers = {};
 	};
 	
 	// Uses d3_queue to synchronously import json files. 
@@ -675,7 +654,21 @@
 		}
 	}
 
-	
+	// Cache reference vector layers
+	App.initReferenceLayers = function(callback) {
+		App.referenceLayers = {};
+		// Import reference layer json, make layers out of them, store them.
+		App.importReferenceLayers(function(error, data) {
+			if (error) {throw error;}
+			
+			var citiesJSON = data[0],
+				streamsJSON = data[1];
+			App.makeCitiesReferenceLayer(citiesJSON);
+			App.makeStreamsReferenceLayer(streamsJSON);
+			console.log(App.referenceLayers);
+			callback();
+		});
+	}
 	
 	
 // END Event listeners ---------------------------------------------------------
@@ -687,7 +680,9 @@
 		App.addMap();
 		App.GUI.init();
 		App.initColorsPalates();
-		App.GUI.loadDataByGUI();
+		App.initReferenceLayers(function(){
+			App.GUI.loadDataByGUI();
+		});
 	};
 	
 }()); // END App------------------------------------------------

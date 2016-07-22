@@ -64,12 +64,12 @@
 		
 		<div data-toggle="buttons">
 			
-			<label class="btn btn-primary scenarioButton landcover snowfall agLandVal devLandVal active" id="refButtonLabel">
+			<label class="btn btn-primary referenceScenarioBtn scenarioButton landcover snowfall agLandVal devLandVal active" id="refButtonLabel">
 				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
 				Reference
 			</label>
 			
-			<label class="btn btn-primary scenarioButton landcover snowfall agLandVal devLandVal" id="econExtremeButtonLabel">
+			<label class="btn btn-primary climateScenarioBtn scenarioButton landcover snowfall agLandVal devLandVal" id="econExtremeButtonLabel">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				Econ Extreme
 			</label>
@@ -77,7 +77,11 @@
 		</div>
 
 		<div class="checkbox">
-			<label><input type="checkbox" id="citiesLayerCheckbox" checked value="">Reference Layers</label>
+			<label><input type="checkbox" id="citiesLayerCheckbox" checked value="">Cities</label>
+		</div>
+		
+		<div class="checkbox">
+			<label><input type="checkbox" id="streamsLayerCheckbox" checked value="">Streams</label>
 		</div>
 		
 		<div class="sliderContainer">

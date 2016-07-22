@@ -102,8 +102,25 @@ body, html {
 .scenarioButton {
 	margin: 5px 0px 0px 0px;
 	width: 100%;
-	height: 50px;
+	height: auto;
 }
+
+/*.climateScenarioBtn,
+.climateScenarioBtn.active,
+.climateScenarioBtn.active.focus,
+.climateScenarioBtn.active:focus,
+.climateScenarioBtn.active:hover,
+.climateScenarioBtn:active,
+.climateScenarioBtn:active:hover,
+.climateScenarioBtn:active.focus,
+.climateScenarioBtn:active:focus,
+.climateScenarioBtn.focus,
+.climateScenarioBtn.focus:hover,
+.climateScenarioBtn:focus,
+.climateScenarioBtn:hover {
+	background: black;
+	border-color: black;
+}*/
 
 
 label {
