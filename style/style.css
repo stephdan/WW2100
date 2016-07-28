@@ -135,6 +135,12 @@ select {
 	position: relative;
 }
 
+.modal img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .selectpicker {
 	width: 50px;
 }

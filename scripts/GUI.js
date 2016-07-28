@@ -46,6 +46,10 @@ $("#baseLayerSelect").on("change", function(event, ui) {
 	App.setBaseLayer($(this).val());
 });
 
+
+// SCENARIO BUTTONS ------------------------------------------------------------
+// TODO these can be consolidated into a single event listener. Later.
+
 $("#refButtonLabel").on("click", function() {
 	if(selectedScenario !== "ref") {
 		selectedScenario = "ref";
@@ -59,6 +63,51 @@ $("#econExtremeButtonLabel").on("click", function() {
 		my.loadDataByGUI();
 	}
 });
+
+$("#highPopButtonLabel").on("click", function() {
+	if(selectedScenario !== "highPop") {
+		selectedScenario = "highPop";
+		my.loadDataByGUI();
+	}
+});
+
+$("#fireSuppressButtonLabel").on("click", function() {
+	if(selectedScenario !== "fireSuppress") {
+		selectedScenario = "fireSuppress";
+		my.loadDataByGUI();
+	}
+});
+
+$("#highClimButtonLabel").on("click", function() {
+	if(selectedScenario !== "highClim") {
+		selectedScenario = "highClim";
+		my.loadDataByGUI();
+	}
+});
+
+$("#econExtremeButtonLabel").on("click", function() {
+	if(selectedScenario !== "econExtreme") {
+		selectedScenario = "econExtreme";
+		my.loadDataByGUI();
+	}
+});
+
+$("#urbExpandButtonLabel").on("click", function() {
+	if(selectedScenario !== "urbanExpand") {
+		selectedScenario = "urbanExpand";
+		my.loadDataByGUI();
+	}
+});
+
+$("#managedButtonLabel").on("click", function() {
+	if(selectedScenario !== "managed") {
+		selectedScenario = "managed";
+		my.loadDataByGUI();
+	}
+});
+
+// end scenario buttons -------------------------------------------------------
+
 
 $("#opacitySlider").on("input", function() {
 	App.setDataLayerOpacity($(this).val());

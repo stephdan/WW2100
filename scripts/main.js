@@ -3,9 +3,14 @@
 	
 	// Establish a global namespace
 	var App = {},
-		jsonLayer, //TODO this is kindof a random place to put this
+		activeDataLayer,
 		cachedJsonLayers = {};
 	
+	// Assign global variable
+	window.App = App;
+	
+	// Various app settings shared throughout the code. They get altered by 
+	// GUI interactions mostly. 
 	App.settings = {
 		showReferenceLayers: true,
 		showCities: true,
@@ -13,36 +18,54 @@
 		dataLayerOpacity: 0.8,
 		currentDataSettings: ""
 	};
-	
-	
-	App.getJsonLayer = function() {
-		return jsonLayer;
-	};
-	
-	// Assign global variable
-	window.App = App;
-	
+		
 	// TODO these snowData things should be stored elsewhere, but not sure where
-	// just yet. It will depend on how this whole snow deal gets structured. 
+	// just yet. It will depend on how snow gets structured. 
 	var snowDataPath ="data/snowData/fakeData_midref.csv";
 	var snowData;
-	var selectedDataType;
+	d3.csv(snowDataPath, function(d) {
+		snowData = d.map(function(v) {
+			return v.value;
+		});
+	});
 	
 	
-	App.clearMainDataLayer = function(){
-		App.map.removeLayer(jsonLayer);
-	};
-	
-	App.addMainDataLayer = function() {
-		jsonLayer.addTo(App.map);
-	};
-	
+	// Generates color palates for the different data layers and legends. 
+	// Change the settings in here to edit map and legend colors. 
+	// NOTE: changing the number of classes for each data layer will cause 
+	// an error unless the appropriate adjustments are made to legendLabels.
+	// See legendLabels comments below. 
 	App.initColorsPalates = function(){
 		
 		App.colorPalates = {};
 		
+		// Colors for generating color ramps; low color, high color,
+		// and the number of color classes.
+		// ColorUtils.getColorRamp uses rgb arrays [r,g,b] and converts them
+		// to strings "rgb(r,g,b)" for compatibility with leaflet.
+		var snowLow = [255,255,255],
+			snowHigh = [105, 70,156],
+			snowClasses = 7,
+			
+			devLandValueLow = [237,248,233],
+			devLandValueHigh = [0,109,44],
+			devLandvalueClasses = 5,
+			
+			agLandValueLow = [237,248,233],
+			agLandValueHigh = [0,109,44],
+			agLandvalueClasses = 6,
+			
+			aridityLow =  [255,255,212],
+			aridityHigh = [140,45,4],
+			aridityClasses = 7;
+		
+		// Landcover is categorical, so each color is hard coded here rather 
+		// than generated as a ramp.
 		App.colorPalates.landcover = [
-					"rgb(125, 95, 149)", // Urban
+					"rgb(188,189,220)", // Urban1
+					"rgb(158,154,200)", // Urban2
+					"rgb(117,107,177)", // Urban3
+					"rgb(84,39,143)", // Urban4
 					"rgb(252, 241, 185)", // Unforested
 					"rgb(92,144,2)", // subtropical mixed forest (ftm)
 					"rgb(127,178,57)", // temperate warm mixed forest (fdw)
@@ -52,31 +75,44 @@
 					"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
 					"rgb(206,238,255)" // subalpine forest (fmh)
 				];
-		
+		// Set the color palette for snow
 		App.colorPalates.snowfall = ColorUtils.getColorRamp(
-					[255,255,255], 
-					[105, 70,156], 
-					7, "string"
-				);
-		
-		App.colorPalates.devLandVal = ColorUtils.getColorRamp(
-					[237,248,233], 
-					[0,109,44], 
-					5, 
+					snowLow, 
+					snowHigh, 
+					snowClasses, 
 					"string"
 				);
-		
+		// Set the color palette for developed land value
+		App.colorPalates.devLandVal = ColorUtils.getColorRamp(
+					devLandValueLow, 
+					devLandValueHigh, 
+					devLandvalueClasses, 
+					"string"
+				);
+		// Set the color palette for agricultural land value
 		App.colorPalates.agLandVal = ColorUtils.getColorRamp(
-					[237,248,233], 
-					[0,109,44], 
-					6, 
+					agLandValueLow, 
+					agLandValueHigh, 
+				    agLandvalueClasses, 
 					"string"
 				); 
+		App.colorPalates.aridity = ColorUtils.getColorRamp(
+					aridityLow,
+					aridityHigh,
+					aridityClasses,
+					"string"
+				);
 	};
-		
-	var legendLabels = {
+	
+	// Labels for the legend are hardcoded here. The number of labels has to 
+	// match the number of color classes for each data layer 
+	// generated in initColorPalettes.
+	App.legendLabels = {
 		landcover: [
-			"Urban",
+			"Urban: Pop.Density < 1,500 per sqkm",
+			"Urban: Pop.Density > 1,500 per sqkm",
+			"Urban: Pop.Density > 3,000 per sqkm",
+			"Urban: Pop.Density > 4,500 per sqkm",
 			"Unforested",
 			"Subtropical Mixed Forest",
 			"Temperate Warm Mixed Forest",
@@ -109,31 +145,35 @@
 			"1,501 to 2,000",
 			"2,001 to 2,500",
 			"More than 2,500"
+		],
+		aridity: [
+			"Less than 0.005",
+			"0.005 to 0.01",
+			"0.01 to 0.1",
+			"0.1 to 0.5",
+			"0.5 to 1.0",
+			"1.0 to 1.5",
+			"More than 1.5"
 		]
-	}
-	
-	var legendTitles = {
-		landcover: "Landcover and Forest Type",
-		snowfall: "Snowfall (type?)",
-		devLandVal: "Developed Land Value <br/>$ per Acre",
-		agLandVal: "Agricultural Land Value <br/>$ per Acre"
-	}
-	
-	
-	d3.csv(snowDataPath, function(d) {
-		snowData = d.map(function(v) {
-			return v.value;
-		});
-	});
-	
-	App.setDataLayerOpacity = function(opacity) {
-		App.settings.dataLayerOpacity = opacity;
-		jsonLayer.setStyle({fillOpacity: opacity});
 	};
 	
-	/**
-	 * Adds the leaflet basemap to the page. 
-	 */
+	// A legend title for each of the data layers
+	App.legendTitles = {
+		landcover: "Landcover and Forest Type",
+		snowfall: "Snow Water <br/>Equivalent in cm",
+		devLandVal: "Developed Land Value <br/>$ per Acre",
+		agLandVal: "Agricultural Land Value <br/>$ per Acre",
+		aridity: "Aridity Index"
+	};
+	
+	// Changes the opacity of the main data layer.
+	App.setDataLayerOpacity = function(opacity) {
+		App.settings.dataLayerOpacity = opacity;
+		activeDataLayer.setStyle({fillOpacity: opacity});
+	};
+	
+
+	// Creates the leaflet map and configures the available base layers.
 	App.addMap = function() {
 		// Create the leaflet map
 		App.map = L.map("map", {
@@ -165,6 +205,8 @@
 		App.mapLayers = {};
 	};
 
+	// Changes the baselayer of the leaflet map. Called when GUI settings
+	// are changed.
 	App.setBaseLayer = function(layerName) {
 		var newLayer = App.basemapLayers[layerName];
 		App.map.removeLayer(App.currentBasemap);
@@ -172,26 +214,60 @@
 		App.currentBasemap = newLayer;
 	};
 	
+	// Imports ww2100 data layer as json, creates a leaflet layer from the 
+	// json, styles the layer according to data type, then adds it to the
+	// leaflet map and configures the legend. 
+	// Ensures only one ww2100 data layer is loaded at a time, and overlays
+	// the reference layers on top. Called when GUI settings are changed.
+	// settings: {type, date, scenario}
 	App.addWW2100DataLayer = function(settings) {
 		
+		// Show the loading message.
 		$("#loading").removeClass("hidden");
 		
+		// Object that stores all the paths to the ww2100 json files. Accessed
+		// using properties of the settings argument.
 		var allDataPaths = {
 				landcover: {
 					ref: {
-						early: "data/geometry/json/lulc/Ref2010_lulc.json",
-						mid: "data/geometry/json/lulc/Ref2050_lulc.json",
-						late: "data/geometry/json/lulc/Ref2100_lulc.json"
+						early: "data/geometry/dataLayers/lulc/Ref2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/Ref2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/Ref2100_lulc.json"
 					},
 					econExtreme: {
-						early: "data/geometry/json/lulc/EconExtreme2010_lulc.json",
-						mid: "data/geometry/json/lulc/EconExtreme2050_lulc.json",
-						late: "data/geometry/json/lulc/EconExtreme2100_lulc.json"
+						early: "data/geometry/dataLayers/lulc/EconExtreme2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/EconExtreme2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/EconExtreme2100_lulc.json"
+					},
+					fireSuppress: {
+						early: "data/geometry/dataLayers/lulc/FireSuppress2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/FireSuppress2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/FireSuppress2100_lulc.json"
+					},
+					highClim: {
+						early: "data/geometry/dataLayers/lulc/HighClim2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/HighClim2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/HighClim2100_lulc.json"
+					},
+					urbanExpand: {
+						early: "data/geometry/dataLayers/lulc/UrbExpand2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/UrbExpand2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/UrbExpand2100_lulc.json"
+					},
+					highPop: {
+						early: "data/geometry/dataLayers/lulc/HighPop2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/HighPop2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/HighPop2100_lulc.json"
+					},
+					managed: {
+						early: "data/geometry/dataLayers/lulc/Managed2010_lulc.json",
+						mid:   "data/geometry/dataLayers/lulc/Managed2050_lulc.json",
+						late:  "data/geometry/dataLayers/lulc/Managed2100_lulc.json"
 					}
 				},
 				snowfall: {
 					ref: {
-						early: "data/geometry/json/snow/catch_shaper.json",
+						early: "data/geometry/dataLayers/snow/catch_shaper.json",
 						mid: "",
 						late: ""
 					},
@@ -203,31 +279,56 @@
 				},
 				agLandVal: {
 					ref: {
-						early: "data/geometry/json/agLandVal/ref2010_ag.json",
-						mid: "data/geometry/json/agLandVal/ref2050_ag_mapShaper.json",
-						late: "data/geometry/json/agLandVal/ref2100_ag_mapShaper.json",
+						early: "data/geometry/dataLayers/agLandVal/ref2010_ag.json",
+						mid: "data/geometry/dataLayers/agLandVal/ref2050_ag.json",
+						late: "data/geometry/dataLayers/agLandVal/ref2100_ag.json"
 					},
 					econExtreme: {
-						early: "data/geometry/json/agLandVal/econExtreme2010_ag.json",
-						mid: "",
-						late: ""
+						early: "data/geometry/dataLayers/agLandVal/econExtreme2010_ag.json",
+						mid: "data/geometry/dataLayers/agLandVal/econExtreme2050_ag.json",
+						late: "data/geometry/dataLayers/agLandVal/econExtreme2100_ag.json"
+					},
+					highPop: {
+						early: "data/geometry/dataLayers/agLandVal/highPop2010_ag.json",
+						mid: "data/geometry/dataLayers/agLandVal/highPop2050_ag.json",
+						late: "data/geometry/dataLayers/agLandVal/highPop2100_ag.json"
+					},
+					urbanExpand: {
+						early: "data/geometry/dataLayers/agLandVal/urbanExpansion2010_ag.json",
+						mid: "data/geometry/dataLayers/agLandVal/urbanExpansion2050_ag.json",
+						late: "data/geometry/dataLayers/agLandVal/urbanExpansion2100_ag.json"
 					}
 				},
 				devLandVal: {
 					ref: {
-						early: "data/geometry/json/devLandVal/ref2010_developed.json",
-						mid: "data/geometry/json/devLandVal/ref2050_developed.json",
-						late: "data/geometry/json/devLandVal/ref2100_developed.json"
+						early: "data/geometry/dataLayers/devLandVal/ref2010_developed.json",
+						mid: "data/geometry/dataLayers/devLandVal/ref2050_developed.json",
+						late: "data/geometry/dataLayers/devLandVal/ref2100_developed.json"
 					},
 					econExtreme: {
 						early: "",
 						mid: "",
 						late: ""
 					}
+				},
+				aridity: {
+					ref: {
+						early: "data/geometry/dataLayers/aridity/Ref2010_proj.json",
+						mid: "data/geometry/dataLayers/aridity/ref2050_proj.json",
+						late: "data/geometry/dataLayers/aridity/ref2100_proj.json"
+					},
+					econExtreme: {
+						early: "data/geometry/dataLayers/aridity/EconExtreme2010_proj.json",
+						mid: "data/geometry/dataLayers/aridity/EconExtreme2050_proj.json",
+						late: "data/geometry/dataLayers/aridity/EconExtreme2100_proj.json"
+					}
 				}
 		},
 		
+		// Names the leaflet layer the combination of the settings. This 
+		// reference is needed to remove the layer later. 
 		layerToAdd = settings.type + settings.date + settings.scenario,
+		
 		layer;
 		
 		// If the layer is already loaded, do nothing.
@@ -241,9 +342,12 @@
 		
 		console.log("loading " + layerToAdd);
 		
-		selectedDataType = settings.type;
+		// Other functions need the settings, too!
+		App.settings.currentDataSettings = settings;
 		
 		// if the layer is already cached, add it to the map
+		// TODO This is a bit experimental to see if it helps load layers faster, 
+		// but is risky because it could overload available memory. 
 		if(cachedJsonLayers.hasOwnProperty(layerToAdd)) {
 			console.log("layer is cached!");
 			console.log(cachedJsonLayers);
@@ -252,7 +356,7 @@
 			// happen in this case because the json is cached
 			setTimeout(function() {
 				App.clearMapLayers();
-				jsonLayer = cachedJsonLayers[layerToAdd];
+				activeDataLayer = cachedJsonLayers[layerToAdd];
 				// set the opacity in case it has changed
 				App.setDataLayerOpacity(App.settings.dataLayerOpacity);
 				App.mapLayers[layerToAdd] = cachedJsonLayers[layerToAdd].addTo(App.map);
@@ -261,10 +365,11 @@
 			}, 10);
 			
 			
-		} else {
+		} else { // create the layer, cache it, add it to the map
 			console.log("layer is NOT cached.");
 			console.log(cachedJsonLayers);
-			// create the layer, cache it, add it to the map
+			
+			// The json is imported here
 			d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
 				if(error) {
 					alert("There is currently no data for this setting. Soon to come!"); 
@@ -275,35 +380,34 @@
 				}
 				
 				// Turn the geoJson into a leaflet layer
-				jsonLayer = L.geoJson(importedJson, {
+				activeDataLayer = L.geoJson(importedJson, {
+					style: styleWW2100Layer,
 					// A low smooth factor prevents gaps between simplified
 					// polygons, but decreases performance.
 					// raise up to 1 to increase performance, while adding 
 					// weird gaps between polygons. 
-					style: styleWW2100Layer,
 					smoothFactor: 0,
 					
 					// This adds event listeners to each feature
 					onEachFeature: onEachFeature
 				});
-				cachedJsonLayers[layerToAdd] = jsonLayer;
+				// TODO Again, caching these big json files may not be the best idea.
+				cachedJsonLayers[layerToAdd] = activeDataLayer;
 				App.clearMapLayers();
 				// layerToAdd is just a string that happens to be a key in the
 				// mapLayers object. 
-				App.mapLayers[layerToAdd] = jsonLayer.addTo(App.map);
+				App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
+				// Add the reference layers on TOP of the data layer.
 				App.addReferenceLayers();
+				// Hide the loading message.
 				$("#loading").addClass("hidden");
-				App.settings.currentDataSettings = settings;
 			});	
 		}
-		// Configure legend here
-		App.configureLegend({
-			title: legendTitles[settings.type], 
-			colors: App.colorPalates[settings.type], 
-			labels: legendLabels[settings.type]});
+		App.configureLegend();
 	};
 	
 	// Remove the specified data layer from the map. 
+	// TODO This isn't used anywhere. Mostly just for debug.
 	App.removeDataLayerFromMap = function(layerToRemove) {
 		if(App.mapLayers.hasOwnProperty(layerToRemove)) {
 			App.map.removeLayer(App.mapLayers[layerToRemove]);
@@ -313,14 +417,15 @@
 		}
 	};
 	
-	
+	// Styles individual feature polygons based on the data type. More specifically,
+	// returns styling instructions in a format that Leaflet can use.
 	function styleWW2100Layer(feature){
 		var fillColor,
-			// The next two may never change, so could be hardcoded below later
+			// The next two variables may never change, so could be hardcoded below later
 			stroke = false,
 			fillOpacity = 0.8;		
 		
-		switch(selectedDataType){
+		switch(App.settings.currentDataSettings.type){
 			case "landcover": fillColor = getLandcoverColor(feature);
 				break;
 			case "snowfall": fillColor = getSnowfallColor(feature);
@@ -329,6 +434,7 @@
 				break;
 			case "agLandVal": fillColor = getAgriculturalLandValueColors(feature);
 				break;
+			case "aridity" : fillColor = getAridityColors(feature);
 		}
 		return {
 			fillColor: fillColor,
@@ -337,31 +443,39 @@
 		};
 	}
 	
+	// Returns a color based on the lcCombined parameter of the provided 
+	// landcover feature 
 	function getLandcoverColor(feature) {
 		var colors = App.colorPalates.landcover;
 		switch (feature.properties.lcCombined) {
 			case 50: //urban
 			    return colors[0];
-			case -99: //unforested
+			case 51: //urban
 			    return colors[1];
+			case 52: //urban
+			    return colors[2];
+			case 53: //urban
+			    return colors[3];
+			case -99: //unforested
+			    return colors[4];
 			case 8: // subtropical mixed forest
-				return colors[2];
+				return colors[5];
 			case 1: // temperate warm mixed forest (fdw)
-				return colors[3];
-			case 5: //cool mixed
-			    return colors[4];	
-			case 2:  //subalpine
-			    return colors[8];
-			case 3: //moist temp needle
-			    return colors[7];
-			case 4: // C3 shrubland (fto)
-				return colors[1];
-			case 6: //maritime needle
-			    return colors[5];
-			case 7: // temperate needleleaf woodland (fuc)
 				return colors[6];
+			case 5: //cool mixed
+			    return colors[7];	
+			case 2:  //subalpine
+			    return colors[11];
+			case 3: //moist temp needle
+			    return colors[10];
+			case 4: // C3 shrubland (fto)
+				return colors[5];
+			case 6: //maritime needle
+			    return colors[8];
+			case 7: // temperate needleleaf woodland (fuc)
+				return colors[9];
 			case 9: //temperate needleleaf forest
-			    return colors[6];
+			    return colors[9];
         }
         console.log("unknown case: " + feature.properties.lcCombined);
         return "rgb(100,100,100)";
@@ -446,7 +560,25 @@
 		}
 	}
 	
-
+	function getAridityColors(feature){
+		// Get the snowfall value of that catchment
+		var aridity = Number(feature.properties.aridClass),
+			colors = App.colorPalates.aridity;
+		
+		if(isNaN(aridity)) {
+			console.log("Aridityis NaN!");
+			return "rgb(100,100,100)"
+		}
+		switch (aridity) {
+			case 1: return colors[0];
+			case 2: return colors[1];
+			case 3: return colors[2];
+			case 4: return colors[3];
+			case 5: return colors[4];	
+			case 6: return colors[5];
+			case 7: return colors[6];
+		}
+	}
 	
 	function createLabelIcon(labelClass,labelText){
 		
@@ -533,8 +665,8 @@
 	// than always importing this data.
 	App.importReferenceLayers = function(callback) {
 		var dataPaths = {
-			cities: "data/geometry/baseLayers/cities_oregon.json",
-			streams: "data/geometry/baseLayers/streams.json"
+			cities: "data/geometry/referenceLayers/cities.json",
+			streams: "data/geometry/referenceLayers/streams.json"
 		};
 		
 		d3_queue.queue(1)
@@ -555,15 +687,7 @@
 		App.mapLayers = {};
 	};
 	
-	App.dataLayers = {
-		LULC2010_ref: "data/geometry/json/lulc/Ref2010_LULC.json",
-		LULC2050_ref: "data/geometry/json/lulc/Ref2050_LULC.json",
-		LULC2100_ref: "data/geometry/json/lulc/Ref2100_LULC.json",
-		catchments: "data/geometry/json/snow/catch.geojson",
-		catchments_shaper: "data/geometry/json/snow/catch_shaper.json"
-	};
-	
-	App.configureLegend = function(legendData) {
+	App.configureLegend = function() {
 		var legendItemContainer,
 			legendItem,
 			labelSizePx = 12,
@@ -571,7 +695,13 @@
 			rectHeight = 13,
 			rectSpacer = 4,
 			maxLabelWidth = 0,
-			labelSpacer = 10;
+			labelSpacer = 10,
+			
+			dataType = App.settings.currentDataSettings.type,
+			title = App.legendTitles[dataType],
+			colors = App.colorPalates[dataType],
+			labels = App.legendLabels[dataType];
+			
 		
 		d3.select("#legendItemContainer svg").remove();
 		
@@ -579,7 +709,7 @@
 		legendItemContainer = d3.select("#legendItemContainer")
 			.append("svg")
 			.attr("height", function() {
-				var l = legendData.colors.length;
+				var l = colors.length;
 				return (l * rectHeight + (l - 1) * rectSpacer) + 2;
 			})
 			.attr("width", function() {
@@ -587,7 +717,7 @@
 			});
 			
 		legendItem = legendItemContainer.selectAll("g")
-			.data(legendData.colors)
+			.data(colors)
 			.enter().append("g");
 			
 		legendItem.append("rect")
@@ -608,7 +738,7 @@
 			.style("font-size", labelSizePx + "px")
 			.style("font-family", "Tahoma, Geneva, sans-serif")
 			.text(function(d, i) {
-				return legendData.labels[i];
+				return labels[i];
 			})
 			.attr("x", rectWidth + labelSpacer)
 			.attr("y", function(d, i) {
@@ -622,7 +752,7 @@
 				return maxLabelWidth + rectWidth + labelSpacer;
 			});
 		
-		$("#legendContainer label").html(legendData.title);
+		$("#legendContainer label").html(title);
 	};
 
 // Event listeners for snow layer pointer interations --------------------------
@@ -642,11 +772,11 @@
 	}
 	
 	function resetHighlight(e) {
-	    jsonLayer.resetStyle(e.target);
+	    activeDataLayer.resetStyle(e.target);
 	}
 
 	function onEachFeature(feature, layer) {
-		if(selectedDataType==="snowfall") {
+		if(App.settings.currentDataSettings.type==="snowfall") {
 			layer.on({
 		        mouseover: highlightFeature,
 		        mouseout: resetHighlight
@@ -665,7 +795,6 @@
 				streamsJSON = data[1];
 			App.makeCitiesReferenceLayer(citiesJSON);
 			App.makeStreamsReferenceLayer(streamsJSON);
-			console.log(App.referenceLayers);
 			callback();
 		});
 	}

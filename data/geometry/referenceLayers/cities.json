@@ -1,0 +1,21 @@
+{"type":"FeatureCollection","features":[
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.84250309435794,45.455247415237295]},"properties":{"name":"Tillamook","latitude":45.4552474152,"longitude":-123.842503094}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-116.96188948755963,44.02662660631239]},"properties":{"name":"Ontario","latitude":44.0266266063,"longitude":-116.961889488}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-118.08660119817603,45.32468690905199]},"properties":{"name":"La Grande","latitude":45.3246869091,"longitude":-118.086601198}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-122.93695113309127,46.13871990872974]},"properties":{"name":"Longview","latitude":46.1387199087,"longitude":-122.936951133}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.35609867541075,43.21843304348357]},"properties":{"name":"Roseburg","latitude":43.2184330435,"longitude":-123.356098675}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-118.78748864935068,45.6725984894569]},"properties":{"name":"Pendleton","latitude":45.6725984895,"longitude":-118.787488649}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-118.95202640976811,44.416525287954585]},"properties":{"name":"John Day","latitude":44.416525288,"longitude":-118.95202641}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.3271857115434,42.43954001776439]},"properties":{"name":"Grants Pass","latitude":42.4395400178,"longitude":-123.327185712}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.2799792906448,44.572355569530714]},"properties":{"name":"Corvallis","latitude":44.5723555695,"longitude":-123.279979291}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.08694197781847,44.62049216621057]},"properties":{"name":"Albany","latitude":44.6204921662,"longitude":-123.086941978}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.82999739774334,46.18838096016225]},"properties":{"name":"Astoria","latitude":46.1883809602,"longitude":-123.829997398}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-122.87442265001818,42.32662701320669]},"properties":{"name":"Medford","latitude":42.3266270132,"longitude":-122.87442265}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-121.78053593126373,42.225005309104574]},"properties":{"name":"Klamath Falls","latitude":42.2250053091,"longitude":-121.780535931}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.10001611518834,44.0500101919244]},"properties":{"name":"Eugene","latitude":44.0500101919,"longitude":-123.100016115}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-124.21658878771876,43.366615213080536]},"properties":{"name":"Coos Bay","latitude":43.3666152131,"longitude":-124.216588788}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-121.30999617703003,44.071920999216104]},"properties":{"name":"Bend","latitude":44.0719209992,"longitude":-121.309996177}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-122.63999251492606,45.63030132962615]},"properties":{"name":"Vancouver","latitude":45.6303013296,"longitude":-122.639992515}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-123.0238967304224,44.928070291211725]},"properties":{"name":"Salem","latitude":44.9280702912,"longitude":-123.02389673}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-122.68193593213289,45.521969681728024]},"properties":{"name":"Portland","latitude":45.5200238231,"longitude":-122.679990074}}
+]}
