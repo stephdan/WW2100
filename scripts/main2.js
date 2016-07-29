@@ -168,15 +168,20 @@
 	
 	// Changes the opacity of the main data layer.
 	App.setDataLayerOpacity = function(opacity) {
-		App.settings.dataLayerOpacity = opacity;
-		activeDataLayer.setStyle({fillOpacity: opacity});
+		
+		if(opacity) {
+			App.settings.dataLayerOpacity = opacity;
+		}
+		activeDataLayer.setOpacity(App.settings.dataLayerOpacity);
 	};
+	
 	
 
 	// Creates the leaflet map and configures the available base layers.
 	App.addMap = function() {
 		
 		// Enable using topojson in leaflet. 
+		// TODO not tested yet.
 		L.TopoJSON = L.GeoJSON.extend({  
 		  addData: function(jsonData) {    
 		    if (jsonData.type === "Topology") {
@@ -362,64 +367,46 @@
 		// Other functions need the settings, too!
 		App.settings.currentDataSettings = settings;
 		
-		// if the layer is already cached, add it to the map
-		// TODO This is a bit experimental to see if it helps load layers faster, 
-		// but is risky because it could overload available memory. 
-		if(cachedJsonLayers.hasOwnProperty(layerToAdd)) {
-			console.log("layer is cached!");
-			console.log(cachedJsonLayers);
-			// A slight pause to allow the loading message to display
-			// Usually this happens when importing json files, but that doesn't
-			// happen in this case because the json is cached
-			setTimeout(function() {
-				App.clearMapLayers();
-				activeDataLayer = cachedJsonLayers[layerToAdd];
-				// set the opacity in case it has changed
-				App.setDataLayerOpacity(App.settings.dataLayerOpacity);
-				App.mapLayers[layerToAdd] = cachedJsonLayers[layerToAdd].addTo(App.map);
-				App.addReferenceLayers();
+		// The json is imported here. Do this if you want to add a geojson
+		// maplayer to the map, as opposed to a tile layer. 
+		d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
+			if(error) {
+				alert("There is currently no data for this setting. Soon to come!"); 
 				$("#loading").addClass("hidden");
-			}, 10);
-			
-			
-		} else { // create the layer, cache it, add it to the map
-			console.log("layer is NOT cached.");
-			console.log(cachedJsonLayers);
-			
-			// The json is imported here
-			d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
-				if(error) {
-					alert("There is currently no data for this setting. Soon to come!"); 
-					$("#loading").addClass("hidden");
-					App.clearMapLayers();
-					App.addReferenceLayers();
-					throw new Error("Problem reading csv");
-				}
-				
-				// Turn the geoJson into a leaflet layer
-				activeDataLayer = L.geoJson(importedJson, {
-					style: styleWW2100Layer,
-					// A low smooth factor prevents gaps between simplified
-					// polygons, but decreases performance.
-					// raise up to 1 to increase performance, while adding 
-					// weird gaps between polygons. 
-					smoothFactor: 0,
-					
-					// This adds event listeners to each feature
-					onEachFeature: onEachFeature
-				});
-				// TODO Again, caching these big json files may not be the best idea.
-				//cachedJsonLayers[layerToAdd] = activeDataLayer;
 				App.clearMapLayers();
-				// layerToAdd is just a string that happens to be a key in the
-				// mapLayers object. 
-				App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
-				// Add the reference layers on TOP of the data layer.
 				App.addReferenceLayers();
-				// Hide the loading message.
-				$("#loading").addClass("hidden");
-			});	
-		}
+				throw new Error("Problem reading csv");
+			}
+			
+			// Turn the geoJson into a leaflet layer
+			// activeDataLayer = L.geoJson(importedJson, {
+				// style: styleWW2100Layer,
+				// // raise up to 1 to increase performance, while adding 
+				// // weird gaps between polygons. 
+				// smoothFactor: 0,
+				// // This adds event listeners to each feature
+				// onEachFeature: onEachFeature
+			// });
+			
+			// Add the json as a vector tile layer. Much better performance
+			// than a regular json layer. 
+			App.colorizeFeatures(importedJson);
+			activeDataLayer = App.buildTileLayer(importedJson);
+			
+			// TODO Again, caching these big json files may not be the best idea.
+			//cachedJsonLayers[layerToAdd] = activeDataLayer;
+			App.clearMapLayers();
+			// layerToAdd is just a string that happens to be a key in the
+			// mapLayers object. 
+			App.setDataLayerOpacity();
+			App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
+			// Add the reference layers on TOP of the data layer.
+			App.addReferenceLayers();
+			// Hide the loading message.
+			$("#loading").addClass("hidden");
+		});	
+		
+		// no need to wait for the data to load. 
 		App.configureLegend();
 	};
 	
@@ -436,11 +423,12 @@
 	
 	// Styles individual feature polygons based on the data type. More specifically,
 	// returns styling instructions in a format that Leaflet can use.
+	// TODO obsolete when using vector tiles. Might could delete this, unless
+	// I want layers with polygon interactions. 
 	function styleWW2100Layer(feature){
 		var fillColor,
 			// The next two variables may never change, so could be hardcoded below later
-			stroke = false,
-			fillOpacity = 0.8;		
+			stroke = false;		
 		
 		switch(App.settings.currentDataSettings.type){
 			case "landcover": fillColor = getLandcoverColor(feature);
@@ -459,6 +447,36 @@
 			fillOpacity: App.settings.dataLayerOpacity
 		};
 	}
+	
+	/**
+	 * Adds a color property to each feature based on other property values.
+	 * @param {Object} data : This is geojson. 
+	 */
+	App.colorizeFeatures = function(data) {
+		// What's this for?
+	    var i, colorizerFunction;
+	    
+	    switch(App.settings.currentDataSettings.type){
+			case "landcover": colorizerFunction = getLandcoverColor;
+				break;
+			case "snowfall": colorizerFunction = getSnowfallColor;
+				break;
+			case "devLandVal": colorizerFunction = getDevelopedLandValueColors;
+				break;
+			case "agLandVal": colorizerFunction = getAgriculturalLandValueColors;
+				break;
+			case "aridity" : colorizerFunction = getAridityColors;
+		}
+	    
+	    // for each feature in the json...
+	    for (i = 0; i < data.features.length; i+=1) {
+			// add a color property.
+	        data.features[i].properties.color = colorizerFunction(data.features[i]);
+
+	    }
+
+	};
+	
 	
 	// Returns a color based on the lcCombined parameter of the provided 
 	// landcover feature 
@@ -837,5 +855,4 @@
 $(document).ready(function() {
 	"use strict";
 	App.init();
-	
 });
