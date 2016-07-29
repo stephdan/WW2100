@@ -175,6 +175,22 @@
 
 	// Creates the leaflet map and configures the available base layers.
 	App.addMap = function() {
+		
+		// Enable using topojson in leaflet. 
+		L.TopoJSON = L.GeoJSON.extend({  
+		  addData: function(jsonData) {    
+		    if (jsonData.type === "Topology") {
+		      for (key in jsonData.objects) {
+		        geojson = topojson.feature(jsonData, jsonData.objects[key]);
+		        L.GeoJSON.prototype.addData.call(this, geojson);
+		      }
+		    }    
+		    else {
+		      L.GeoJSON.prototype.addData.call(this, jsonData);
+		    }
+		  }  
+		});
+		
 		// Create the leaflet map
 		App.map = L.map("map", {
 			maxBounds: L.latLngBounds([55, -135], [35,-110]),
@@ -203,6 +219,7 @@
 		App.currentBasemap = App.basemapLayers.Esri_WorldTerrain;
 		// Make a place to store data layers
 		App.mapLayers = {};
+		//L.control.scale().addTo(App.map);
 	};
 
 	// Changes the baselayer of the leaflet map. Called when GUI settings
@@ -392,7 +409,7 @@
 					onEachFeature: onEachFeature
 				});
 				// TODO Again, caching these big json files may not be the best idea.
-				cachedJsonLayers[layerToAdd] = activeDataLayer;
+				//cachedJsonLayers[layerToAdd] = activeDataLayer;
 				App.clearMapLayers();
 				// layerToAdd is just a string that happens to be a key in the
 				// mapLayers object. 
