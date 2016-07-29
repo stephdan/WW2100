@@ -173,6 +173,12 @@ function convert(data, tolerance) {
 }
 
 function convertFeature(features, feature, tolerance) {
+	
+	if(feature.geometry===null) {
+		console.log("it's null!");
+		return;
+	}
+	
     var geom = feature.geometry,
         type = geom.type,
         coords = geom.coordinates,

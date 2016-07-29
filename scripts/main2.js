@@ -186,7 +186,7 @@
 		  addData: function(jsonData) {    
 		    if (jsonData.type === "Topology") {
 		      for (key in jsonData.objects) {
-		        geojson = topojson.feature(jsonData, jsonData.objects[key]);
+		        var geojson = topojson.feature(jsonData, jsonData.objects[key]);
 		        L.GeoJSON.prototype.addData.call(this, geojson);
 		      }
 		    }    
@@ -378,6 +378,20 @@
 				throw new Error("Problem reading csv");
 			}
 			
+			var key;
+			
+			// If the json is topojson, convert it to geojson
+			console.log(importedJson.type);
+			if(importedJson.type === "Topology") {
+				for(key in importedJson.objects) {
+					importedJson = topojson.feature(importedJson, importedJson.objects[key]);
+				}
+			}
+			
+			// TODO It might be good to use this code in the event that you 
+			// don't want a particular data layer tiled. If you want features
+			// interactions, for example. Probably with snow, if anything. 
+			// Otherwise, this is obsolete. 
 			// Turn the geoJson into a leaflet layer
 			// activeDataLayer = L.geoJson(importedJson, {
 				// style: styleWW2100Layer,
@@ -388,25 +402,26 @@
 				// onEachFeature: onEachFeature
 			// });
 			
+			// Assign a color property to each feature.
+			App.colorizeFeatures(importedJson);
+			
 			// Add the json as a vector tile layer. Much better performance
 			// than a regular json layer. 
-			App.colorizeFeatures(importedJson);
 			activeDataLayer = App.buildTileLayer(importedJson);
 			
-			// TODO Again, caching these big json files may not be the best idea.
-			//cachedJsonLayers[layerToAdd] = activeDataLayer;
 			App.clearMapLayers();
-			// layerToAdd is just a string that happens to be a key in the
-			// mapLayers object. 
+			
+			// Set the opacity of the data layer to the current opacity setting
 			App.setDataLayerOpacity();
+			
+			// layerToAdd is just a string that happens to be a key in the
 			App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
 			// Add the reference layers on TOP of the data layer.
 			App.addReferenceLayers();
 			// Hide the loading message.
 			$("#loading").addClass("hidden");
 		});	
-		
-		// no need to wait for the data to load. 
+		// no need to wait for the data to load before making the lengend.
 		App.configureLegend();
 	};
 	
