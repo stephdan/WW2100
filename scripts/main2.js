@@ -21,13 +21,12 @@
 		
 	// TODO these snowData things should be stored elsewhere, but not sure where
 	// just yet. It will depend on how snow gets structured. 
-	var snowDataPath ="data/snowData/fakeData_midref.csv";
+	var snowDataPath ="data/snowData/April1SWE_Ref_DecadalAvg_HUC_done.csv";
 	var snowData;
 	d3.csv(snowDataPath, function(d) {
-		snowData = d.map(function(v) {
-			return v.value;
-		});
+		snowData = d;
 	});
+	
 	
 	
 	// Generates color palates for the different data layers and legends. 
@@ -43,9 +42,9 @@
 		// and the number of color classes.
 		// ColorUtils.getColorRamp uses rgb arrays [r,g,b] and converts them
 		// to strings "rgb(r,g,b)" for compatibility with leaflet.
-		var snowLow = [255,255,255],
+		var snowLow = [242,240,247],
 			snowHigh = [105, 70,156],
-			snowClasses = 7,
+			snowClasses = 6,
 			
 			devLandValueLow = [237,248,233],
 			devLandValueHigh = [0,109,44],
@@ -123,8 +122,7 @@
 			"Subalpine Forest"
 		],
 		snowfall: [
-			"Less than 0.1",
-			"0.1 to 5.0",
+			"0.0 to 5.0",
 			"5.1 to 10.0",
 			"10.1 to 50.0",
 			"50.1 to 100.0",
@@ -289,7 +287,7 @@
 				},
 				snowfall: {
 					ref: {
-						early: "data/geometry/dataLayers/snow/catch_shaper.json",
+						early: "data/geometry/dataLayers/snow/wHuc12_slim_simp.json",
 						mid: "",
 						late: ""
 					},
@@ -351,7 +349,8 @@
 		// reference is needed to remove the layer later. 
 		layerToAdd = settings.type + settings.date + settings.scenario,
 		
-		layer;
+		layer,
+		pathToGeometry;
 		
 		// If the layer is already loaded, do nothing.
 		for(layer in App.mapLayers) {
@@ -367,9 +366,16 @@
 		// Other functions need the settings, too!
 		App.settings.currentDataSettings = settings;
 		
+		if(settings.type === "snowfall") {
+			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_slim_simp.json";
+		} else {
+			pathToGeometry = allDataPaths[settings.type][settings.scenario][settings.date];
+		}
+		
+		
 		// The json is imported here. Do this if you want to add a geojson
-		// maplayer to the map, as opposed to a tile layer. 
-		d3.json(allDataPaths[settings.type][settings.scenario][settings.date], function(error, importedJson) {
+		// maplayer to the map, as opposed to a tile layer. 		
+		d3.json(pathToGeometry, function(error, importedJson) {
 			if(error) {
 				alert("There is currently no data for this setting. Soon to come!"); 
 				$("#loading").addClass("hidden");
@@ -533,34 +539,52 @@
 	
 	function getSnowfallColor(feature) {
 		// Get the snowfall value of that catchment
-		var catchID = feature.properties.CATCHID,
-			snowfall = Number(snowData[catchID - 1]),
-			colors = App.colorPalates.snowfall;
+		var hucID = feature.properties.HUC12,
+			colors = App.colorPalates.snowfall,
+			snowfall,
+			date = App.settings.currentDataSettings.date,
+			year,
+			i;
+			
+		if(date === "early"){
+			year = "2010";
+		} else if (date === "mid"){
+			year = "2050";
+		} else {
+			year = "2099";
+		}
+		
+		for(i = 0; i < snowData.length; i += 1) {
+			if(hucID === snowData[i].huc) {
+				snowfall = snowData[i][year];
+			}
+		}
+		
+		
+		
 		
 		if(isNaN(snowfall)) {
 			console.log("snowfall is NaN!");
-			return "rgb(100,100,100)"
+			return "rgb(100,100,100)";
 		}
-		if(snowfall < 0.1) {
+
+		if(snowfall <= 5.0) {
 			return colors[0];
 		}
-		if(snowfall <= 5.0) {
+		if(snowfall <= 10.0) {
 			return colors[1];
 		}
-		if(snowfall <= 10.0) {
+		if(snowfall <= 50.0) {
 			return colors[2];
 		}
-		if(snowfall <= 50.0) {
+		if(snowfall <= 100.0) {
 			return colors[3];
 		}
-		if(snowfall <= 100.0) {
+		if(snowfall <= 500.0) {
 			return colors[4];
 		}
-		if(snowfall <= 500.0) {
-			return colors[5];
-		}
 		if(snowfall > 500.0) {
-			return colors[6];
+			return colors[5];
 		}
 	}
 	
