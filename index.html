@@ -39,10 +39,10 @@
 	<div id="dataSelectUIContainer" class="uiBox">
 		
 		<div class="selectorContainer">
-			<label>Data Selection</label>
+			<label>Select Data Layer</label>
 			<select name="dataTypeSelect" id="dataTypeSelect" class="form-control">
 				<option value="landcover">Land Cover</option>
-				<option value="snowfall">Snowfall</option>
+				<option value="snowfall">Snow Water Equivalent</option>
 				<option value="devLandVal">Developed Land Value</option>
 				<option value="agLandVal">Agricultural Land Value</option>
 				<option value="aridity">Aridity Index</option>
@@ -64,6 +64,7 @@
 			</datalist>
 		</div>
 		
+		<label style="margin: 10px 0px 0px 0px;">Select Scenario</label>
 		<div data-toggle="buttons">
 			
 			<label 
@@ -72,30 +73,6 @@
 			 id="refButtonLabel">
 				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
 				Reference Case
-			</label>
-			
-			<label 
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover agLandVal aridity" 
-			 id="econExtremeButtonLabel">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				Worst Case
-			</label>
-			
-			<label 
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover agLandVal" 
-			 id="highPopButtonLabel">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				High Population
-			</label>
-			
-			<label 
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover" 
-			 id="fireSuppressButtonLabel">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				High Fire Suppression
 			</label>
 			
 			<label 
@@ -109,9 +86,25 @@
 			<label 
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
 			        landcover agLandVal" 
+			 id="highPopButtonLabel">
+				<input type="radio" name="options" id="option2" autocomplete="off"> 
+				High Population
+			</label>
+			
+			<label 
+			 class="btn btn-primary climateScenarioBtn scenarioButton 
+			        landcover agLandVal" 
 			 id="urbExpandButtonLabel">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				High Urban Expansion
+				Urban Expansion
+			</label>
+			
+			<label 
+			 class="btn btn-primary climateScenarioBtn scenarioButton 
+			        landcover" 
+			 id="fireSuppressButtonLabel">
+				<input type="radio" name="options" id="option2" autocomplete="off"> 
+				Fire Suppression
 			</label>
 			
 			<label 
@@ -121,6 +114,24 @@
 				<input type="radio" name="options" id="option2" autocomplete="off">
 				Managed
 			</label>
+			
+			<label 
+			 class="btn btn-primary climateScenarioBtn scenarioButton 
+			        landcover agLandVal aridity" 
+			 id="econExtremeButtonLabel">
+				<input type="radio" name="options" id="option2" autocomplete="off"> 
+				Worst Case
+			</label>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			
 			
 		</div>
@@ -144,12 +155,12 @@
 		</div>
 		
 		<div class="sliderContainer">
-			<label>Opacity</label>
+			<label>Adjust Opacity</label>
 			<input type="range" id="opacitySlider"/ min="0", max="1" value="0.8" step="0.01">
 		</div>
 		
 		<div class="selectorContainer">
-			<label>Base Layer</label>
+			<label>Select Base Layer</label>
 			<select name="baseLayerSelect" id="baseLayerSelect" class="form-control">
 				<option class="basemap" value="Esri_WorldTerrain">Terrain</option>
 				<option class="basemap" value="Stamen_Toner">Roads, Streams, Cities</option>

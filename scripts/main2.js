@@ -61,10 +61,7 @@
 		// Landcover is categorical, so each color is hard coded here rather 
 		// than generated as a ramp.
 		App.colorPalates.landcover = [
-					"rgb(188,189,220)", // Urban1
 					"rgb(158,154,200)", // Urban2
-					"rgb(117,107,177)", // Urban3
-					"rgb(84,39,143)", // Urban4
 					"rgb(252, 241, 185)", // Unforested
 					"rgb(92,144,2)", // subtropical mixed forest (ftm)
 					"rgb(127,178,57)", // temperate warm mixed forest (fdw)
@@ -108,10 +105,7 @@
 	// generated in initColorPalettes.
 	App.legendLabels = {
 		landcover: [
-			"Urban: Pop.Density < 1,500 per sqkm",
-			"Urban: Pop.Density > 1,500 per sqkm",
-			"Urban: Pop.Density > 3,000 per sqkm",
-			"Urban: Pop.Density > 4,500 per sqkm",
+			"Urban/Developed",
 			"Unforested",
 			"Subtropical Mixed Forest",
 			"Temperate Warm Mixed Forest",
@@ -158,7 +152,7 @@
 	// A legend title for each of the data layers
 	App.legendTitles = {
 		landcover: "Landcover and Forest Type",
-		snowfall: "Snow Water <br/>Equivalent in cm",
+		snowfall: "April 1st <br/>Snow Water <br/>Equivalent in mm",
 		devLandVal: "Developed Land Value <br/>$ per Acre",
 		agLandVal: "Agricultural Land Value <br/>$ per Acre",
 		aridity: "Aridity Index"
@@ -199,7 +193,7 @@
 			maxBounds: L.latLngBounds([55, -135], [35,-110]),
 			minZoom: 7,
 			maxZoom: 11
-		}).setView([44.5, -122.7], 9);
+		}).setView([44.5, -122.7], 8);
 		
 		// A selection of basemaps to choose from using the very handy 
 		// leaflet-oroviders.js
@@ -367,7 +361,7 @@
 		App.settings.currentDataSettings = settings;
 		
 		if(settings.type === "snowfall") {
-			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_slim_simp.json";
+			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_simp.json";
 		} else {
 			pathToGeometry = allDataPaths[settings.type][settings.scenario][settings.date];
 		}
@@ -414,6 +408,10 @@
 			// Add the json as a vector tile layer. Much better performance
 			// than a regular json layer. 
 			activeDataLayer = App.buildTileLayer(importedJson);
+			
+			// Gotta make the z-index a little higher so baselayer tiles
+			// don't get placed on top of it.
+			activeDataLayer.setZIndex(2);
 			
 			App.clearMapLayers();
 			
@@ -507,31 +505,31 @@
 			case 50: //urban
 			    return colors[0];
 			case 51: //urban
-			    return colors[1];
+			    return colors[0];
 			case 52: //urban
-			    return colors[2];
+			    return colors[0];
 			case 53: //urban
-			    return colors[3];
+			    return colors[0];
 			case -99: //unforested
-			    return colors[4];
+			    return colors[1];
 			case 8: // subtropical mixed forest
-				return colors[5];
+				return colors[2];
 			case 1: // temperate warm mixed forest (fdw)
-				return colors[6];
+				return colors[3];
 			case 5: //cool mixed
-			    return colors[7];	
+			    return colors[4];	
 			case 2:  //subalpine
-			    return colors[11];
-			case 3: //moist temp needle
-			    return colors[10];
-			case 4: // C3 shrubland (fto)
-				return colors[5];
-			case 6: //maritime needle
 			    return colors[8];
+			case 3: //moist temp needle
+			    return colors[7];
+			case 4: // C3 shrubland (fto)
+				return colors[3];
+			case 6: //maritime needle
+			    return colors[5];
 			case 7: // temperate needleleaf woodland (fuc)
-				return colors[9];
+				return colors[6];
 			case 9: //temperate needleleaf forest
-			    return colors[9];
+			    return colors[6];
         }
         console.log("unknown case: " + feature.properties.lcCombined);
         return "rgb(100,100,100)";
