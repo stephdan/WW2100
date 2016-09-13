@@ -328,8 +328,8 @@
 				aridity: {
 					ref: {
 						early: "data/geometry/dataLayers/aridity/Ref2010_proj.json",
-						mid: "data/geometry/dataLayers/aridity/ref2050_proj.json",
-						late: "data/geometry/dataLayers/aridity/ref2100_proj.json"
+						mid: "data/geometry/dataLayers/aridity/Ref2050_proj.json",
+						late: "data/geometry/dataLayers/aridity/Ref2100_proj.json"
 					},
 					econExtreme: {
 						early: "data/geometry/dataLayers/aridity/EconExtreme2010_proj.json",
