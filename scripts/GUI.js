@@ -14,6 +14,49 @@ var layerSelectMenu,
 	my = {},
 	selectedScenario = "ref";
 
+// Enable popovers
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+});
+
+// remove popovers when the window is resized
+$(window).on('resize', function () {
+    // hide tooltips
+    //$(".scenarioButton").popover("hide");
+    $(".scenarioExplainerButton").blur();
+});
+
+// Require manual triggers for popovers so they don't appear when
+// scenario buttons are clicked.
+$(".scenarioButton").popover({trigger: "manual"});
+
+// Add focus to a scenarioButtonExplainer when it's clicked.
+// FIXME The buttons already get focus in Firefox, but not in chrome. Maybe
+// it would be better to figure out why they're not getting focus in chrome. 
+$(".scenarioExplainerButton").on("click", function() {
+	if($(this).is(":focus")) {
+		return;
+	}
+	$(this).focus();
+});
+
+$(".scenarioExplainerButton").focusin(function() {
+	// Figure out which one this is
+	var id = $(this).prop("id");
+	// chop off the word explainer
+	var idWithoutExplainer = id.slice(0, id.length - 9);
+	
+	$("#" + idWithoutExplainer).popover("show");
+});
+
+$(".scenarioExplainerButton").focusout(function() {
+	// Figure out which one this is
+	var id = $(this).prop("id");
+	// chop off the word explainer
+	var idWithoutExplainer = id.slice(0, id.length - 9);
+	
+	$("#" + idWithoutExplainer).popover("hide");
+});
 
 dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
@@ -50,56 +93,56 @@ $("#baseLayerSelect").on("change", function(event, ui) {
 // SCENARIO BUTTONS ------------------------------------------------------------
 // TODO these can be consolidated into a single event listener. Later.
 
-$("#refButtonLabel").on("click", function() {
+$("#refButton").on("click", function() {
 	if(selectedScenario !== "ref") {
 		selectedScenario = "ref";
 		my.loadDataByGUI();
 	}
 });
 
-$("#econExtremeButtonLabel").on("click", function() {
+$("#econExtremeButton").on("click", function() {
 	if(selectedScenario !== "econExtreme") {
 		selectedScenario = "econExtreme";
 		my.loadDataByGUI();
 	}
 });
 
-$("#highPopButtonLabel").on("click", function() {
+$("#highPopButton").on("click", function() {
 	if(selectedScenario !== "highPop") {
 		selectedScenario = "highPop";
 		my.loadDataByGUI();
 	}
 });
 
-$("#fireSuppressButtonLabel").on("click", function() {
+$("#fireSuppressButton").on("click", function() {
 	if(selectedScenario !== "fireSuppress") {
 		selectedScenario = "fireSuppress";
 		my.loadDataByGUI();
 	}
 });
 
-$("#highClimButtonLabel").on("click", function() {
+$("#highClimButton").on("click", function() {
 	if(selectedScenario !== "highClim") {
 		selectedScenario = "highClim";
 		my.loadDataByGUI();
 	}
 });
 
-$("#econExtremeButtonLabel").on("click", function() {
+$("#econExtremeButton").on("click", function() {
 	if(selectedScenario !== "econExtreme") {
 		selectedScenario = "econExtreme";
 		my.loadDataByGUI();
 	}
 });
 
-$("#urbExpandButtonLabel").on("click", function() {
+$("#urbExpandButton").on("click", function() {
 	if(selectedScenario !== "urbanExpand") {
 		selectedScenario = "urbanExpand";
 		my.loadDataByGUI();
 	}
 });
 
-$("#managedButtonLabel").on("click", function() {
+$("#managedButton").on("click", function() {
 	if(selectedScenario !== "managed") {
 		selectedScenario = "managed";
 		my.loadDataByGUI();
@@ -162,12 +205,19 @@ my.showButtonById = function(buttonId) {
 my.showHideScenarioButtons = function(type) {
 	// Show and hide buttons based on the current scenario
 	$(".scenarioButton").each(function(i) {
+		var id = $(this).prop("id");
+		
 		if($(this).hasClass(type)) {
 			$(this).show();
+			$("#" + id + "Explainer").show();
 		} else {
 			$(this).hide();
+			$("#" + id + "Explainer").hide();
 		}
 	});
+	
+	
+	
 };
 
 my.showHideButtons = function(showTheseButtons, hideTheseButtons) {

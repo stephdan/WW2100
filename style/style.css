@@ -101,8 +101,32 @@ body, html {
 
 .scenarioButton {
 	margin: 5px 0px 0px 0px;
-	width: 100%;
+	width: 89%;
 	height: auto;
+	/*display: inline-block;*/
+}
+
+.scenarioExplainerButton {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	color: rgb(180,180,180);
+	text-align: center;
+	padding: 0px;
+	/*stuff to make it not look like a button*/
+	appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    border: 0;
+    background: transparent;
+    margin-left: -3px;
+    top: 7px;
+    font-size: 16px;
+}
+
+.scenarioExplainerButton:hover {
+	color: rgb(100,100,100);
 }
 
 label {
