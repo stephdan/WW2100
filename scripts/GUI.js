@@ -39,25 +39,56 @@ my.makeStoryWindow = function() {
 		    "<div class='closeStoryWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
 		  "</div>" + 
 		  "<div class='storyContent resizableContent'>" + 
-		    "<p>" + 
-		      "Some important words." + 
-		    "</p>" + 
 		  "</div>" + 
 		"</div>"
 	);
 	
 	storyWindow.appendTo("body");
 
+	$(".resizableContent").height(function() {
+		var storyWindowHeight = $("#storyWindow").height(),
+			storyTitleBarHeight = $("#storyTitleBar").height(),
+			padding = $(".resizableContent").innerHeight() - $(".resizableContent").height();
+		
+		return storyWindowHeight - (storyTitleBarHeight + (padding));
+	});
+
 	storyWindow.resizable({
 		minHeight: 200, 
-		minWidth: 200
-	})
-
+		minWidth: 200,
+		resize: function(event, ui) {
+			// Set the height of the content
+			$(".resizableContent").height(function() {
+				var storyWindowHeight = $("#storyWindow").height(),
+					storyTitleBarHeight = $("#storyTitleBar").height(),
+					padding = $(".resizableContent").innerHeight() - $(".resizableContent").height();
+				
+				return storyWindowHeight - (storyTitleBarHeight + (padding));
+			});
+		}
+	});
+	
+	my.updateStoryWindow();
+	    
 	$(".closeStoryWindow").click(function() {
 		storyWindow.remove();
 		$("#info").show();
-	})
+	});
+};
 
+my.updateStoryWindow = function() {
+	if( $("#storyWindow").length ) {
+		var storyTextFilePath = "dataLayerStories/" + dataTypeSelectMenu.val() + ".txt";
+	
+		$.get(storyTextFilePath)
+		    .done(function() { 
+		        $(".storyContent").load(storyTextFilePath);
+		    }).fail(function() { 
+		         $(".storyContent").load("dataLayerStories/doesNotExist.txt");
+		    });
+		    
+		$("#storyTitleText").text($("#dataTypeSelect option:selected").text());
+	}
 };
 
 // remove popovers when the window is resized
@@ -103,20 +134,19 @@ $(".scenarioExplainerButton").focusout(function() {
 dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
 	// timePeriodSelectMenu and scenarioSelectMenu
-	var type = $(this).val(),
-		showTheseButtons,
-		hideTheseButtons;
+	var type = $(this).val();
 	// Change the data-target attribute of the info button. This way information
 	// about this layer will be shown when the info button is clicked. 
 	if(type === "landcover") {
 		$("#info").attr("data-target", "#landcoverModal");		
-	} else if (type === "snowfall"){
+	} else if (type === "snowWaterEquivalent"){
 		$("#info").attr("data-target", "#snowfallModal");
 	} else if (type === "devLandVal") {
 		$("#info").attr("data-target", "#devLandValModal");
 	}
 	my.showHideScenarioButtons(type);
 	my.loadDataByGUI();
+	my.updateStoryWindow();
 });
 
 $("#timeRange").on("change", function() {
@@ -127,10 +157,6 @@ $("#info").on("click", function() {
 	my.makeStoryWindow();
 	$(this).hide();
 });
-
-// scenarioSelectMenu = $("#scenarioSelect").on("change", function(event, ui) {
-	// my.loadDataByGUI();
-// });
 
 $("#baseLayerSelect").on("change", function(event, ui) {
 	App.setBaseLayer($(this).val());
@@ -262,9 +288,6 @@ my.showHideScenarioButtons = function(type) {
 			$("#" + id + "Explainer").hide();
 		}
 	});
-	
-	
-	
 };
 
 my.showHideButtons = function(showTheseButtons, hideTheseButtons) {

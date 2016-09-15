@@ -1,0 +1,5 @@
+The map of land value shows spatial differences in agricultural and developed 
+lands. Farmland value is influenced by agricultural productivity, which is 
+determined by characteristics such as soil quality and precipitation or 
+irrigation water rights. Developed land value is affected by population density 
+and income and varies generally within each urban area. 

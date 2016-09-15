@@ -1,0 +1,23 @@
+<p>
+Changes in snowpack are highly sensitive to temperature. In the most plausible 
+scenarios, snowpack declines between 87 and 94 percent by 2099, and becomes 
+limited to the highest elevations. 
+</p>
+
+<p>
+Our results examine the maximum SWE over the January 1– April 1 period for each 
+year for the LowClim, Ref, HighClim, and FireSuppress scenarios. The LowClim 
+scenario, in which temperatures increase only slightly and winter precipitation 
+also slightly increases, shows an increase in seasonal max snow water equivalent 
+of about 41% for elevations above 1200 meters (3937 feet). Low elevation snow 
+(500- 1200 meters, or 1640-3937 feet) stays roughly the same throughout the nine 
+decades, with wide variance and no significant statistical differences for SWE 
+between the decades. The Ref scenario shows a steep decline in seasonal max SWE 
+at both high and low elevations (-74% and -93%, respectively). SWE declines even 
+more steeply in the HighClim scenario with a loss of 90% of SWE above 1200 meters 
+(3937 feet) and a loss of 94% of SWE at the 500-1200 meter (1640-3937 feet) 
+elevation zone. Hydrologic impacts indicate that the snowmelt contribution to 
+spring discharge is lost as snowfall converts to rainfall in winter. Remaining 
+snowpack melts earlier. In all but the LowClim scenario, we see an increase in 
+winter flows as a result of these declines in SWE.
+</p>

@@ -72,7 +72,7 @@
 					"rgb(206,238,255)" // subalpine forest (fmh)
 				];
 		// Set the color palette for snow
-		App.colorPalates.snowfall = ColorUtils.getColorRamp(
+		App.colorPalates.snowWaterEquivalent = ColorUtils.getColorRamp(
 					snowLow, 
 					snowHigh, 
 					snowClasses, 
@@ -115,7 +115,7 @@
 			"Moist Temperate Needleleaf Forest",
 			"Subalpine Forest"
 		],
-		snowfall: [
+		snowWaterEquivalent: [
 			"0.0 to 5.0",
 			"5.1 to 10.0",
 			"10.1 to 50.0",
@@ -152,7 +152,7 @@
 	// A legend title for each of the data layers
 	App.legendTitles = {
 		landcover: "Landcover and Forest Type",
-		snowfall: "April 1st <br/>Snow Water <br/>Equivalent in mm",
+		snowWaterEquivalent: "April 1st <br/>Snow Water <br/>Equivalent in mm",
 		devLandVal: "Developed Land Value <br/>$ per Acre",
 		agLandVal: "Agricultural Land Value <br/>$ per Acre",
 		aridity: "Aridity Index"
@@ -279,7 +279,7 @@
 						late:  "data/geometry/dataLayers/lulc/Managed2100_lulc.json"
 					}
 				},
-				snowfall: {
+				snowWaterEquivalent: {
 					ref: {
 						early: "data/geometry/dataLayers/snow/wHuc12_slim_simp.json",
 						mid: "",
@@ -360,7 +360,7 @@
 		// Other functions need the settings, too!
 		App.settings.currentDataSettings = settings;
 		
-		if(settings.type === "snowfall") {
+		if(settings.type === "snowWaterEquivalent") {
 			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_simp.json";
 		} else {
 			pathToGeometry = allDataPaths[settings.type][settings.scenario][settings.date];
@@ -381,7 +381,7 @@
 			var key;
 			
 			// If the json is topojson, convert it to geojson
-			console.log(importedJson.type);
+			// console.log(importedJson.type);
 			if(importedJson.type === "Topology") {
 				for(key in importedJson.objects) {
 					importedJson = topojson.feature(importedJson, importedJson.objects[key]);
@@ -452,7 +452,7 @@
 		switch(App.settings.currentDataSettings.type){
 			case "landcover": fillColor = getLandcoverColor(feature);
 				break;
-			case "snowfall": fillColor = getSnowfallColor(feature);
+			case "snowWaterEquivalent": fillColor = getSnowWaterEquivalentColor(feature);
 				break;
 			case "devLandVal": fillColor = getDevelopedLandValueColors(feature);
 				break;
@@ -478,7 +478,7 @@
 	    switch(App.settings.currentDataSettings.type){
 			case "landcover": colorizerFunction = getLandcoverColor;
 				break;
-			case "snowfall": colorizerFunction = getSnowfallColor;
+			case "snowWaterEquivalent": colorizerFunction = getSnowWaterEquivalentColor;
 				break;
 			case "devLandVal": colorizerFunction = getDevelopedLandValueColors;
 				break;
@@ -535,11 +535,11 @@
         return "rgb(100,100,100)";
 	}
 	
-	function getSnowfallColor(feature) {
-		// Get the snowfall value of that catchment
+	function getSnowWaterEquivalentColor(feature) {
+		// Get the snowWaterEquivalent value of that catchment
 		var hucID = feature.properties.HUC12,
-			colors = App.colorPalates.snowfall,
-			snowfall,
+			colors = App.colorPalates.snowWaterEquivalent,
+			snowWaterEquivalent,
 			date = App.settings.currentDataSettings.date,
 			year,
 			i;
@@ -554,40 +554,40 @@
 		
 		for(i = 0; i < snowData.length; i += 1) {
 			if(hucID === snowData[i].huc) {
-				snowfall = snowData[i][year];
+				snowWaterEquivalent = snowData[i][year];
 			}
 		}
 		
 		
 		
 		
-		if(isNaN(snowfall)) {
-			console.log("snowfall is NaN!");
+		if(isNaN(snowWaterEquivalent)) {
+			console.log("snowWaterEquivalent is NaN!");
 			return "rgb(100,100,100)";
 		}
 
-		if(snowfall <= 5.0) {
+		if(snowWaterEquivalent <= 5.0) {
 			return colors[0];
 		}
-		if(snowfall <= 10.0) {
+		if(snowWaterEquivalent <= 10.0) {
 			return colors[1];
 		}
-		if(snowfall <= 50.0) {
+		if(snowWaterEquivalent <= 50.0) {
 			return colors[2];
 		}
-		if(snowfall <= 100.0) {
+		if(snowWaterEquivalent <= 100.0) {
 			return colors[3];
 		}
-		if(snowfall <= 500.0) {
+		if(snowWaterEquivalent <= 500.0) {
 			return colors[4];
 		}
-		if(snowfall > 500.0) {
+		if(snowWaterEquivalent > 500.0) {
 			return colors[5];
 		}
 	}
 	
 	function getDevelopedLandValueColors(feature) {
-		// Get the snowfall value of that catchment
+		// Get the snowWaterEquivalent value of that catchment
 		var landValue = Number(feature.properties.DEV_VAL),
 			colors = App.colorPalates.devLandVal;
 		
@@ -614,7 +614,7 @@
 	}
 	
 	function getAgriculturalLandValueColors(feature) {
-		// Get the snowfall value of that catchment
+		// Get the snowWaterEquivalent value of that catchment
 		var landValue = Number(feature.properties.AG_VALCAT),
 			colors = App.colorPalates.agLandVal;
 		
@@ -633,7 +633,7 @@
 	}
 	
 	function getAridityColors(feature){
-		// Get the snowfall value of that catchment
+		// Get the snowWaterEquivalent value of that catchment
 		var aridity = Number(feature.properties.aridClass),
 			colors = App.colorPalates.aridity;
 		
@@ -848,7 +848,7 @@
 	}
 
 	function onEachFeature(feature, layer) {
-		if(App.settings.currentDataSettings.type==="snowfall") {
+		if(App.settings.currentDataSettings.type==="snowWaterEquivalent") {
 			layer.on({
 		        mouseover: highlightFeature,
 		        mouseout: resetHighlight
