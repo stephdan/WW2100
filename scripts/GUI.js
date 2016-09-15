@@ -24,16 +24,41 @@ $(document).ready(function(){
     });
 });
 
-$(".closeStoryWindow").click(function() {
-	$("#storyWindow").hide();
-	$("#info").show();
-})
+// $(".closeStoryWindow").click(function() {
+	// $("#storyWindow").hide();
+	// $("#info").show();
+// })
 
 // TODO Starting to add functionality for programmatically creating story windows.
 // Learned it from cartovis!
-function makeStoryWindow() {
-	//var storyWindow = $("<div id='storyWindow'>" +)
-}
+my.makeStoryWindow = function() {
+	var storyWindow = $(
+		"<div id='storyWindow' class='ui-widget-content resizable'>" + 
+		  "<div id='storyTitleBar'>" + 
+		    "<div id='storyTitleText'>Demo Scenario</div>" + 
+		    "<div class='closeStoryWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
+		  "</div>" + 
+		  "<div class='storyContent resizableContent'>" + 
+		    "<p>" + 
+		      "Some important words." + 
+		    "</p>" + 
+		  "</div>" + 
+		"</div>"
+	);
+	
+	storyWindow.appendTo("body");
+
+	storyWindow.resizable({
+		minHeight: 200, 
+		minWidth: 200
+	})
+
+	$(".closeStoryWindow").click(function() {
+		storyWindow.remove();
+		$("#info").show();
+	})
+
+};
 
 // remove popovers when the window is resized
 $(window).on('resize', function () {
@@ -99,7 +124,7 @@ $("#timeRange").on("change", function() {
 });
 
 $("#info").on("click", function() {
-	$("#storyWindow").show();
+	my.makeStoryWindow();
 	$(this).hide();
 });
 
@@ -253,7 +278,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 };
 
 my.init = function() {
-	//updateLayerSelectMenu();
+	my.makeStoryWindow();
 };
 
 return my;

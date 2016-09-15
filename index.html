@@ -178,13 +178,6 @@
 			</button>
 			
 			
-			
-			
-			
-			
-			
-			
-			
 		</div>
 
 		<div class="checkbox">
@@ -217,149 +210,9 @@
 				<option class="basemap" value="Stamen_Toner">Roads, Streams, Cities</option>
 				<option class="basemap" value="Esri_WorldImagery">Imagery</option>
 				<option class="basemap" value="Esri_NatGeoWorldMap">National Geographic</option>
-				
 			</select>
 		</div>
-		
-		
 	</div>
-
-	<!-- Bootstrap Modals! These are what show up when the i button is clicked -->
-	
-	<!-- Snow Info modal -->
-	<div class="container">
-	  <!-- Modal -->
-	  <div class="modal fade" id="snowfallModal" role="dialog">
-	    <div class="modal-dialog">
-	      <!-- Modal content-->
-	      <div class="modal-content">
-	        <div class="modal-header">
-	          <button type="button" class="close" data-dismiss="modal">&times;</button>
-	          <h4 class="modal-title">Snow Information</h4>
-	        </div>
-	        <div class="modal-body">
-	          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
-	          	sed do eiusmod tempor incididunt ut labore et dolore magna 
-	          	aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
-	          	ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis 
-	          	aute irure dolor in reprehenderit in voluptate velit esse cillum 
-	          	dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
-	          	cupidatat non proident, sunt in culpa qui officia deserunt 
-	          	mollit anim id est laborum.</p>
-	        </div>
-	        <div class="modal-footer">
-	          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	        </div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-	
-	<!-- Developed Land Value info modal -->
-	<div class="container">
-	  <!-- Modal -->
-	  <div class="modal fade" id="devLandValModal" role="dialog">
-	    <div class="modal-dialog">
-	      <!-- Modal content-->
-	      <div class="modal-content">
-	        <div class="modal-header">
-	          <button type="button" class="close" data-dismiss="modal">&times;</button>
-	          <h4 class="modal-title">Developed Land Value Information</h4>
-	        </div>
-	        <div class="modal-body">
-	          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
-	          	sed do eiusmod tempor incididunt ut labore et dolore magna 
-	          	aliqua. Ut enim ad minim veniam, quis nostrud exercitation 
-	          	ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis 
-	          	aute irure dolor in reprehenderit in voluptate velit esse cillum 
-	          	dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
-	          	cupidatat non proident, sunt in culpa qui officia deserunt 
-	          	mollit anim id est laborum.</p>
-	        </div>
-	        <div class="modal-footer">
-	          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	        </div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-	
-	<!-- Landcover Info Modal -->
-	<div class="container">
-	  <!-- Modal -->
-	  <div class="modal fade" id="landcoverModal" role="dialog">
-	    <div class="modal-dialog">
-	      <!-- Modal content-->
-	      <div class="modal-content">
-	        <div class="modal-header">
-	          <button type="button" class="close" data-dismiss="modal">&times;</button>
-	          <h4 class="modal-title">Landcover</h4>
-	        </div>
-	        <div class="modal-body">
-	          <p>Use the interactive map to view changes in land cover over time 
-	          	for different modeling scenarios. Look for these major trends:</p>
-	          
-	          <label>Expansion of Cities</label>
-	          
-	          <ul>
-	          	<li>
-	          		Population growth leads to expansion of cities and 
-	          		conversion of lands from agricultural (yellow shading) and 
-	          		forest (green shading) land uses to developed land uses 
-	          		(purple).   Use the time slider bar, to compare the size of 
-	          		cities in 2010, 2050, and 2099.   
-	          	</li>
-	          	<li>
-	          		The extent of urbanization depends on the rate of 
-	          		population and income growth, and land management policies.  
-	          		Use the scenario buttons to explore the effect of different 
-	          		assumptions about population growth. The Reference scenario 
-	          		adopts population growth rates from the Oregon Office of 
-	          		Economic Analysis (2011). Population more than doubles over 
-	          		the century, rising from 2.41 million in 2010 to 5.37 million 
-	          		in 2099. The Worst Case scenario assumes than many more 
-	          		people move Willamette valley cities -- population nearly 
-	          		quadruples to 8.25 million by 2099.
-	          	</li>
-	          </ul>
-	          <img style="width: 75%" src="resources/lulc_refVSworst2.png" />
-	          <label>Changes in Forest Types:</label>
-	          
-	          <ul>
-	          	<li>
-	          		•	A warming climate leads to drier forests that are more 
-	          		susceptible to wildfire.  Fire opens up lands to regrow into 
-	          		new forest types better suited to warmer climate conditions. 
-	          		Use the time slider bar to compare the types of forests that 
-	          		extend over the Willamette Basin uplands over the 
-	          		simulations. At high elevations, subalpine forests are 
-	          		replaced by cool conifer forests. At mid-elevations, 
-	          		Douglas-fir and western hemlock forest types shift to 
-	          		mixed-conifer forest types.
-	          	</li>
-	          	<li>
-	          		•	Forest changes are most extensive in simulations with 
-	          		greater climate warming.  Use the scenario buttons to 
-	          		compare changes in forest types between low (Low Climate 
-	          		Scenario), moderate (Reference Scenario) and high climate 
-	          		(High Climate Scenario) change scenarios.   Climate warming 
-	          		and wildfire is most extensive in the high climate scenario 
-	          		and leads to the most dramatic shifts in forest composition.
-	          	</li>
-	          </ul>
-	          <img src="resources/lulc_graph.png" style="width: 60%;"/>
-	          
-	        </div>
-	        <div class="modal-footer">
-	          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	        </div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-
-	<!-- END MODALS -->
-	
 	
 	<div id="legendAndInfoButtonContainer">
 		<!-- Container for the legend -->
@@ -367,15 +220,7 @@
 			<label>Legend Title</label>
 			<div id="legendItemContainer"></div>
 		</div>
-		<!-- Button for showing modals -->
-		<!-- <div id="info" data-toggle="modal" data-target="#landcoverModal">
-			<svg id="infoIcon" width="10" height="33">
-				<circle cx="4.5" cy="7" r="3"/>
-				<rect x="0" y="13" width="7" height="3"></rect>
-				<rect x="3" y="15" width="4" height="10"></rect>
-				<rect x="0" y="24" width="10" height="3"></rect>
-			</svg>
-		</div> -->
+
 	</div>
 	
 	<div id="info" style="display: none;">
@@ -388,26 +233,6 @@
 			<rect x="0" y="24" width="10" height="3"></rect>
 		</svg>
 	</div>
-	
-	<div id="storyWindow" class="ui-widget-content resizable">
-		<div id="storyTitleBar">
-			<div id='storyTitleText'>Story Title!</div>
-			<div class='closeStoryWindow'><span class='ui-icon ui-icon-close'></span></div>
-		</div>
-	    <div class="storyContent resizableContent">
-			<p>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer 
-				nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed 
-				nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis 
-				ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.
-				Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent 
-				taciti sociosqu ad litora torquent per conubia nostra, per 
-				inceptos himenaeos. Curabitur sodales ligula in libero. Sed 
-				dignissim lacinia nunc. 
-			</p>
-	    </div>
-	</div>
-	
 	
 	<div id="loading" class="uiBox hidden">Loading data, please wait...</div>
 	
