@@ -85,8 +85,9 @@ body, html {
 	width: 20px; 
 	height: 33px;
 	display: inline-block;
-	position: relative;
-	bottom: -16px;
+	position: absolute;
+	top: 75px;
+	left: 10px;
 }
 
 #steplist {
@@ -168,3 +169,65 @@ select {
 .selectpicker {
 	width: 50px;
 }
+
+.resizable { 
+    width: 300px;
+    height: 300px;
+    position: absolute;
+	top: 75px;
+	left: 10px;
+	z-index: 2;
+	
+	background-color: rgb(255,255,255);
+	background-color: rgba(255,255,255,0.85);
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 3px;
+	border-color: rgb(200,200,200);
+	box-shadow: 3px 3px 5px rgb(100,100,100);
+	box-shadow: 3px 3px 5px rgba(100,100,100,0.5);
+	font-family: Verdana, Geneva, sans-serif;
+}
+
+.resizableContent {
+    height: calc(100% - 30px);
+    width: 100%;
+    padding: 0.7em;
+    overflow: auto; 
+}
+
+.resizable h3 { 
+    text-align: center; 
+    margin: 0; 
+}
+
+#storyTitleBar {
+	text-align: center;
+	height: 30px;
+}
+
+#storyTitleText{
+	position: absolute;
+	top: 3px;
+	left: 0px;
+	right: 0px;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+/*The x icon in the storyWindow*/
+#storyTitleBar .closeStoryWindow {
+	position: absolute;
+	top: 5px;
+	height: 16px;
+	width: 16px;
+	cursor: pointer;
+	right: 5px;
+}
+
+
+
+
+
+
+

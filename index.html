@@ -16,8 +16,6 @@
     <script src="https://d3js.org/d3-queue.v2.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
 
-	
-
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="lib/bootstrap-3.3.6-dist/js/bootstrap.js"></script>
@@ -69,7 +67,7 @@
 			
 			<label 
 			 data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="Mid-range assumptions about climate change and human growth."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary referenceScenarioBtn scenarioButton 
@@ -85,7 +83,7 @@
 			
 			<label 
 			 data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="Assumes a high level of climate change."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
@@ -101,7 +99,7 @@
 			
 			<label 
 			 data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="High urban population growth."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
@@ -117,7 +115,7 @@
 			
 			<label 
 			 data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="Fast expansion of urban growth boundary, low development density."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
@@ -133,7 +131,7 @@
 			
 			<label 
 			data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="Increased fire suppression."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
@@ -149,7 +147,7 @@
 			
 			<label 
 			data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="Assumes mid-range changes in climate and population growth, with a continuation of recent trends in resource use and management."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
@@ -165,7 +163,7 @@
 			
 			<label 
 			data-toggle="popover"
-			 data-content="Words and things. Also, some other words."
+			 data-content="Assumes extreme changes in climate change and population growth, combined with policies that emphasize resource use over conservation."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
@@ -370,17 +368,46 @@
 			<div id="legendItemContainer"></div>
 		</div>
 		<!-- Button for showing modals -->
-		<div id="info" data-toggle="modal" data-target="#landcoverModal">
-			<!-- The i is totally just 3 svg rectangles and a circle 
-				arranged in an i shape -->
+		<!-- <div id="info" data-toggle="modal" data-target="#landcoverModal">
 			<svg id="infoIcon" width="10" height="33">
 				<circle cx="4.5" cy="7" r="3"/>
 				<rect x="0" y="13" width="7" height="3"></rect>
 				<rect x="3" y="15" width="4" height="10"></rect>
 				<rect x="0" y="24" width="10" height="3"></rect>
 			</svg>
-		</div>
+		</div> -->
 	</div>
+	
+	<div id="info" style="display: none;">
+		<!-- The i is totally just 3 svg rectangles and a circle 
+			arranged in an i shape -->
+		<svg id="infoIcon" width="10" height="33">
+			<circle cx="4.5" cy="7" r="3"/>
+			<rect x="0" y="13" width="7" height="3"></rect>
+			<rect x="3" y="15" width="4" height="10"></rect>
+			<rect x="0" y="24" width="10" height="3"></rect>
+		</svg>
+	</div>
+	
+	<div id="storyWindow" class="ui-widget-content resizable">
+		<div id="storyTitleBar">
+			<div id='storyTitleText'>Story Title!</div>
+			<div class='closeStoryWindow'><span class='ui-icon ui-icon-close'></span></div>
+		</div>
+	    <div class="storyContent resizableContent">
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer 
+				nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed 
+				nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis 
+				ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.
+				Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent 
+				taciti sociosqu ad litora torquent per conubia nostra, per 
+				inceptos himenaeos. Curabitur sodales ligula in libero. Sed 
+				dignissim lacinia nunc. 
+			</p>
+	    </div>
+	</div>
+	
 	
 	<div id="loading" class="uiBox hidden">Loading data, please wait...</div>
 	

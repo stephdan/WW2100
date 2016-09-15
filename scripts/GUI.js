@@ -17,7 +17,23 @@ var layerSelectMenu,
 // Enable popovers
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover();
+    $(".resizable").resizable({
+		minHeight: 200, 
+		minWidth: 200,
+		constrainment: "#map"
+    });
 });
+
+$(".closeStoryWindow").click(function() {
+	$("#storyWindow").hide();
+	$("#info").show();
+})
+
+// TODO Starting to add functionality for programmatically creating story windows.
+// Learned it from cartovis!
+function makeStoryWindow() {
+	//var storyWindow = $("<div id='storyWindow'>" +)
+}
 
 // remove popovers when the window is resized
 $(window).on('resize', function () {
@@ -25,6 +41,7 @@ $(window).on('resize', function () {
     //$(".scenarioButton").popover("hide");
     $(".scenarioExplainerButton").blur();
 });
+
 
 // Require manual triggers for popovers so they don't appear when
 // scenario buttons are clicked.
@@ -79,6 +96,11 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 
 $("#timeRange").on("change", function() {
 	my.loadDataByGUI();
+});
+
+$("#info").on("click", function() {
+	$("#storyWindow").show();
+	$(this).hide();
 });
 
 // scenarioSelectMenu = $("#scenarioSelect").on("change", function(event, ui) {
