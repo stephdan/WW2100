@@ -21,13 +21,31 @@
 		
 	// TODO these snowData things should be stored elsewhere, but not sure where
 	// just yet. It will depend on how snow gets structured. 
-	var snowDataPath ="data/snowData/April1SWE_Ref_DecadalAvg_HUC_done.csv";
+	// var snowDataPath ="data/snowData/April1SWE_Ref_DecadalAvg_HUC_done.csv";
+	var snowDataPath ="data/snowData/SWE_highClim_decadalAvg_HUCs.csv";
+	console.log("Snow data: " + snowDataPath);
 	var snowData;
 	d3.csv(snowDataPath, function(d) {
 		snowData = d;
 	});
 	
-	
+	App.importSnowData = function() {
+		var refPath =      "data/snowData/SWE_ref_decadalAvg_HUCs.csv",
+			lowClimPath =  "data/snowData/SWE_lowClim_decadalAvg_HUCs.csv",
+			highClimPath = "data/snowData/SWE_highClim_decadalAvg_HUCs.csv";
+		
+		App.snowData = {};
+		
+		d3.csv(refPath, function(d) {
+			App.snowData.ref = d;
+		});
+		d3.csv(lowClimPath, function(d) {
+			App.snowData.lowClim = d;
+		});
+		d3.csv(highClimPath, function(d) {
+			App.snowData.highClim = d;
+		});	
+	};
 	
 	// Generates color palates for the different data layers and legends. 
 	// Change the settings in here to edit map and legend colors. 
@@ -152,7 +170,7 @@
 	// A legend title for each of the data layers
 	App.legendTitles = {
 		landcover: "Landcover and Forest Type",
-		snowWaterEquivalent: "April 1st <br/>Snow Water <br/>Equivalent in mm",
+		snowWaterEquivalent: "Average Maximum <br/>Snow Water <br/>Equivalent in mm",
 		devLandVal: "Developed Land Value <br/>$ per Acre",
 		agLandVal: "Agricultural Land Value <br/>$ per Acre",
 		aridity: "Aridity Index"
@@ -241,6 +259,7 @@
 		
 		// Object that stores all the paths to the ww2100 json files. Accessed
 		// using properties of the settings argument.
+		// TODO Paths should be created programmatically rather than listed. 
 		var allDataPaths = {
 				landcover: {
 					ref: {
@@ -279,18 +298,18 @@
 						late:  "data/geometry/dataLayers/lulc/Managed2100_lulc.json"
 					}
 				},
-				snowWaterEquivalent: {
-					ref: {
-						early: "data/geometry/dataLayers/snow/wHuc12_slim_simp.json",
-						mid: "",
-						late: ""
-					},
-					econExtreme: {
-						early: "",
-						mid: "",
-						late: ""
-					}
-				},
+				// snowWaterEquivalent: {
+					// ref: {
+						// early: "data/geometry/dataLayers/snow/wHuc12_slim_simp.json",
+						// mid: "",
+						// late: ""
+					// },
+					// econExtreme: {
+						// early: "",
+						// mid: "",
+						// late: ""
+					// }
+				// },
 				agLandVal: {
 					ref: {
 						early: "data/geometry/dataLayers/agLandVal/ref2010_ag.json",
@@ -360,6 +379,8 @@
 		// Other functions need the settings, too!
 		App.settings.currentDataSettings = settings;
 		
+		// If we're looking at SWE, get the HUC12 polygons. Otherwise, get the 
+		// correct IDU polygon layer. 
 		if(settings.type === "snowWaterEquivalent") {
 			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_simp.json";
 		} else {
@@ -413,12 +434,13 @@
 			// don't get placed on top of it.
 			activeDataLayer.setZIndex(2);
 			
+			// Clear the map just before adding new features. 
 			App.clearMapLayers();
 			
 			// Set the opacity of the data layer to the current opacity setting
 			App.setDataLayerOpacity();
 			
-			// layerToAdd is just a string that happens to be a key in the
+			// layerToAdd is just a string that happens to be a key in mapLayers
 			App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
 			// Add the reference layers on TOP of the data layer.
 			App.addReferenceLayers();
@@ -426,6 +448,8 @@
 			$("#loading").addClass("hidden");
 		});	
 		// no need to wait for the data to load before making the lengend.
+		// That's why this is outside of the above import function, which 
+		// runs asynchronously.  
 		App.configureLegend();
 	};
 	
@@ -469,10 +493,10 @@
 	
 	/**
 	 * Adds a color property to each feature based on other property values.
-	 * @param {Object} data : This is geojson. 
+	 * @param {Object} data : geojson polygon map features 
 	 */
 	App.colorizeFeatures = function(data) {
-		// What's this for?
+
 	    var i, colorizerFunction;
 	    
 	    switch(App.settings.currentDataSettings.type){
@@ -535,31 +559,32 @@
         return "rgb(100,100,100)";
 	}
 	
+	// Assign a color to the provided feature based on its SWE value.
 	function getSnowWaterEquivalentColor(feature) {
 		// Get the snowWaterEquivalent value of that catchment
 		var hucID = feature.properties.HUC12,
 			colors = App.colorPalates.snowWaterEquivalent,
 			snowWaterEquivalent,
 			date = App.settings.currentDataSettings.date,
-			year,
+			scenario = App.settings.currentDataSettings.scenario,
+			decade,
 			i;
 			
 		if(date === "early"){
-			year = "2010";
+			decade = "2010";
 		} else if (date === "mid"){
-			year = "2050";
+			decade = "2050";
 		} else {
-			year = "2099";
+			decade = "2090";
 		}
 		
-		for(i = 0; i < snowData.length; i += 1) {
-			if(hucID === snowData[i].huc) {
-				snowWaterEquivalent = snowData[i][year];
+		for(i = 0; i < App.snowData[scenario].length; i += 1) {
+			if(hucID === App.snowData[scenario][i].huc) {
+				//snowWaterEquivalent = snowData[i][decade]/1000;
+				snowWaterEquivalent = App.snowData[scenario][i][decade]/1000;
+				break;
 			}
 		}
-		
-		
-		
 		
 		if(isNaN(snowWaterEquivalent)) {
 			console.log("snowWaterEquivalent is NaN!");
@@ -738,7 +763,7 @@
 	App.importReferenceLayers = function(callback) {
 		var dataPaths = {
 			cities: "data/geometry/referenceLayers/cities.json",
-			streams: "data/geometry/referenceLayers/streams.json"
+			streams: "data/geometry/referenceLayers/cleanedRivers_dis2_wgs84.geojson"
 		};
 		
 		d3_queue.queue(1)
@@ -881,6 +906,7 @@
 		App.addMap();
 		App.GUI.init();
 		App.initColorsPalates();
+		App.importSnowData();
 		App.initReferenceLayers(function(){
 			App.GUI.loadDataByGUI();
 		});

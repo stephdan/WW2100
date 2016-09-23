@@ -166,6 +166,13 @@ $("#baseLayerSelect").on("change", function(event, ui) {
 // SCENARIO BUTTONS ------------------------------------------------------------
 // TODO these can be consolidated into a single event listener. Later.
 
+$("#lowClimButton").on("click", function() {
+	if(selectedScenario !== "lowClim") {
+		selectedScenario = "lowClim";
+		my.loadDataByGUI();
+	}
+});
+
 $("#refButton").on("click", function() {
 	if(selectedScenario !== "ref") {
 		selectedScenario = "ref";

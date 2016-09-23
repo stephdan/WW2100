@@ -67,6 +67,22 @@
 			
 			<label 
 			 data-toggle="popover"
+			 data-content="Assumes a low level of climate change."
+			 data-placement="left"
+			 data-container="body"
+			 class="btn btn-primary climateScenarioBtn scenarioButton 
+			        snowWaterEquivalent" 
+			 id="lowClimButton">
+				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
+				Low Climate Change
+			</label>
+			
+			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
+			id="lowClimButtonExplainer">
+			</button>
+			
+			<label 
+			 data-toggle="popover"
 			 data-content="Mid-range assumptions about climate change and human growth."
 			 data-placement="left"
 			 data-container="body"
@@ -87,7 +103,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover" 
+			        landcover snowWaterEquivalent" 
 			 id="highClimButton">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				High Climate Change
