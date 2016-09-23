@@ -309,6 +309,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 
 my.init = function() {
 	my.makeStoryWindow();
+	//my.showHideScenarioButtons("landcover");
 };
 
 return my;

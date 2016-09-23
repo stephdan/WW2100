@@ -48,6 +48,7 @@
 		</div>
 		
 		<div class="sliderContainer">
+			<label>Select Time Period</label>
 			<div class="stepLabels" style="text-align: center">
 				<span style="float: left">2010</span>
 				<span>2050</span>
@@ -66,6 +67,7 @@
 		<div data-toggle="buttons">
 			
 			<label 
+			 style="display: none;"
 			 data-toggle="popover"
 			 data-content="Assumes a low level of climate change."
 			 data-placement="left"
@@ -78,7 +80,8 @@
 			</label>
 			
 			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="lowClimButtonExplainer">
+			id="lowClimButtonExplainer"
+			style="display: none;">
 			</button>
 			
 			<label 
@@ -210,7 +213,7 @@
 		
 		<div class="checkbox">
 			<label><input type="checkbox" id="streamsLayerCheckbox" checked value="">
-				<div id="streamsIcon"></div> Streams
+				<div id="streamsIcon"></div> Rivers
 			</label>
 		</div>
 		
