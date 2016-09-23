@@ -137,11 +137,11 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	var type = $(this).val();
 	// Change the data-target attribute of the info button. This way information
 	// about this layer will be shown when the info button is clicked. 
-	if(type === "landcover") {
+	if(type === "lulc") {
 		$("#info").attr("data-target", "#landcoverModal");		
-	} else if (type === "snowWaterEquivalent"){
+	} else if (type === "maxSWE"){
 		$("#info").attr("data-target", "#snowfallModal");
-	} else if (type === "devLandVal") {
+	} else if (type === "landValue") {
 		$("#info").attr("data-target", "#devLandValModal");
 	}
 	my.showHideScenarioButtons(type);
@@ -309,7 +309,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 
 my.init = function() {
 	my.makeStoryWindow();
-	//my.showHideScenarioButtons("landcover");
+	//my.showHideScenarioButtons("lulc");
 };
 
 return my;

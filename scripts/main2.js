@@ -64,8 +64,8 @@
 			snowHigh = [105, 70,156],
 			snowClasses = 6,
 			
-			devLandValueLow = [237,248,233],
-			devLandValueHigh = [0,109,44],
+			devLandValueLow = [246,210,234],
+			devLandValueHigh = [89, 0,132],
 			devLandvalueClasses = 5,
 			
 			agLandValueLow = [237,248,233],
@@ -76,21 +76,23 @@
 			aridityHigh = [140,45,4],
 			aridityClasses = 7;
 		
-		// Landcover is categorical, so each color is hard coded here rather 
+		// lulc is categorical, so each color is hard coded here rather 
 		// than generated as a ramp.
-		App.colorPalates.landcover = [
-					"rgb(158,154,200)", // Urban2
-					"rgb(252, 241, 185)", // Unforested
+		App.colorPalates.lulc = [
+					"rgb(158,154,200)", // Developed
+					"rgb(207, 180, 99)" , // Unforested
 					"rgb(92,144,2)", // subtropical mixed forest (ftm)
 					"rgb(127,178,57)", // temperate warm mixed forest (fdw)
 					"rgb(161, 211, 113)", // cool mixed forest (fvg)
 					"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
 					"rgb(90, 189,173)", // temperate needleleaf
 					"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
-					"rgb(206,238,255)" // subalpine forest (fmh)
+					"rgb(206,238,255)", // subalpine forest (fmh)
+					"rgb(252, 241, 185)", // Agriculture
+					"rgb(88,147,169)" // Open water
 				];
 		// Set the color palette for snow
-		App.colorPalates.snowWaterEquivalent = ColorUtils.getColorRamp(
+		App.colorPalates.maxSWE = ColorUtils.getColorRamp(
 					snowLow, 
 					snowHigh, 
 					snowClasses, 
@@ -122,7 +124,7 @@
 	// match the number of color classes for each data layer 
 	// generated in initColorPalettes.
 	App.legendLabels = {
-		landcover: [
+		lulc: [
 			"Urban/Developed",
 			"Unforested",
 			"Subtropical Mixed Forest",
@@ -131,9 +133,11 @@
 			"Maritime Needleleaf Forest",
 			"Temperate Needleleaf",
 			"Moist Temperate Needleleaf Forest",
-			"Subalpine Forest"
+			"Subalpine Forest",
+			"Agriculture",
+			"Open Water"
 		],
-		snowWaterEquivalent: [
+		maxSWE: [
 			"0.0 to 5.0",
 			"5.1 to 10.0",
 			"10.1 to 50.0",
@@ -169,10 +173,9 @@
 	
 	// A legend title for each of the data layers
 	App.legendTitles = {
-		landcover: "Landcover and Forest Type",
-		snowWaterEquivalent: "Average Maximum <br/>Snow Water <br/>Equivalent in mm",
-		devLandVal: "Developed Land Value <br/>$ per Acre",
-		agLandVal: "Agricultural Land Value <br/>$ per Acre",
+		lulc: "Landcover and Forest Type",
+		maxSWE: "Average Maximum <br/>Snow Water <br/>Equivalent in mm",
+		landValue: "Land Value <br/>$ per Acre",
 		aridity: "Aridity Index"
 	};
 	
@@ -246,6 +249,27 @@
 		App.currentBasemap = newLayer;
 	};
 	
+	
+	App.getPathToGeometry = function() {
+		var basePath = "data/geometry/dataLayers/",
+			dataPath,
+			type = App.settings.currentDataSettings.type,
+			scenario = App.settings.currentDataSettings.scenario,
+			date = App.settings.currentDataSettings.date,
+			decade;
+			
+		if(date === "early") {
+			decade = "2010";
+		} else if (date === "mid") {
+			decade = "2050";
+		} else {
+			decade = "2100";
+		}
+		
+		dataPath = type + "/" + type + "_" + scenario + decade + ".json";
+		return basePath + dataPath;
+	};
+	
 	// Imports ww2100 data layer as json, creates a leaflet layer from the 
 	// json, styles the layer according to data type, then adds it to the
 	// leaflet map and configures the legend. 
@@ -256,114 +280,12 @@
 		
 		// Show the loading message.
 		$("#loading").removeClass("hidden");
-		
-		// Object that stores all the paths to the ww2100 json files. Accessed
-		// using properties of the settings argument.
-		// TODO Paths should be created programmatically rather than listed. 
-		var allDataPaths = {
-				landcover: {
-					ref: {
-						early: "data/geometry/dataLayers/lulc/Ref2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/Ref2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/Ref2100_lulc.json"
-					},
-					econExtreme: {
-						early: "data/geometry/dataLayers/lulc/EconExtreme2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/EconExtreme2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/EconExtreme2100_lulc.json"
-					},
-					fireSuppress: {
-						early: "data/geometry/dataLayers/lulc/FireSuppress2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/FireSuppress2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/FireSuppress2100_lulc.json"
-					},
-					highClim: {
-						early: "data/geometry/dataLayers/lulc/HighClim2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/HighClim2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/HighClim2100_lulc.json"
-					},
-					urbanExpand: {
-						early: "data/geometry/dataLayers/lulc/UrbExpand2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/UrbExpand2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/UrbExpand2100_lulc.json"
-					},
-					highPop: {
-						early: "data/geometry/dataLayers/lulc/HighPop2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/HighPop2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/HighPop2100_lulc.json"
-					},
-					managed: {
-						early: "data/geometry/dataLayers/lulc/Managed2010_lulc.json",
-						mid:   "data/geometry/dataLayers/lulc/Managed2050_lulc.json",
-						late:  "data/geometry/dataLayers/lulc/Managed2100_lulc.json"
-					}
-				},
-				// snowWaterEquivalent: {
-					// ref: {
-						// early: "data/geometry/dataLayers/snow/wHuc12_slim_simp.json",
-						// mid: "",
-						// late: ""
-					// },
-					// econExtreme: {
-						// early: "",
-						// mid: "",
-						// late: ""
-					// }
-				// },
-				agLandVal: {
-					ref: {
-						early: "data/geometry/dataLayers/agLandVal/ref2010_ag.json",
-						mid: "data/geometry/dataLayers/agLandVal/ref2050_ag.json",
-						late: "data/geometry/dataLayers/agLandVal/ref2100_ag.json"
-					},
-					econExtreme: {
-						early: "data/geometry/dataLayers/agLandVal/econExtreme2010_ag.json",
-						mid: "data/geometry/dataLayers/agLandVal/econExtreme2050_ag.json",
-						late: "data/geometry/dataLayers/agLandVal/econExtreme2100_ag.json"
-					},
-					highPop: {
-						early: "data/geometry/dataLayers/agLandVal/highPop2010_ag.json",
-						mid: "data/geometry/dataLayers/agLandVal/highPop2050_ag.json",
-						late: "data/geometry/dataLayers/agLandVal/highPop2100_ag.json"
-					},
-					urbanExpand: {
-						early: "data/geometry/dataLayers/agLandVal/urbanExpansion2010_ag.json",
-						mid: "data/geometry/dataLayers/agLandVal/urbanExpansion2050_ag.json",
-						late: "data/geometry/dataLayers/agLandVal/urbanExpansion2100_ag.json"
-					}
-				},
-				devLandVal: {
-					ref: {
-						early: "data/geometry/dataLayers/devLandVal/ref2010_developed.json",
-						mid: "data/geometry/dataLayers/devLandVal/ref2050_developed.json",
-						late: "data/geometry/dataLayers/devLandVal/ref2100_developed.json"
-					},
-					econExtreme: {
-						early: "",
-						mid: "",
-						late: ""
-					}
-				},
-				aridity: {
-					ref: {
-						early: "data/geometry/dataLayers/aridity/Ref2010_proj.json",
-						mid: "data/geometry/dataLayers/aridity/Ref2050_proj.json",
-						late: "data/geometry/dataLayers/aridity/Ref2100_proj.json"
-					},
-					econExtreme: {
-						early: "data/geometry/dataLayers/aridity/EconExtreme2010_proj.json",
-						mid: "data/geometry/dataLayers/aridity/EconExtreme2050_proj.json",
-						late: "data/geometry/dataLayers/aridity/EconExtreme2100_proj.json"
-					}
-				}
-		},
-		
+				
 		// Names the leaflet layer the combination of the settings. This 
 		// reference is needed to remove the layer later. 
-		layerToAdd = settings.type + settings.date + settings.scenario,
-		
-		layer,
-		pathToGeometry;
+		var layerToAdd = settings.type + settings.date + settings.scenario,
+			layer,
+			pathToGeometry;
 		
 		// If the layer is already loaded, do nothing.
 		for(layer in App.mapLayers) {
@@ -381,10 +303,12 @@
 		
 		// If we're looking at SWE, get the HUC12 polygons. Otherwise, get the 
 		// correct IDU polygon layer. 
-		if(settings.type === "snowWaterEquivalent") {
+		if(settings.type === "maxSWE") {
 			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_simp.json";
 		} else {
-			pathToGeometry = allDataPaths[settings.type][settings.scenario][settings.date];
+			// build a path from the settings.
+			pathToGeometry = App.getPathToGeometry();
+			//pathToGeometry = allDataPaths[settings.type][settings.scenario][settings.date];
 		}
 		
 		
@@ -474,9 +398,9 @@
 			stroke = false;		
 		
 		switch(App.settings.currentDataSettings.type){
-			case "landcover": fillColor = getLandcoverColor(feature);
+			case "lulc": fillColor = getlulcColor(feature);
 				break;
-			case "snowWaterEquivalent": fillColor = getSnowWaterEquivalentColor(feature);
+			case "maxSWE": fillColor = getSnowWaterEquivalentColor(feature);
 				break;
 			case "devLandVal": fillColor = getDevelopedLandValueColors(feature);
 				break;
@@ -500,13 +424,11 @@
 	    var i, colorizerFunction;
 	    
 	    switch(App.settings.currentDataSettings.type){
-			case "landcover": colorizerFunction = getLandcoverColor;
+			case "lulc": colorizerFunction = getlulcColor;
 				break;
-			case "snowWaterEquivalent": colorizerFunction = getSnowWaterEquivalentColor;
+			case "maxSWE": colorizerFunction = getSnowWaterEquivalentColor;
 				break;
-			case "devLandVal": colorizerFunction = getDevelopedLandValueColors;
-				break;
-			case "agLandVal": colorizerFunction = getAgriculturalLandValueColors;
+			case "landValue": colorizerFunction = getLandValueColors;
 				break;
 			case "aridity" : colorizerFunction = getAridityColors;
 		}
@@ -522,22 +444,35 @@
 	
 	
 	// Returns a color based on the lcCombined parameter of the provided 
-	// landcover feature 
-	function getLandcoverColor(feature) {
-		var colors = App.colorPalates.landcover;
+	// lulc feature 
+	function getlulcColor(feature) {
+		var colors = App.colorPalates.lulc;
 		switch (feature.properties.lcCombined) {
-			case 50: //urban
+			// LULC_B values
+			case 11: //High-Intensity Developed
 			    return colors[0];
-			case 51: //urban
+			case 12: //Medium-Intensity Developed
 			    return colors[0];
-			case 52: //urban
+			case 13: //Low-Intensity Developed
 			    return colors[0];
-			case 53: //urban
+			case 14: //Developed Open Space
 			    return colors[0];
-			case -99: //unforested
+			case 15: //Undifferentiated Developed
+			    return colors[0];
+			case 20: //Agriculture
+			    return colors[9];
+			case 30: //Grassland or Shrub Scrub
 			    return colors[1];
-			case 8: // subtropical mixed forest
-				return colors[2];
+			case 51: //Barren
+			    return colors[1];
+			case 61: //Wetlands
+			    return colors[1];
+			case 71: //Open Water
+			    return colors[10];
+			case 72: //Snow and Ice
+			    return colors[1];
+			    
+			// PVT values
 			case 1: // temperate warm mixed forest (fdw)
 				return colors[3];
 			case 5: //cool mixed
@@ -552,6 +487,8 @@
 			    return colors[5];
 			case 7: // temperate needleleaf woodland (fuc)
 				return colors[6];
+			case 8: // subtropical mixed forest
+				return colors[2];
 			case 9: //temperate needleleaf forest
 			    return colors[6];
         }
@@ -563,8 +500,8 @@
 	function getSnowWaterEquivalentColor(feature) {
 		// Get the snowWaterEquivalent value of that catchment
 		var hucID = feature.properties.HUC12,
-			colors = App.colorPalates.snowWaterEquivalent,
-			snowWaterEquivalent,
+			colors = App.colorPalates.maxSWE,
+			maxSWE,
 			date = App.settings.currentDataSettings.date,
 			scenario = App.settings.currentDataSettings.scenario,
 			decade,
@@ -581,39 +518,41 @@
 		for(i = 0; i < App.snowData[scenario].length; i += 1) {
 			if(hucID === App.snowData[scenario][i].huc) {
 				//snowWaterEquivalent = snowData[i][decade]/1000;
-				snowWaterEquivalent = App.snowData[scenario][i][decade]/1000;
+				maxSWE = App.snowData[scenario][i][decade]/1000;
 				break;
 			}
 		}
 		
-		if(isNaN(snowWaterEquivalent)) {
-			console.log("snowWaterEquivalent is NaN!");
+		if(isNaN(maxSWE)) {
+			console.log("maxSWE is NaN!");
 			return "rgb(100,100,100)";
 		}
 
-		if(snowWaterEquivalent <= 5.0) {
+		if(maxSWE <= 5.0) {
 			return colors[0];
 		}
-		if(snowWaterEquivalent <= 10.0) {
+		if(maxSWE <= 10.0) {
 			return colors[1];
 		}
-		if(snowWaterEquivalent <= 50.0) {
+		if(maxSWE <= 50.0) {
 			return colors[2];
 		}
-		if(snowWaterEquivalent <= 100.0) {
+		if(maxSWE <= 100.0) {
 			return colors[3];
 		}
-		if(snowWaterEquivalent <= 500.0) {
+		if(maxSWE <= 500.0) {
 			return colors[4];
 		}
-		if(snowWaterEquivalent > 500.0) {
+		if(maxSWE > 500.0) {
 			return colors[5];
 		}
 	}
 	
+	
+	
 	function getDevelopedLandValueColors(feature) {
 		// Get the snowWaterEquivalent value of that catchment
-		var landValue = Number(feature.properties.DEV_VAL),
+		var landValue = Number(feature.properties.MEAN_DEV_V),
 			colors = App.colorPalates.devLandVal;
 		
 		if(isNaN(landValue)) {
@@ -640,7 +579,7 @@
 	
 	function getAgriculturalLandValueColors(feature) {
 		// Get the snowWaterEquivalent value of that catchment
-		var landValue = Number(feature.properties.AG_VALCAT),
+		var landValue = Number(feature.properties.MEAN_AG_VA),
 			colors = App.colorPalates.agLandVal;
 		
 		if(isNaN(landValue)) {
@@ -654,6 +593,66 @@
 			case 4: return colors[3];
 			case 5: return colors[4];	
 			case 6: return colors[5];
+		}
+	}
+	
+	function getLandValueColors(feature) {
+		// If MEAN_DEV_V is > 0
+		var agVal = feature.properties.MEAN_AG_VA,
+			devVal = feature.properties.MEAN_DEV_V,
+			colors;
+			
+		if(devVal > 0) {
+			// Color it by dev val, ja?
+			colors = App.colorPalates.devLandVal;
+			
+			if(isNaN(devVal)) {
+				console.log("Developed Land Value is NaN!");
+				return "rgb(100,100,100)"
+			}
+			
+			if(devVal < 250000) {
+				return colors[0];
+			}
+			if(devVal <= 500000) {
+				return colors[1];
+			}
+			if(devVal <= 750000) {
+				return colors[2];
+			}
+			if(devVal <= 1000000) {
+				return colors[3];
+			}
+			if(devVal > 1000000) {
+				return colors[4];
+			}
+			
+			
+		} else {
+			colors = App.colorPalates.agLandVal;
+			if(isNaN(agVal)) {
+				console.log("Developed Land Value is NaN!");
+				return "rgb(100,100,100)"
+			}
+			
+			if(agVal < 500) {
+				return colors[0];
+			}
+			if(agVal <= 1000) {
+				return colors[1];
+			}
+			if(agVal <= 1500) {
+				return colors[2];
+			}
+			if(agVal <= 2000) {
+				return colors[3];
+			}
+			if(agVal <= 2500) {
+				return colors[4];
+			}
+			if(agVal > 2500) {
+				return colors[5];
+			}			
 		}
 	}
 	
@@ -873,7 +872,7 @@
 	}
 
 	function onEachFeature(feature, layer) {
-		if(App.settings.currentDataSettings.type==="snowWaterEquivalent") {
+		if(App.settings.currentDataSettings.type==="maxSWE") {
 			layer.on({
 		        mouseover: highlightFeature,
 		        mouseout: resetHighlight

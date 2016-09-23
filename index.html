@@ -39,10 +39,9 @@
 		<div class="selectorContainer">
 			<label>Select Data Layer</label>
 			<select name="dataTypeSelect" id="dataTypeSelect" class="form-control">
-				<option value="landcover">Land Cover</option>
-				<option value="snowWaterEquivalent">Snow Water Equivalent</option>
-				<option value="devLandVal">Developed Land Value</option>
-				<option value="agLandVal">Agricultural Land Value</option>
+				<option value="lulc">Land Cover</option>
+				<option value="maxSWE">Snow Water Equivalent</option>
+				<option value="landValue">Land Value</option>
 				<option value="aridity">Aridity Index</option>
 			</select>
 		</div>
@@ -73,7 +72,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        snowWaterEquivalent" 
+			        maxSWE" 
 			 id="lowClimButton">
 				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
 				Low Climate Change
@@ -90,7 +89,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary referenceScenarioBtn scenarioButton 
-			        landcover snowWaterEquivalent agLandVal devLandVal aridity active" 
+			        lulc maxSWE landValue aridity active" 
 			 id="refButton">
 				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
 				Reference Case
@@ -101,18 +100,20 @@
 			</button>
 			
 			<label 
+			 style="display: none;"
 			 data-toggle="popover"
 			 data-content="Assumes a high level of climate change."
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover snowWaterEquivalent" 
+			        lulc maxSWE" 
 			 id="highClimButton">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				High Climate Change
 			</label>
 			
 			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
+			style="display: none;"
 			id="highClimButtonExplainer">
 			</button>
 			
@@ -122,7 +123,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover agLandVal" 
+			        lulc landValue" 
 			 id="highPopButton">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				High Population
@@ -138,7 +139,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover agLandVal" 
+			        lulc landValue" 
 			 id="urbExpandButton">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				Urban Expansion
@@ -154,7 +155,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover" 
+			        lulc" 
 			 id="fireSuppressButton">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				Fire Suppression
@@ -170,7 +171,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover" 
+			        lulc landValue" 
 			 id="managedButton">
 				<input type="radio" name="options" id="option2" autocomplete="off">
 				Managed
@@ -186,7 +187,7 @@
 			 data-placement="left"
 			 data-container="body"
 			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        landcover agLandVal aridity" 
+			        lulc landValue aridity" 
 			 id="econExtremeButton">
 				<input type="radio" name="options" id="option2" autocomplete="off"> 
 				Worst Case
