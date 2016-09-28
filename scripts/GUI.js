@@ -93,11 +93,8 @@ my.updateStoryWindow = function() {
 
 // remove popovers when the window is resized
 $(window).on('resize', function () {
-    // hide tooltips
-    //$(".scenarioButton").popover("hide");
     $(".scenarioExplainerButton").blur();
 });
-
 
 // Require manual triggers for popovers so they don't appear when
 // scenario buttons are clicked.
@@ -134,18 +131,17 @@ $(".scenarioExplainerButton").focusout(function() {
 dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	// TODO update the options in the 
 	// timePeriodSelectMenu and scenarioSelectMenu
-	var type = $(this).val();
-	// Change the data-target attribute of the info button. This way information
-	// about this layer will be shown when the info button is clicked. 
-	if(type === "lulc") {
-		$("#info").attr("data-target", "#landcoverModal");		
-	} else if (type === "maxSWE"){
-		$("#info").attr("data-target", "#snowfallModal");
-	} else if (type === "landValue") {
-		$("#info").attr("data-target", "#devLandValModal");
+	var dataLayer = $(this).val();	
+	// If the currently selected scenario isn't used by this dataLayer, change
+	// it to the reference scenario by manually clicking the reference case
+	// button. The class list of the selected scenario
+	// button includes the names of the data layers that use that scenario.
+	if($("#" + selectedScenario + "Button").hasClass(dataLayer)){
+		my.loadDataByGUI(); 
+	} else {
+		$("#refButton").click();
 	}
-	my.showHideScenarioButtons(type);
-	my.loadDataByGUI();
+	my.showHideScenarioButtons(dataLayer);
 	my.updateStoryWindow();
 });
 

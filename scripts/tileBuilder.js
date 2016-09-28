@@ -34,7 +34,6 @@ function drawingOnCanvas(canvasOverlay, params) {
     var ctx = params.canvas.getContext('2d');
     ctx.globalCompositeOperation = 'source-over';
 
-
     //console.log('getting tile z' + params.tilePoint.z + '-' + params.tilePoint.x + '-' + params.tilePoint.y);
 
 	/**
@@ -60,7 +59,7 @@ function drawingOnCanvas(canvasOverlay, params) {
 	 * Setting the stroke style of the entire canvas to gray? Could this also
 	 * be done for each feature? Pretty sure. 
 	 */
-    ctx.strokeStyle = 'grey';
+    //ctx.strokeStyle = 'grey';
 
 	/**
 	 * Loops through the features that exist in the tile!
@@ -79,7 +78,8 @@ function drawingOnCanvas(canvasOverlay, params) {
 		 * Otherwise, it sets it to a default. 
 		 */
         ctx.fillStyle = feature.tags.color ? feature.tags.color : 'rgba(255,0,0,0.05)';
-        
+        ctx.strokeStyle = feature.tags.color ? feature.tags.color : 'rgba(255,0,0,0.05)';
+        ctx.lineWidth = 0.75;
         /**
          * This seems important. Again, reminding me of java. 
          */
@@ -112,8 +112,10 @@ function drawingOnCanvas(canvasOverlay, params) {
 		/**
 		 * Fills in the polygons, and makes the stroke!
 		 */
-        if (type === 3 || type === 1) ctx.fill('evenodd');
-        //ctx.stroke();
+        if (type === 3 || type === 1) {
+            ctx.fill('evenodd');
+        }
+        ctx.stroke();
     }
 }
 

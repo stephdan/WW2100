@@ -78,46 +78,46 @@
 		
 		// lulc is categorical, so each color is hard coded here rather 
 		// than generated as a ramp.
-		App.colorPalates.lulc = [
+		App.colorPalates.lulc = [[
 					"rgb(158,154,200)", // Developed
-					"rgb(207, 180, 99)" , // Unforested
+					"rgb(252,241,185)", // Agriculture
+					"rgb(207,180,99)" , // Unforested
 					"rgb(92,144,2)", // subtropical mixed forest (ftm)
 					"rgb(127,178,57)", // temperate warm mixed forest (fdw)
-					"rgb(161, 211, 113)", // cool mixed forest (fvg)
-					"rgb(29, 166, 133)", // maritime needleleaf forest (fwi)
-					"rgb(90, 189,173)", // temperate needleleaf
-					"rgb(157, 213,213)", // moist temperate needleleaf forest (fsi)
+					"rgb(161,211,113)", // cool mixed forest (fvg)
+					"rgb(29,166,133)", // maritime needleleaf forest (fwi)
+					"rgb(90,189,173)", // temperate needleleaf
+					"rgb(157,213,213)", // moist temperate needleleaf forest (fsi)
 					"rgb(206,238,255)", // subalpine forest (fmh)
-					"rgb(252, 241, 185)", // Agriculture
 					"rgb(88,147,169)" // Open water
-				];
+				]];
 		// Set the color palette for snow
-		App.colorPalates.maxSWE = ColorUtils.getColorRamp(
+		App.colorPalates.maxSWE = [ColorUtils.getColorRamp(
 					snowLow, 
 					snowHigh, 
 					snowClasses, 
 					"string"
-				);
-		// Set the color palette for developed land value
-		App.colorPalates.devLandVal = ColorUtils.getColorRamp(
-					devLandValueLow, 
-					devLandValueHigh, 
-					devLandvalueClasses, 
-					"string"
-				);
-		// Set the color palette for agricultural land value
-		App.colorPalates.agLandVal = ColorUtils.getColorRamp(
+				)];
+		App.colorPalates.landValue = [
+					ColorUtils.getColorRamp(
+						devLandValueLow, 
+						devLandValueHigh, 
+						devLandvalueClasses, 
+						"string"
+					),
+					ColorUtils.getColorRamp(
 					agLandValueLow, 
 					agLandValueHigh, 
 				    agLandvalueClasses, 
 					"string"
-				); 
-		App.colorPalates.aridity = ColorUtils.getColorRamp(
+					)
+				];
+		App.colorPalates.aridity = [ColorUtils.getColorRamp(
 					aridityLow,
 					aridityHigh,
 					aridityClasses,
 					"string"
-				);
+				)];
 	};
 	
 	// Labels for the legend are hardcoded here. The number of labels has to 
@@ -125,58 +125,86 @@
 	// generated in initColorPalettes.
 	App.legendLabels = {
 		lulc: [
-			"Urban/Developed",
-			"Unforested",
-			"Subtropical Mixed Forest",
-			"Temperate Warm Mixed Forest",
-			"Cool Mixed Forest",
-			"Maritime Needleleaf Forest",
-			"Temperate Needleleaf",
-			"Moist Temperate Needleleaf Forest",
-			"Subalpine Forest",
-			"Agriculture",
-			"Open Water"
+			[
+				"Urban/Developed",
+				"Agriculture",
+				"Unforested",
+				"Subtropical Mixed Forest",
+				"Temperate Warm Mixed Forest",
+				"Cool Mixed Forest",
+				"Maritime Needleleaf Forest",
+				"Temperate Needleleaf",
+				"Moist Temperate Needleleaf Forest",
+				"Subalpine Forest",
+				"Open Water"
+			]
 		],
 		maxSWE: [
-			"0.0 to 5.0",
-			"5.1 to 10.0",
-			"10.1 to 50.0",
-			"50.1 to 100.0",
-			"100.1 to 500.0",
-			"500.1 to 2000.0"
+			[
+				"0.0 to 5.0",
+				"5.1 to 10.0",
+				"10.1 to 50.0",
+				"50.1 to 100.0",
+				"100.1 to 500.0",
+				"500.1 to 2000.0"
+			]
+		],
+		landValue: [
+			[
+				"Less than 250,000",
+				"250,001 - 500,000",
+				"500,001 - 750,000",
+				"750,001 - 1,000,000",
+				"More than 1,000,000"
+			],
+			[
+				"Less than 500",
+				"501 to 1,000",
+				"1,001 to 1,500",
+				"1,501 to 2,000",
+				"2,001 to 2,500",
+				"More than 2,500"
+			]
 		],
 		devLandVal: [
-			"Less than 250,000",
-			"250,001 - 500,000",
-			"500,001 - 750,000",
-			"750,001 - 1,000,000",
-			"More than 1,000,000"
+			[
+				"Less than 250,000",
+				"250,001 - 500,000",
+				"500,001 - 750,000",
+				"750,001 - 1,000,000",
+				"More than 1,000,000"
+			]
 		],
 		agLandVal: [
-			"Less than 500",
-			"501 to 1,000",
-			"1,001 to 1,500",
-			"1,501 to 2,000",
-			"2,001 to 2,500",
-			"More than 2,500"
+			[
+				"Less than 500",
+				"501 to 1,000",
+				"1,001 to 1,500",
+				"1,501 to 2,000",
+				"2,001 to 2,500",
+				"More than 2,500"
+			]
 		],
 		aridity: [
-			"Less than 0.005",
-			"0.005 to 0.01",
-			"0.01 to 0.1",
-			"0.1 to 0.5",
-			"0.5 to 1.0",
-			"1.0 to 1.5",
-			"More than 1.5"
+			[
+				"Less than 0.005",
+				"0.005 to 0.01",
+				"0.01 to 0.1",
+				"0.1 to 0.5",
+				"0.5 to 1.0",
+				"1.0 to 1.5",
+				"More than 1.5"
+			]
 		]
 	};
 	
 	// A legend title for each of the data layers
 	App.legendTitles = {
-		lulc: "Landcover and Forest Type",
-		maxSWE: "Average Maximum <br/>Snow Water <br/>Equivalent in mm",
-		landValue: "Land Value <br/>$ per Acre",
-		aridity: "Aridity Index"
+		lulc: ["Landcover and Forest Type"],
+		maxSWE: ["Average Maximum <br/>Snow Water <br/>Equivalent in mm"],
+		landValue: ["Developed Land Value <br/>$ per Acre",
+					"Agricultural Land Value <br/>$ per Acre"],
+		aridity: ["Aridity Index"]
 	};
 	
 	// Changes the opacity of the main data layer.
@@ -446,7 +474,7 @@
 	// Returns a color based on the lcCombined parameter of the provided 
 	// lulc feature 
 	function getlulcColor(feature) {
-		var colors = App.colorPalates.lulc;
+		var colors = App.colorPalates.lulc[0];
 		switch (feature.properties.lcCombined) {
 			// LULC_B values
 			case 11: //High-Intensity Developed
@@ -460,37 +488,37 @@
 			case 15: //Undifferentiated Developed
 			    return colors[0];
 			case 20: //Agriculture
-			    return colors[9];
+			    return colors[1];
 			case 30: //Grassland or Shrub Scrub
-			    return colors[1];
+			    return colors[2];
 			case 51: //Barren
-			    return colors[1];
+			    return colors[2];
 			case 61: //Wetlands
-			    return colors[1];
+			    return colors[2];
 			case 71: //Open Water
 			    return colors[10];
 			case 72: //Snow and Ice
-			    return colors[1];
+			    return colors[2];
 			    
 			// PVT values
 			case 1: // temperate warm mixed forest (fdw)
-				return colors[3];
+				return colors[4];
 			case 5: //cool mixed
-			    return colors[4];	
+			    return colors[5];	
 			case 2:  //subalpine
-			    return colors[8];
+			    return colors[9];
 			case 3: //moist temp needle
-			    return colors[7];
+			    return colors[8];
 			case 4: // C3 shrubland (fto)
-				return colors[3];
+				return colors[4];
 			case 6: //maritime needle
-			    return colors[5];
-			case 7: // temperate needleleaf woodland (fuc)
-				return colors[6];
-			case 8: // subtropical mixed forest
-				return colors[2];
-			case 9: //temperate needleleaf forest
 			    return colors[6];
+			case 7: // temperate needleleaf woodland (fuc)
+				return colors[7];
+			case 8: // subtropical mixed forest
+				return colors[3];
+			case 9: //temperate needleleaf forest
+			    return colors[7];
         }
         console.log("unknown case: " + feature.properties.lcCombined);
         return "rgb(100,100,100)";
@@ -500,7 +528,7 @@
 	function getSnowWaterEquivalentColor(feature) {
 		// Get the snowWaterEquivalent value of that catchment
 		var hucID = feature.properties.HUC12,
-			colors = App.colorPalates.maxSWE,
+			colors = App.colorPalates.maxSWE[0],
 			maxSWE,
 			date = App.settings.currentDataSettings.date,
 			scenario = App.settings.currentDataSettings.scenario,
@@ -548,54 +576,6 @@
 		}
 	}
 	
-	
-	
-	function getDevelopedLandValueColors(feature) {
-		// Get the snowWaterEquivalent value of that catchment
-		var landValue = Number(feature.properties.MEAN_DEV_V),
-			colors = App.colorPalates.devLandVal;
-		
-		if(isNaN(landValue)) {
-			console.log("Developed Land Value is NaN!");
-			return "rgb(100,100,100)"
-		}
-		
-		if(landValue < 250000) {
-			return colors[0];
-		}
-		if(landValue <= 500000) {
-			return colors[1];
-		}
-		if(landValue <= 750000) {
-			return colors[2];
-		}
-		if(landValue <= 1000000) {
-			return colors[3];
-		}
-		if(landValue > 1000000) {
-			return colors[4];
-		}
-	}
-	
-	function getAgriculturalLandValueColors(feature) {
-		// Get the snowWaterEquivalent value of that catchment
-		var landValue = Number(feature.properties.MEAN_AG_VA),
-			colors = App.colorPalates.agLandVal;
-		
-		if(isNaN(landValue)) {
-			console.log("Developed Land Value is NaN!");
-			return "rgb(100,100,100)"
-		}
-		switch (landValue) {
-			case 1: return colors[0];
-			case 2: return colors[1];
-			case 3: return colors[2];
-			case 4: return colors[3];
-			case 5: return colors[4];	
-			case 6: return colors[5];
-		}
-	}
-	
 	function getLandValueColors(feature) {
 		// If MEAN_DEV_V is > 0
 		var agVal = feature.properties.MEAN_AG_VA,
@@ -604,13 +584,12 @@
 			
 		if(devVal > 0) {
 			// Color it by dev val, ja?
-			colors = App.colorPalates.devLandVal;
+			colors = App.colorPalates.landValue[0];
 			
 			if(isNaN(devVal)) {
 				console.log("Developed Land Value is NaN!");
 				return "rgb(100,100,100)"
 			}
-			
 			if(devVal < 250000) {
 				return colors[0];
 			}
@@ -626,10 +605,8 @@
 			if(devVal > 1000000) {
 				return colors[4];
 			}
-			
-			
 		} else {
-			colors = App.colorPalates.agLandVal;
+			colors = App.colorPalates.landValue[1];
 			if(isNaN(agVal)) {
 				console.log("Developed Land Value is NaN!");
 				return "rgb(100,100,100)"
@@ -711,7 +688,6 @@
 				pointToLayer: function(feature, latlng) {
 				return L.circleMarker(latlng, cityMarkerOptions);
 			},
-			
 			onEachFeature: function(feature, layer) {
 				var lat = feature.properties.latitude,
 					lng = feature.properties.longitude,
@@ -735,11 +711,24 @@
 		App.referenceLayers.streams = streamsLayer;
 	};
 	
+	App.makeOpenWaterReferenceLayer = function(openWaterJSON) {
+		var openWaterStyle = {
+		    "color": "rgb(88,147,169)",
+		    "weight": 0,
+		    "fillOpacity": 1.0
+		};
+		var openWaterLayer = L.geoJson(openWaterJSON, {
+			style: openWaterStyle
+		});
+		App.referenceLayers.openWater = openWaterLayer;
+	};
+	
 	App.addReferenceLayers = function() {
 		App.clearReferenceLayers();
 
 		if(App.settings.showStreams) {
 			App.referenceLayers.streams.addTo(App.map);
+			App.referenceLayers.openWater.addTo(App.map);
 		}
 		if(App.settings.showCities) {
 			App.referenceLayers.cities.addTo(App.map);
@@ -762,12 +751,14 @@
 	App.importReferenceLayers = function(callback) {
 		var dataPaths = {
 			cities: "data/geometry/referenceLayers/cities.json",
-			streams: "data/geometry/referenceLayers/cleanedRivers_dis2_wgs84.geojson"
+			streams: "data/geometry/referenceLayers/streams1.json",
+			openWater: "data/geometry/referenceLayers/openWater.json"
 		};
 		
 		d3_queue.queue(1)
 			.defer(d3.json, dataPaths.cities)
 			.defer(d3.json, dataPaths.streams)
+			.defer(d3.json, dataPaths.openWater)
 			.awaitAll(callback);
 	};
 	
@@ -784,7 +775,10 @@
 	};
 	
 	App.configureLegend = function() {
-		var legendItemContainer,
+		var legendContainer = d3.select("#legendContainer"),
+			legendItemContainer,
+			legendSection,
+			legendSectionTitle,
 			legendItem,
 			labelSizePx = 12,
 			rectWidth = 20,
@@ -794,61 +788,115 @@
 			labelSpacer = 10,
 			
 			dataType = App.settings.currentDataSettings.type,
-			title = App.legendTitles[dataType],
+			titles = App.legendTitles[dataType],
 			colors = App.colorPalates[dataType],
-			labels = App.legendLabels[dataType];
+			labels = App.legendLabels[dataType],
+			k;
+		
+		// Remove old legend material.
+		d3.selectAll("#legendContainer svg").remove();
+		d3.selectAll("#legendContainer label").remove();
+		
+		for(k = 0; k < titles.length; k += 1) {
+			// Add a legend section title
+			legendSectionTitle = legendContainer.append("label")
+				.html(titles[k]);
 			
-		
-		d3.select("#legendItemContainer svg").remove();
-		
-		// Creates the svg to stick legend items in, sets the width and height
-		legendItemContainer = d3.select("#legendItemContainer")
-			.append("svg")
-			.attr("height", function() {
-				var l = colors.length;
-				return (l * rectHeight + (l - 1) * rectSpacer) + 2;
-			})
-			.attr("width", function() {
-				//return "100%"
-			});
+			// Add an svg element to hold legend items
+			legendSection = legendContainer.append("svg")
+				.classed(".legendSection", true)
+				.attr("height", function() {
+					var l = colors[k].length;
+					return (l * rectHeight + (l - 1) * rectSpacer) + 2;
+				});
 			
-		legendItem = legendItemContainer.selectAll("g")
-			.data(colors)
-			.enter().append("g");
-			
-		legendItem.append("rect")
-			.attr("width", rectWidth)
-			.attr("height", rectHeight)
-			.attr("fill", "white")
-			.attr("stroke", "rgb(200,200,200)")
-			.attr("stroke-width", 0.25)
-			.attr("y", function(d, i) {
-				return (rectHeight + rectSpacer) * i;
-			})
-			.attr("x", 2)
-			.attr("fill", function(d, i) {
-				return d;
-			});
+			// Add an svg group for each legend item in this section.	
+			legendItem = legendSection.selectAll("g")
+				.data(colors[k])
+				.enter().append("g");
+				
+			// Add rectangular color swatches for each legend item. 
+			legendItem.append("rect")
+				.attr("width", rectWidth)
+				.attr("height", rectHeight)
+				.attr("fill", "white")
+				.attr("stroke", "rgb(200,200,200)")
+				.attr("stroke-width", 0.25)
+				.attr("y", function(d, i) {
+					return (rectHeight + rectSpacer) * i;
+				})
+				.attr("x", 2)
+				.attr("fill", function(d, i) {
+					return d;
+				});
+				
+			legendItem.append("text")
+				.style("font-size", labelSizePx + "px")
+				.style("font-family", "Tahoma, Geneva, sans-serif")
+				.text(function(d, i) {
+					return labels[k][i];
+				})
+				.attr("x", rectWidth + labelSpacer)
+				.attr("y", function(d, i) {
+					return (rectHeight/2 + (labelSizePx/2 - 1))+ ((rectHeight + rectSpacer) * i);
+				})
+				.each(function(d) {
+					maxLabelWidth = this.getBBox().width > maxLabelWidth ? this.getBBox().width : maxLabelWidth;
+				});
+				
+			legendSection.attr("width", function() {
+					return maxLabelWidth + rectWidth + labelSpacer;
+				});
+		}
 		
-		legendItem.append("text")
-			.style("font-size", labelSizePx + "px")
-			.style("font-family", "Tahoma, Geneva, sans-serif")
-			.text(function(d, i) {
-				return labels[i];
-			})
-			.attr("x", rectWidth + labelSpacer)
-			.attr("y", function(d, i) {
-				return (rectHeight/2 + (labelSizePx/2 - 1))+ ((rectHeight + rectSpacer) * i);
-			})
-			.each(function(d) {
-				maxLabelWidth = this.getBBox().width > maxLabelWidth ? this.getBBox().width : maxLabelWidth;
-			});
 		
-		legendItemContainer.attr("width", function() {
-				return maxLabelWidth + rectWidth + labelSpacer;
-			});
 		
-		$("#legendContainer label").html(title);
+		// // Creates the svg to stick legend items in, sets the width and height
+		// legendItemContainer = d3.select("#legendItemContainer")
+			// .append("svg")
+			// .attr("height", function() {
+				// var l = colors.length;
+				// return (l * rectHeight + (l - 1) * rectSpacer) + 2;
+			// });
+// 		
+		// // Append a bunch of svg groups using the color data
+		// legendItem = legendItemContainer.selectAll("g")
+			// .data(colors)
+			// .enter().append("g");
+// 		
+		// legendItem.append("rect")
+			// .attr("width", rectWidth)
+			// .attr("height", rectHeight)
+			// .attr("fill", "white")
+			// .attr("stroke", "rgb(200,200,200)")
+			// .attr("stroke-width", 0.25)
+			// .attr("y", function(d, i) {
+				// return (rectHeight + rectSpacer) * i;
+			// })
+			// .attr("x", 2)
+			// .attr("fill", function(d, i) {
+				// return d;
+			// });
+// 		
+		// legendItem.append("text")
+			// .style("font-size", labelSizePx + "px")
+			// .style("font-family", "Tahoma, Geneva, sans-serif")
+			// .text(function(d, i) {
+				// return labels[i];
+			// })
+			// .attr("x", rectWidth + labelSpacer)
+			// .attr("y", function(d, i) {
+				// return (rectHeight/2 + (labelSizePx/2 - 1))+ ((rectHeight + rectSpacer) * i);
+			// })
+			// .each(function(d) {
+				// maxLabelWidth = this.getBBox().width > maxLabelWidth ? this.getBBox().width : maxLabelWidth;
+			// });
+// 		
+		// legendItemContainer.attr("width", function() {
+				// return maxLabelWidth + rectWidth + labelSpacer;
+			// });
+// 		
+		// $("#legendContainer label").html(title);
 	};
 
 // Event listeners for snow layer pointer interations --------------------------
@@ -888,9 +936,11 @@
 			if (error) {throw error;}
 			
 			var citiesJSON = data[0],
-				streamsJSON = data[1];
+				streamsJSON = data[1],
+				openWaterJSON = data[2];
 			App.makeCitiesReferenceLayer(citiesJSON);
 			App.makeStreamsReferenceLayer(streamsJSON);
+			App.makeOpenWaterReferenceLayer(openWaterJSON);
 			callback();
 		});
 	}
