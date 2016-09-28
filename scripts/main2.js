@@ -141,12 +141,12 @@
 		],
 		maxSWE: [
 			[
-				"0.0 to 5.0",
-				"5.1 to 10.0",
-				"10.1 to 50.0",
-				"50.1 to 100.0",
-				"100.1 to 500.0",
-				"500.1 to 2000.0"
+				"0.0 to 0.5",
+				"0.5 to 1.0",
+				"1.0 to 5.0",
+				"5.0 to 10.0",
+				"10.0 to 50.0",
+				"50.0 to 200.0"
 			]
 		],
 		landValue: [
@@ -546,7 +546,7 @@
 		for(i = 0; i < App.snowData[scenario].length; i += 1) {
 			if(hucID === App.snowData[scenario][i].huc) {
 				//snowWaterEquivalent = snowData[i][decade]/1000;
-				maxSWE = App.snowData[scenario][i][decade]/1000;
+				maxSWE = App.snowData[scenario][i][decade]/10000;
 				break;
 			}
 		}

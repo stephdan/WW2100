@@ -33,11 +33,12 @@
 	<!-- leaflet map goes in this div -->
 	<div id="map"></div>
 	
-	<!-- Holds all the dropdowns etc for data selection -->
+	<!-- Sidebar UI containing dropdowns, button etc for data selection -->
 	<div id="dataSelectUIContainer" class="uiBox">
 		
-		<div class="selectorContainer">
-			<label>Select Data Layer</label>
+		<p class="UIHeader">Select Data Layer</p>
+			
+		<div class="selectorContainer UIElementContainer">
 			<select name="dataTypeSelect" id="dataTypeSelect" class="form-control">
 				<option value="lulc">Land Cover</option>
 				<option value="maxSWE">Snow Water Equivalent</option>
@@ -46,8 +47,9 @@
 			</select>
 		</div>
 		
-		<div class="sliderContainer">
-			<label>Select Time Period</label>
+		<p class="UIHeader">Select Time Period</p>
+			
+		<div class="sliderContainer UIElementContainer">
 			<div class="stepLabels" style="text-align: center">
 				<span style="float: left">2010</span>
 				<span>2050</span>
@@ -62,169 +64,212 @@
 			</datalist>
 		</div>
 		
-		<label style="margin: 10px 0px 0px 0px;">Compare Scenarios</label>
-		<div data-toggle="buttons">
+		<div>
+			<p class="UIHeader" id="compareScenariosHeader"
+					data-toggle="popover"
+					data-content="<a target='_blank' 
+					href='http://inr.oregonstate.edu/ww2100/model-overview/scenarios'
+					>Learn more</a> about scenarios."
+					data-placement="left"
+					data-container="body">
+				Compare Scenarios
+			</p>
 			
-			<label 
-			 style="display: none;"
-			 data-toggle="popover"
-			 data-content="Assumes a low level of climate change."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        maxSWE" 
-			 id="lowClimButton">
-				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
-				Low Climate Change
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="lowClimButtonExplainer"
-			style="display: none;">
+			<button class="glyphicon glyphicon-question-sign explainerButton headerExplainerButton"
+					id="compareScenariosHeaderExplainer"
 			</button>
+		</div>
+		
+		
+		
+		
+		<!-- start scenario buttons -->
+		<div class="scenarioButtonsContainer UIElementContainer">
+			<div data-toggle="buttons">
+				<label 
+				 style="display: none;"
+				 data-toggle="popover"
+				 data-content="Low Change Climate: Mean annual temperature rises ~1°C (2°F) over the 
+				 21st century. Precipitation increases slightly in the wet season 
+				 and decreases slightly in the dry season though interannual 
+				 variability is greater than any trend."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        maxSWE" 
+				 id="lowClimButton">
+					<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
+					Low Clim
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+						id="lowClimButtonExplainer"
+						style="display: none;">
+				</button>
+				
+				<label 
+				 data-toggle="popover"
+				 data-content="Reference Case: Mid-range projections for climate 
+				 warming, population, and income growth (mean annual temperature 
+				 rises ~4°C (~7.5°F) over the 21st century; basinwide population in 
+				 2010 = 2.41M and 2100 = 5.37M); laws and regulations continue in their 
+				 present form. Precipitation increases slightly in the wet season 
+				 and decreases slightly in the dry season though interannual 
+				 variability is greater than any trend."
+				 data-placement="left"
+				 data-html=true
+				 data-container="body"
+				 class="btn btn-primary referenceScenarioBtn scenarioButton 
+				        lulc maxSWE landValue aridity active" 
+				 id="refButton">
+					<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
+					Reference Case
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+				id="refButtonExplainer">
+				</button>
+				
+				<label 
+				 style="display: none;"
+				 data-toggle="popover"
+				 data-content="High Change Climate: Mean annual temperature rises 
+				 6°C (~10.5°F) over the 
+				 21st century. Precipitation increases slightly in the wet season 
+				 and decreases slightly in the dry season though interannual 
+				 variability is greater than any trend."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        maxSWE" 
+				 id="highClimButton">
+					<input type="radio" name="options" id="option2" autocomplete="off"> 
+					High Clim
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton "
+				style="display: none;"
+				id="highClimButtonExplainer">
+				</button>
+				
+				<label 
+				 data-toggle="popover"
+				 data-content="Population growth rates doubled in urban areas, 
+				 relative to the Reference Case; basinwide pop. in 2100 = 8.25M."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        lulc landValue" 
+				 id="highPopButton">
+					<input type="radio" name="options" id="option2" autocomplete="off"> 
+					High Population
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+				id="highPopButtonExplainer">
+				</button>
+				
+				<label 
+				 data-toggle="popover"
+				 data-content="Lower density development permitted, relative to the 
+				 Reference Case."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        lulc landValue" 
+				 id="urbExpandButton">
+					<input type="radio" name="options" id="option2" autocomplete="off"> 
+					Urban Expansion
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+				id="urbExpandButtonExplainer">
+				</button>
+				
+				<label 
+				data-toggle="popover"
+				 data-content="Fire suppression efforts increased, relative to the 
+				 Reference Case."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        lulc" 
+				 id="fireSuppressButton">
+					<input type="radio" name="options" id="option2" autocomplete="off"> 
+					Fire Suppression
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+				id="fireSuppressButtonExplainer">
+				</button>
+				
+				<label 
+				data-toggle="popover"
+				 data-content="mid-range projections for climate warming, 
+				 population, and income growth; recent trends in resource use and 
+				 management."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        lulc landValue" 
+				 id="managedButton">
+					<input type="radio" name="options" id="option2" autocomplete="off">
+					Managed
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+				id="managedButtonExplainer">
+				</button>
+				
+				<label 
+				data-toggle="popover"
+				 data-content="Extreme changes in climate and population growth, 
+				 increased fire suppression and high utilization of irrigation and 
+				 instream flow rights."
+				 data-placement="left"
+				 data-container="body"
+				 class="btn btn-primary climateScenarioBtn scenarioButton 
+				        lulc landValue aridity" 
+				 id="econExtremeButton">
+					<input type="radio" name="options" id="option2" autocomplete="off"> 
+					Worst Case
+				</label>
+				
+				<button class="glyphicon glyphicon-question-sign explainerButton scenarioExplainerButton"
+				id="econExtremeButtonExplainer">
+				</button>
+			</div>
+		</div> <!-- end scenario buttons -->
+		
+		<p class="UIHeader">Reference Layers</p>
+
+		<div class="referenceLayerCheckboxContainer">
+			<div class="checkbox" style="margin-top: 0px">
+				<label><input type="checkbox" id="citiesLayerCheckbox" checked value="">
+					<div id="citiesIcon">
+						<svg width="20px" height="10px">
+							<circle cx="10" cy="5" r="3" fill="black" />
+						</svg> 
+					</div> Cities
+				</label>
+			</div>	
 			
-			<label 
-			 data-toggle="popover"
-			 data-content="Mid-range assumptions about climate change and human growth."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary referenceScenarioBtn scenarioButton 
-			        lulc maxSWE landValue aridity active" 
-			 id="refButton">
-				<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
-				Reference Case
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="refButtonExplainer">
-			</button>
-			
-			<label 
-			 style="display: none;"
-			 data-toggle="popover"
-			 data-content="Assumes a high level of climate change."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        maxSWE" 
-			 id="highClimButton">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				High Climate Change
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			style="display: none;"
-			id="highClimButtonExplainer">
-			</button>
-			
-			<label 
-			 data-toggle="popover"
-			 data-content="High urban population growth."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        lulc landValue" 
-			 id="highPopButton">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				High Population
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="highPopButtonExplainer">
-			</button>
-			
-			<label 
-			 data-toggle="popover"
-			 data-content="Fast expansion of urban growth boundary, low development density."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        lulc landValue" 
-			 id="urbExpandButton">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				Urban Expansion
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="urbExpandButtonExplainer">
-			</button>
-			
-			<label 
-			data-toggle="popover"
-			 data-content="Increased fire suppression."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        lulc" 
-			 id="fireSuppressButton">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				Fire Suppression
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="fireSuppressButtonExplainer">
-			</button>
-			
-			<label 
-			data-toggle="popover"
-			 data-content="Assumes mid-range changes in climate and population growth, with a continuation of recent trends in resource use and management."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        lulc landValue" 
-			 id="managedButton">
-				<input type="radio" name="options" id="option2" autocomplete="off">
-				Managed
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="managedButtonExplainer">
-			</button>
-			
-			<label 
-			data-toggle="popover"
-			 data-content="Assumes extreme changes in climate change and population growth, combined with policies that emphasize resource use over conservation."
-			 data-placement="left"
-			 data-container="body"
-			 class="btn btn-primary climateScenarioBtn scenarioButton 
-			        lulc landValue aridity" 
-			 id="econExtremeButton">
-				<input type="radio" name="options" id="option2" autocomplete="off"> 
-				Worst Case
-			</label>
-			
-			<button class="glyphicon glyphicon-question-sign scenarioExplainerButton"
-			id="econExtremeButtonExplainer">
-			</button>
-			
-			
+			<div class="checkbox">
+				<label><input type="checkbox" id="streamsLayerCheckbox" checked value="">
+					<div id="streamsIcon"></div> Rivers
+				</label>
+			</div>
 		</div>
 
-		<div class="checkbox">
-			<label><input type="checkbox" id="citiesLayerCheckbox" checked value="">
-				<div id="citiesIcon">
-					<svg width="20px" height="10px">
-						<circle cx="10" cy="5" r="3" fill="black" />
-					</svg> 
-				</div> Cities
-			</label>
-		</div>
+		<p class="UIHeader">Adjust Opacity</p>
 		
-		
-		
-		<div class="checkbox">
-			<label><input type="checkbox" id="streamsLayerCheckbox" checked value="">
-				<div id="streamsIcon"></div> Rivers
-			</label>
-		</div>
-		
-		<div class="sliderContainer">
-			<label>Adjust Opacity</label>
+		<div class="sliderContainer UIElementContainer">
 			<input type="range" id="opacitySlider"/ min="0", max="1" value="0.8" step="0.01">
 		</div>
 		
-		<div class="selectorContainer">
-			<label>Select Base Layer</label>
+		<p class="UIHeader">Select Base Layer</p>
+		
+		<div class="selectorContainer UIElementContainer">
 			<select name="baseLayerSelect" id="baseLayerSelect" class="form-control">
 				<option class="basemap" value="Esri_WorldTerrain">Terrain</option>
 				<option class="basemap" value="Stamen_Toner">Roads, Streams, Cities</option>
@@ -232,13 +277,13 @@
 				<option class="basemap" value="Esri_NatGeoWorldMap">National Geographic</option>
 			</select>
 		</div>
-	</div>
+		
+	</div> <!--End sidebar UI -->
 	
 	<div id="legendAndInfoButtonContainer">
 		<!-- Container for the legend -->
 		<div id="legendContainer" class="uiBox">
 		</div>
-
 	</div>
 	
 	<div id="info" style="display: none;">

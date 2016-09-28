@@ -37,6 +37,17 @@ body, html {
 }
 
 .selectorContainer {
+	/*margin-bottom: 10px;*/
+}
+
+.UIHeader {
+	width: 89%;
+	font-weight: bold;
+	margin-bottom: 3px;
+	display: inline-block;
+}
+
+.UIElementContainer {
 	margin-bottom: 10px;
 }
 
@@ -107,7 +118,7 @@ body, html {
 	/*display: inline-block;*/
 }
 
-.scenarioExplainerButton {
+.explainerButton {
 	display: inline-block;
 	width: 18px;
 	height: 18px;
@@ -122,11 +133,18 @@ body, html {
     border: 0;
     background: transparent;
     margin-left: -3px;
-    top: 7px;
     font-size: 16px;
 }
 
-.scenarioExplainerButton:hover {
+.headerExplainerButton {
+	top: 2px;
+}
+
+.scenarioExplainerButton {
+    top: 7px;
+}
+
+.explainerButton:hover {
 	color: rgb(100,100,100);
 }
 

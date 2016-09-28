@@ -16,7 +16,7 @@ var layerSelectMenu,
 
 // Enable popovers
 $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
+    $('[data-toggle="popover"]').popover({html: true});
     $(".resizable").resizable({
 		minHeight: 200, 
 		minWidth: 200,
@@ -93,7 +93,7 @@ my.updateStoryWindow = function() {
 
 // remove popovers when the window is resized
 $(window).on('resize', function () {
-    $(".scenarioExplainerButton").blur();
+    $(".explainerButton").blur();
 });
 
 // Require manual triggers for popovers so they don't appear when
@@ -110,7 +110,7 @@ $(".scenarioExplainerButton").on("click", function() {
 	$(this).focus();
 });
 
-$(".scenarioExplainerButton").focusin(function() {
+$(".explainerButton").focusin(function() {
 	// Figure out which one this is
 	var id = $(this).prop("id");
 	// chop off the word explainer
@@ -119,7 +119,7 @@ $(".scenarioExplainerButton").focusin(function() {
 	$("#" + idWithoutExplainer).popover("show");
 });
 
-$(".scenarioExplainerButton").focusout(function() {
+$(".explainerButton").focusout(function() {
 	// Figure out which one this is
 	var id = $(this).prop("id");
 	// chop off the word explainer
