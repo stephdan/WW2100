@@ -129,8 +129,6 @@ $(".explainerButton").focusout(function() {
 });
 
 dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
-	// TODO update the options in the 
-	// timePeriodSelectMenu and scenarioSelectMenu
 	var dataLayer = $(this).val();	
 	// If the currently selected scenario isn't used by this dataLayer, change
 	// it to the reference scenario by manually clicking the reference case
@@ -142,8 +140,27 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 		$("#refButton").click();
 	}
 	my.showHideScenarioButtons(dataLayer);
+	my.updateTimePeriodLabels(dataLayer);
 	my.updateStoryWindow();
 });
+
+// Change the labels of the time period slider based on the currently selected
+// data layer. 
+my.updateTimePeriodLabels = function(dataLayer) {
+	var early = $("#earlyTimePeriodLabel"),
+		mid = $("#midTimePeriodLabel"),
+		late = $("#lateTimePeriodLabel");
+
+	if(dataLayer === "maxSWE") {
+		early.text("2010s");
+		mid.text("2050s");
+		late.text("2090s");
+	} else {
+		early.text("2010");
+		mid.text("2050");
+		late.text("2099");
+	}
+}
 
 $("#timeRange").on("change", function() {
 	my.loadDataByGUI();

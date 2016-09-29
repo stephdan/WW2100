@@ -16,6 +16,7 @@
 		showCities: true,
 		showStreams: true,
 		dataLayerOpacity: 0.8,
+		useVectorTiles: true,
 		currentDataSettings: ""
 	};
 		
@@ -146,7 +147,7 @@
 				"1.0 to 5.0",
 				"5.0 to 10.0",
 				"10.0 to 50.0",
-				"50.0 to 200.0"
+				"50.0 and above"
 			]
 		],
 		landValue: [
@@ -213,10 +214,15 @@
 		if(opacity) {
 			App.settings.dataLayerOpacity = opacity;
 		}
-		activeDataLayer.setOpacity(App.settings.dataLayerOpacity);
+
+		// The function for changing opacity of the data layer depends on 
+		// whether vector tiles are used. 
+		if(App.settings.useVectorTiles){
+			activeDataLayer.setOpacity(App.settings.dataLayerOpacity);
+		} else {
+			activeDataLayer.setStyle({fillOpacity: App.settings.dataLayerOpacity})
+		}
 	};
-	
-	
 
 	// Creates the leaflet map and configures the available base layers.
 	App.addMap = function() {
@@ -277,7 +283,6 @@
 		App.currentBasemap = newLayer;
 	};
 	
-	
 	App.getPathToGeometry = function() {
 		var basePath = "data/geometry/dataLayers/",
 			dataPath,
@@ -285,7 +290,11 @@
 			scenario = App.settings.currentDataSettings.scenario,
 			date = App.settings.currentDataSettings.date,
 			decade;
-			
+		
+		if(App.settings.currentDataSettings.type === "maxSWE") {
+			return "data/geometry/dataLayers/snow/wHuc12_simp.json";
+		}
+
 		if(date === "early") {
 			decade = "2010";
 		} else if (date === "mid") {
@@ -293,7 +302,7 @@
 		} else {
 			decade = "2100";
 		}
-		
+
 		dataPath = type + "/" + type + "_" + scenario + decade + ".json";
 		return basePath + dataPath;
 	};
@@ -313,7 +322,8 @@
 		// reference is needed to remove the layer later. 
 		var layerToAdd = settings.type + settings.date + settings.scenario,
 			layer,
-			pathToGeometry;
+			pathToGeometry,
+			key;
 		
 		// If the layer is already loaded, do nothing.
 		for(layer in App.mapLayers) {
@@ -324,25 +334,11 @@
 			}
 		}
 		
-		console.log("loading " + layerToAdd);
-		
 		// Other functions need the settings, too!
 		App.settings.currentDataSettings = settings;
 		
-		// If we're looking at SWE, get the HUC12 polygons. Otherwise, get the 
-		// correct IDU polygon layer. 
-		if(settings.type === "maxSWE") {
-			pathToGeometry = "data/geometry/dataLayers/snow/wHuc12_simp.json";
-		} else {
-			// build a path from the settings.
-			pathToGeometry = App.getPathToGeometry();
-			//pathToGeometry = allDataPaths[settings.type][settings.scenario][settings.date];
-		}
-		
-		
-		// The json is imported here. Do this if you want to add a geojson
-		// maplayer to the map, as opposed to a tile layer. 		
-		d3.json(pathToGeometry, function(error, importedJson) {
+		// Import the json data layer saved at pathToGeometry
+		d3.json(App.getPathToGeometry(), function(error, importedJson) {
 			if(error) {
 				alert("There is currently no data for this setting. Soon to come!"); 
 				$("#loading").addClass("hidden");
@@ -350,8 +346,6 @@
 				App.addReferenceLayers();
 				throw new Error("Problem reading csv");
 			}
-			
-			var key;
 			
 			// If the json is topojson, convert it to geojson
 			// console.log(importedJson.type);
@@ -361,36 +355,49 @@
 				}
 			}
 			
-			// TODO It might be good to use this code in the event that you 
-			// don't want a particular data layer tiled. If you want features
-			// interactions, for example. Probably with snow, if anything. 
-			// Otherwise, this is obsolete. 
-			// Turn the geoJson into a leaflet layer
-			// activeDataLayer = L.geoJson(importedJson, {
-				// style: styleWW2100Layer,
-				// // raise up to 1 to increase performance, while adding 
-				// // weird gaps between polygons. 
-				// smoothFactor: 0,
-				// // This adds event listeners to each feature
-				// onEachFeature: onEachFeature
-			// });
+			if(settings.type === "maxSWE") {
+				// TODO It might be good to use this code in the event that you 
+				// don't want a particular data layer tiled. If you want features
+				// interactions, for example. Probably with snow, if anything. 
+				// Otherwise, this is obsolete. 
+				// Turn the geoJson into a leaflet layer
+				App.settings.useVectorTiles = false;
+				activeDataLayer = L.geoJson(importedJson, {
+					style: styleWW2100Layer,
+					// raise up to 1 to increase performance, while adding 
+					// weird gaps between polygons. 
+					smoothFactor: 0,
+					// This adds event listeners to each feature
+					onEachFeature: onEachFeature
+				});
+			} else {
+				App.settings.useVectorTiles = true;
+				// Assign a color property to each feature.
+				App.colorizeFeatures(importedJson);
+
+				// Add the json as a vector tile layer. Much better performance
+				// than a regular json layer. 
+				activeDataLayer = App.buildTileLayer(importedJson);
+
+				// Gotta make the z-index a little higher so baselayer tiles
+				// don't get placed on top of it.
+				activeDataLayer.setZIndex(2);
+
+				// Set the opacity of the data layer to the current opacity setting
+				App.setDataLayerOpacity();
+			}
+
+				
 			
-			// Assign a color property to each feature.
-			App.colorizeFeatures(importedJson);
 			
-			// Add the json as a vector tile layer. Much better performance
-			// than a regular json layer. 
-			activeDataLayer = App.buildTileLayer(importedJson);
 			
-			// Gotta make the z-index a little higher so baselayer tiles
-			// don't get placed on top of it.
-			activeDataLayer.setZIndex(2);
+			
+			
 			
 			// Clear the map just before adding new features. 
 			App.clearMapLayers();
 			
-			// Set the opacity of the data layer to the current opacity setting
-			App.setDataLayerOpacity();
+			
 			
 			// layerToAdd is just a string that happens to be a key in mapLayers
 			App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
@@ -545,8 +552,7 @@
 		
 		for(i = 0; i < App.snowData[scenario].length; i += 1) {
 			if(hucID === App.snowData[scenario][i].huc) {
-				//snowWaterEquivalent = snowData[i][decade]/1000;
-				maxSWE = App.snowData[scenario][i][decade]/10000;
+				maxSWE = App.snowData[scenario][i][decade]/100000;
 				break;
 			}
 		}
@@ -556,22 +562,22 @@
 			return "rgb(100,100,100)";
 		}
 
-		if(maxSWE <= 5.0) {
+		if(maxSWE <= 0.5) {
 			return colors[0];
 		}
-		if(maxSWE <= 10.0) {
+		if(maxSWE <= 1.0) {
 			return colors[1];
 		}
-		if(maxSWE <= 50.0) {
+		if(maxSWE <= 5.0) {
 			return colors[2];
 		}
-		if(maxSWE <= 100.0) {
+		if(maxSWE <= 10.0) {
 			return colors[3];
 		}
-		if(maxSWE <= 500.0) {
+		if(maxSWE <= 50.0) {
 			return colors[4];
 		}
-		if(maxSWE > 500.0) {
+		if(maxSWE > 50.0) {
 			return colors[5];
 		}
 	}
@@ -795,11 +801,12 @@
 		
 		// Remove old legend material.
 		d3.selectAll("#legendContainer svg").remove();
-		d3.selectAll("#legendContainer label").remove();
+		d3.selectAll("#legendContainer p").remove();
 		
 		for(k = 0; k < titles.length; k += 1) {
 			// Add a legend section title
-			legendSectionTitle = legendContainer.append("label")
+			legendSectionTitle = legendContainer.append("p")
+				.classed("legendHeader", true)
 				.html(titles[k]);
 			
 			// Add an svg element to hold legend items
@@ -848,68 +855,46 @@
 					return maxLabelWidth + rectWidth + labelSpacer;
 				});
 		}
-		
-		
-		
-		// // Creates the svg to stick legend items in, sets the width and height
-		// legendItemContainer = d3.select("#legendItemContainer")
-			// .append("svg")
-			// .attr("height", function() {
-				// var l = colors.length;
-				// return (l * rectHeight + (l - 1) * rectSpacer) + 2;
-			// });
-// 		
-		// // Append a bunch of svg groups using the color data
-		// legendItem = legendItemContainer.selectAll("g")
-			// .data(colors)
-			// .enter().append("g");
-// 		
-		// legendItem.append("rect")
-			// .attr("width", rectWidth)
-			// .attr("height", rectHeight)
-			// .attr("fill", "white")
-			// .attr("stroke", "rgb(200,200,200)")
-			// .attr("stroke-width", 0.25)
-			// .attr("y", function(d, i) {
-				// return (rectHeight + rectSpacer) * i;
-			// })
-			// .attr("x", 2)
-			// .attr("fill", function(d, i) {
-				// return d;
-			// });
-// 		
-		// legendItem.append("text")
-			// .style("font-size", labelSizePx + "px")
-			// .style("font-family", "Tahoma, Geneva, sans-serif")
-			// .text(function(d, i) {
-				// return labels[i];
-			// })
-			// .attr("x", rectWidth + labelSpacer)
-			// .attr("y", function(d, i) {
-				// return (rectHeight/2 + (labelSizePx/2 - 1))+ ((rectHeight + rectSpacer) * i);
-			// })
-			// .each(function(d) {
-				// maxLabelWidth = this.getBBox().width > maxLabelWidth ? this.getBBox().width : maxLabelWidth;
-			// });
-// 		
-		// legendItemContainer.attr("width", function() {
-				// return maxLabelWidth + rectWidth + labelSpacer;
-			// });
-// 		
-		// $("#legendContainer label").html(title);
 	};
 
 // Event listeners for snow layer pointer interations --------------------------
 
-	//TODO these may not be needed
-
 	function highlightFeature(e) {
-	    var layer = e.target;
-		console.log(snowData[layer.feature.properties.CATCHID-1]);
+	    var layer = e.target,
+	    	scenario = App.settings.currentDataSettings.scenario,
+	    	date = App.settings.currentDataSettings.date,
+	    	decade,
+	    	maxSWE,
+	    	allDecades,
+	    	hucID = e.target.feature.properties.HUC12,
+	    	i;
+
+	    // console.log(e.target.feature.properties);
+		// console.log(snowData);
+		if(date === "early"){
+			decade = "2010";
+		} else if (date === "mid"){
+			decade = "2050";
+		} else {
+			decade = "2090";
+		}
+
+		for(i = 0; i < App.snowData[scenario].length; i += 1) {
+			if(hucID === App.snowData[scenario][i].huc) {
+				allDecades = App.snowData[scenario][i]
+				maxSWE = App.snowData[scenario][i][decade]/100000;
+				break;
+			}
+		}
+
+		console.log(allDecades);
+
 	    layer.setStyle({
-			stroke: 1,
+			stroke: true,
+			weight: 2,
 	        color: '#666'
 	    });
+
 	    if (!L.Browser.ie && !L.Browser.opera) {
 	        layer.bringToFront();
 	    }
@@ -961,6 +946,12 @@
 		});
 	};
 	
+	// This is some debug stuff
+	App.getActiveDataLayer = function() {
+		return activeDataLayer;
+	}
+
+
 }()); // END App------------------------------------------------
 
 // Launch the app

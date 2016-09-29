@@ -47,6 +47,13 @@ body, html {
 	display: inline-block;
 }
 
+.legendHeader {
+	display: block;
+	font-family: Verdana, Geneva, sans-serif;
+	margin-bottom: 5px;
+	font-weight: bold;
+}
+
 .UIElementContainer {
 	margin-bottom: 10px;
 }
