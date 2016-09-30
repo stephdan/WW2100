@@ -1,12 +1,13 @@
 body, html {
 	height: 100%;
+	width: 100%;
 	margin: 0;
+	/*overflow:hidden;*/ /* Need to make sidebar scrollable */ 
 }
 
-.textLabelclass{
-  white-space:nowrap;
-  color: yellow;
-}
+/*******************************************************/
+/*       Styling! Document this stuff later.           */
+/*******************************************************/
 
 #map {
 	width: 100%;
@@ -28,6 +29,22 @@ body, html {
 	font-family: Verdana, Geneva, sans-serif;
 }
 
+.UIHeader {
+	width: 89%;
+	font-weight: bold;
+	margin-bottom: 3px;
+	display: inline-block;
+}
+
+.textLabelclass{
+  white-space:nowrap;
+  color: yellow;
+}
+
+
+
+
+
 #dataSelectUIContainer {
 	position: absolute;
 	width: 210px;
@@ -40,12 +57,7 @@ body, html {
 	/*margin-bottom: 10px;*/
 }
 
-.UIHeader {
-	width: 89%;
-	font-weight: bold;
-	margin-bottom: 3px;
-	display: inline-block;
-}
+
 
 .legendHeader {
 	display: block;
@@ -89,34 +101,13 @@ body, html {
 	margin: 5px;
 }
 
-#info {
-	background-color: rgb(255,255,255);
-	background-color: rgba(255,255,255,0.85);
-	z-index: 2;
-	border-style: solid;
-	border-width: 1px;
-	border-radius: 3px;
-	border-color: rgb(200,200,200);
-	box-shadow: 3px 3px 5px rgb(100,100,100);
-	box-shadow: 3px 3px 5px rgba(100,100,100,0.5);
-	padding: 0px;
-	width: 20px; 
-	height: 33px;
-	display: inline-block;
-	position: absolute;
-	top: 75px;
-	left: 10px;
-}
+
 
 #steplist {
 	display: none;
 }
 
-#infoIcon {
-	display: block;
-	margin: auto;
-	fill: rgb(150,150,150);
-}
+
 
 .scenarioButton {
 	margin: 5px 0px 0px 0px;
@@ -155,6 +146,8 @@ body, html {
 	color: rgb(100,100,100);
 }
 
+
+
 label {
 	display: block;
 	font-family: Verdana, Geneva, sans-serif;
@@ -185,26 +178,20 @@ select {
 	position: relative;
 }
 
-#storyWindow img {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	margin-bottom: 20px;
-	width: 100%;
-}
+
 
 .selectpicker {
 	width: 50px;
 }
 
-.resizable { 
-    width: 300px;
-    height: 300px;
-    position: absolute;
-	top: 75px;
-	left: 10px;
-	z-index: 2;
-	
+
+
+
+/*******************************************************/
+/*             Movable/resizable windows               */
+/*******************************************************/
+
+.resizable {
 	background-color: rgb(255,255,255);
 	background-color: rgba(255,255,255,0.85);
 	border-style: solid;
@@ -216,27 +203,29 @@ select {
 	font-family: Verdana, Geneva, sans-serif;
 }
 
+.resizable h3 { 
+    text-align: center; 
+    margin: 0; 
+}
+
 .resizableContent {
-    /*height: calc(100% - 30px);*/
     height: 100%;
     width: 100%;
     padding: 11px;
     overflow: auto; 
 }
 
-.resizable h3 { 
-    text-align: center; 
-    margin: 0; 
-}
-
-#storyTitleBar {
+.movableWindowTitleBar {
 	text-align: center;
-	/*height: 30px;*/
+	cursor: move;
 }
 
-#storyTitleText{
+.movableWindowTitleBar:hover {
+	background-color: rgb(240,240,240);
+}
+
+.movableWindowTitleText {
 	height: auto;
-	/*position: absolute;*/
 	top: 3px;
 	left: 0px;
 	right: 0px;
@@ -244,8 +233,7 @@ select {
 	font-weight: bold;
 }
 
-/*The x icon in the storyWindow*/
-#storyTitleBar .closeStoryWindow {
+.closeWindow {
 	position: absolute;
 	top: 5px;
 	height: 16px;
@@ -254,9 +242,94 @@ select {
 	right: 5px;
 }
 
-.storyContent li {
+/*******************************************************/
+/*               Scenario Story Window                 */
+/*******************************************************/
+
+#storyWindow { 
+    width: 300px;
+    height: 300px;
+    position: absolute;
+	top: 9px;
+	left: 46px;
+	z-index: 2;
+}
+
+#storyWindow img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 20px;
+	width: 100%;
+}
+
+#storyWindowContent li {
 	margin-bottom: 10px;
 }
+
+#info {
+	background-color: rgb(255,255,255);
+	background-color: rgba(255,255,255,0.85);
+	z-index: 2;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 3px;
+	border-color: rgb(200,200,200);
+	box-shadow: 3px 3px 5px rgb(100,100,100);
+	box-shadow: 3px 3px 5px rgba(100,100,100,0.5);
+	padding: 0px;
+	width: 20px; 
+	height: 33px;
+	display: inline-block;
+	position: absolute;
+	top: 9px;
+	left: 46px;
+}
+
+#infoIcon {
+	display: block;
+	margin: auto;
+	fill: rgb(150,150,150);
+}
+
+/*******************************************************/
+/*                   Chart Window                      */
+/*******************************************************/
+
+#chartWindow {
+	width: 300px;
+    height: 300px;
+    position: absolute;
+	top: 10px;
+	right: 230px;
+	z-index: 2;
+}
+
+#chartWindowContent {
+	/*background-color: red;*/
+}
+
+#SWEchart {
+
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #555;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  fill: #555;
+}
+
+.line {
+  fill: none;
+  stroke: #ef0d0c;
+  stroke-width: 1.5px;
+}
+
 
 
 

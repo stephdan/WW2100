@@ -30,6 +30,10 @@
 		snowData = d;
 	});
 	
+	App.getSnowData = function() {
+		return snowData;
+	};
+
 	App.importSnowData = function() {
 		var refPath =      "data/snowData/SWE_ref_decadalAvg_HUCs.csv",
 			lowClimPath =  "data/snowData/SWE_lowClim_decadalAvg_HUCs.csv",
@@ -368,7 +372,7 @@
 					// weird gaps between polygons. 
 					smoothFactor: 0,
 					// This adds event listeners to each feature
-					onEachFeature: onEachFeature
+					onEachFeature: onEachSWEFeature
 				});
 			} else {
 				App.settings.useVectorTiles = true;
@@ -443,6 +447,7 @@
 				break;
 			case "aridity" : fillColor = getAridityColors(feature);
 		}
+
 		return {
 			fillColor: fillColor,
 			stroke: stroke,
@@ -552,6 +557,8 @@
 		
 		for(i = 0; i < App.snowData[scenario].length; i += 1) {
 			if(hucID === App.snowData[scenario][i].huc) {
+				// Go ahead and bind the SWE data for all decades to the feature.
+				feature.properties.SWEdata = App.snowData[scenario][i];
 				maxSWE = App.snowData[scenario][i][decade]/100000;
 				break;
 			}
@@ -859,6 +866,8 @@
 
 // Event listeners for snow layer pointer interations --------------------------
 
+
+
 	function highlightFeature(e) {
 	    var layer = e.target,
 	    	scenario = App.settings.currentDataSettings.scenario,
@@ -887,7 +896,7 @@
 			}
 		}
 
-		console.log(allDecades);
+		// console.log(allDecades);
 
 	    layer.setStyle({
 			stroke: true,
@@ -904,10 +913,15 @@
 	    activeDataLayer.resetStyle(e.target);
 	}
 
-	function onEachFeature(feature, layer) {
+	function mouseoverSWEFeature(e) {
+		highlightFeature(e);
+		App.GUI.makeSWEChart(e.target.feature);
+	}
+
+	function onEachSWEFeature(feature, layer) {
 		if(App.settings.currentDataSettings.type==="maxSWE") {
 			layer.on({
-		        mouseover: highlightFeature,
+		        mouseover: mouseoverSWEFeature,
 		        mouseout: resetHighlight
 		    });
 		}

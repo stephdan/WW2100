@@ -29,26 +29,26 @@ $(document).ready(function(){
 	// $("#info").show();
 // })
 
-// TODO Starting to add functionality for programmatically creating story windows.
+// Programmatically creating story windows.
 // Learned it from cartovis!
 my.makeStoryWindow = function() {
 	var storyWindow = $(
-		"<div id='storyWindow' class='ui-widget-content resizable'>" + 
-		  "<div id='storyTitleBar'>" + 
-		    "<div id='storyTitleText'>Demo Scenario</div>" + 
-		    "<div class='closeStoryWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
+		"<div id='storyWindow' class='ui-widget-content resizable movable'>" + 
+		  "<div id='storyTitleBar' class='movableWindowTitleBar'>" + 
+		    "<div id='storyTitleText' class='movableWindowTitleText'>Demo Scenario</div>" + 
+		    "<div id='closeStoryWindow' class='closeWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
 		  "</div>" + 
-		  "<div class='storyContent resizableContent'>" + 
+		  "<div id='storyWindowContent' class='resizableContent'>" + 
 		  "</div>" + 
 		"</div>"
 	);
 	
 	storyWindow.appendTo("body");
 
-	$(".resizableContent").height(function() {
+	$("#storyWindowContent").height(function() {
 		var storyWindowHeight = $("#storyWindow").height(),
 			storyTitleBarHeight = $("#storyTitleBar").height(),
-			padding = $(".resizableContent").innerHeight() - $(".resizableContent").height();
+			padding = $("#storyWindowContent").innerHeight() - $("#storyWindowContent").height();
 		
 		return storyWindowHeight - (storyTitleBarHeight + (padding));
 	});
@@ -58,22 +58,127 @@ my.makeStoryWindow = function() {
 		minWidth: 200,
 		resize: function(event, ui) {
 			// Set the height of the content
-			$(".resizableContent").height(function() {
+			$("#storyWindowContent").height(function() {
 				var storyWindowHeight = $("#storyWindow").height(),
 					storyTitleBarHeight = $("#storyTitleBar").height(),
-					padding = $(".resizableContent").innerHeight() - $(".resizableContent").height();
+					padding = $("#storyWindowContent").innerHeight() - $("#storyWindowContent").height();
 				
 				return storyWindowHeight - (storyTitleBarHeight + (padding));
 			});
 		}
 	});
 	
+	storyWindow.draggable({
+		containment: "parent",
+		handle: "#storyTitleBar",
+		start: function() {
+			storyWindow.css("opacity", "0.7");
+		},
+		stop: function() {
+			storyWindow.css("opacity", "1");
+		}
+	});
+
 	my.updateStoryWindow();
 	    
-	$(".closeStoryWindow").click(function() {
+	$("#closeStoryWindow").click(function() {
 		storyWindow.remove();
 		$("#info").show();
 	});
+};
+
+my.formatSWEdata = function(SWEdata) {
+	var newData = [],
+		year,
+		years = Object.keys(SWEdata),
+		yearSWEpair, 
+		i;
+
+	for (i = 0; i < years.length; i += 1) {
+		if(years[i] !== "huc") {
+			yearSWEpair = {
+				year: years[i],
+				SWE: SWEdata[years[i]]
+			};
+			newData.push(yearSWEpair);
+		}
+	}
+	return newData;
+}
+
+my.makeSWEChart = function(feature) {
+
+	d3.select("#SWEchart").remove();
+
+	var data = my.formatSWEdata(feature.properties.SWEdata);
+
+		// Append an svg to the chart window.
+	var svg = d3.select("#chartWindowContent")
+				.append("svg")
+				.attr("id", "SWEchart");
+
+	var margin = 50,
+	    width = parseInt(d3.select("#chartWindowContent").style("width")) - margin*2,
+	    height = parseInt(d3.select("#chartWindowContent").style("height")) - margin*2;
+
+	// Make a scale for the x-axis. Right now this is time. 
+	var xScale = d3.scale.linear()
+	    .range([0, width])
+	    .nice(d3.time.year);
+
+	var yScale = d3.scale.linear()
+	    .range([height, 0])
+	    .nice();
+
+	var xAxis = d3.svg.axis()
+	    .scale(xScale)
+	    .orient("bottom")
+	    .tickFormat(d3.format("d"));
+
+	var yAxis = d3.svg.axis()
+	    .scale(yScale)
+	    .orient("left");
+
+	var line = d3.svg.line()
+	    .x(function(d) { 
+	      // console.log(d);
+	      return xScale(d.year); 
+	    })
+	    .y(function(d) { 
+	      return yScale(d.SWE); 
+	    });
+
+	var graph = svg.attr("width", width + margin*2)
+	    		   .attr("height", height + margin*2)
+	               .append("g")
+	               .attr("transform", "translate(" + margin + "," + margin + ")");
+
+	data.forEach(function(d) {
+      d.year = Number(d.year);
+      d.SWE = +d.SWE/100000;
+    });
+
+	xScale.domain(d3.extent(data, function(d) { return d.year; }));
+    yScale.domain(d3.extent(data, function(d) { return d.SWE; }));
+    // yScale.domain([0, 800]);
+
+	graph.append("g")
+	      .attr("class", "x axis")
+	      .attr("transform", "translate(0," + height + ")")
+	      .call(xAxis);
+	graph.append("g")
+	      .attr("class", "y axis")
+	      .call(yAxis)
+	    .append("text")
+	      .attr("transform", "rotate(-90)")
+	      .attr("y", 6)
+	      .attr("dy", ".71em")
+	      .style("text-anchor", "end")
+	      .text("Price ($)");
+	graph.append("path")
+	      .datum(data)
+	      .attr("class", "line")
+	      .attr("d", line);
 };
 
 my.updateStoryWindow = function() {
@@ -82,13 +187,60 @@ my.updateStoryWindow = function() {
 	
 		$.get(storyTextFilePath)
 		    .done(function() { 
-		        $(".storyContent").load(storyTextFilePath);
+		        $("#storyWindowContent").load(storyTextFilePath);
 		    }).fail(function() { 
-		         $(".storyContent").load("dataLayerStories/doesNotExist.txt");
+		         $("#storyWindowContent").load("dataLayerStories/doesNotExist.txt");
 		    });
 		    
 		$("#storyTitleText").text($("#dataTypeSelect option:selected").text());
 	}
+};
+
+my.makeChartWindow = function() {
+	var chartWindow = $(
+		"<div id='chartWindow' class='ui-widget-content resizable movable '>" + 
+		  "<div id='chartTitleBar' class='movableWindowTitleBar'>" + 
+		    "<div id='chartTitleText' class='movableWindowTitleText'>Demo Chart</div>" + 
+		    "<div id='closeChartWindow' class='closeWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
+		  "</div>" + 
+		  "<div id='chartWindowContent' class='resizableContent'>" + 
+		  "</div>" + 
+		"</div>"
+	);
+
+	chartWindow.appendTo("body");
+
+	chartWindow.resizable({
+		minHeight: 200, 
+		minWidth: 200,
+		resize: function(event, ui) {
+			// Set the height of the content to match the resized window.
+			$("#chartWindowContent").height(function() {
+				var chartWindowHeight = $("#chartWindow").height(),
+					chartTitleBarHeight = $("#chartTitleBar").height(),
+					padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
+				
+				return chartWindowHeight - (chartTitleBarHeight + (padding));
+			});
+		}
+	});
+
+	chartWindow.draggable({
+		containment: "parent",
+		handle: "#chartTitleBar",
+		start: function() {
+			chartWindow.css("opacity", "0.7");
+		},
+		stop: function() {
+			chartWindow.css("opacity", "1");
+		}
+	});
+
+	$("#closeChartWindow").click(function() {
+		chartWindow.remove();
+		// $("#info").show();
+	});
+
 };
 
 // remove popovers when the window is resized
@@ -322,6 +474,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 
 my.init = function() {
 	my.makeStoryWindow();
+	my.makeChartWindow();
 	//my.showHideScenarioButtons("lulc");
 };
 
