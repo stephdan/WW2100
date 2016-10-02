@@ -11,17 +11,18 @@ var layerSelectMenu,
 	dataTypeSelectMenu,
 	scenarioSelectMenu,
 	testSelectMenu,
+	currentSWEChart,
 	my = {},
 	selectedScenario = "ref";
 
 // Enable popovers
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({html: true});
-    $(".resizable").resizable({
-		minHeight: 200, 
-		minWidth: 200,
-		constrainment: "#map"
-    });
+    // $(".resizable").resizable({
+		// minHeight: 200, 
+		// minWidth: 200,
+		// constrainment: "#map"
+    // });
 });
 
 // $(".closeStoryWindow").click(function() {
@@ -104,12 +105,10 @@ my.formatSWEdata = function(SWEdata) {
 		}
 	}
 	return newData;
-}
+};
 
-my.makeSWEChart = function(feature) {
-
-	d3.select("#SWEchart").remove();
-
+my.SWEGraph = function (feature){
+	var self = this;
 	var data = my.formatSWEdata(feature.properties.SWEdata);
 
 		// Append an svg to the chart window.
@@ -117,27 +116,27 @@ my.makeSWEChart = function(feature) {
 				.append("svg")
 				.attr("id", "SWEchart");
 
-	var margin = 50,
-	    width = parseInt(d3.select("#chartWindowContent").style("width")) - margin*2,
-	    height = parseInt(d3.select("#chartWindowContent").style("height")) - margin*2;
+	var margin = 40,
+		margins = {top: 6, right: 24, bottom: 20, left: 40},
+		padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height(),
+	    width = parseInt(d3.select("#chartWindowContent").style("width")) - (margins.left + margins.right) - padding,
+	    height = parseInt(d3.select("#chartWindowContent").style("height")) - (margins.top + margins.bottom) -  padding;
 
 	// Make a scale for the x-axis. Right now this is time. 
-	var xScale = d3.scale.linear()
-	    .range([0, width])
-	    .nice(d3.time.year);
+	var xScale = d3.scale.linear().range([0, width]).nice(d3.time.year);
 
-	var yScale = d3.scale.linear()
-	    .range([height, 0])
-	    .nice();
+	var yScale = d3.scale.linear().range([height, 0]).nice();
 
 	var xAxis = d3.svg.axis()
 	    .scale(xScale)
 	    .orient("bottom")
-	    .tickFormat(d3.format("d"));
+	    .tickFormat(d3.format("d"))
+	    .ticks(Math.max(width/50, 2));
 
 	var yAxis = d3.svg.axis()
 	    .scale(yScale)
-	    .orient("left");
+	    .orient("left")
+	    .ticks(Math.max(height/50, 2));
 
 	var line = d3.svg.line()
 	    .x(function(d) { 
@@ -149,9 +148,9 @@ my.makeSWEChart = function(feature) {
 	    });
 
 	var graph = svg.attr("width", width + margin*2)
-	    		   .attr("height", height + margin*2)
-	               .append("g")
-	               .attr("transform", "translate(" + margin + "," + margin + ")");
+					.attr("height", height + margin*2)
+					.append("g")
+					.attr("transform", "translate(" + margins.left + "," + margins.top + ")");
 
 	data.forEach(function(d) {
       d.year = Number(d.year);
@@ -159,9 +158,23 @@ my.makeSWEChart = function(feature) {
     });
 
 	xScale.domain(d3.extent(data, function(d) { return d.year; }));
-    yScale.domain(d3.extent(data, function(d) { return d.SWE; }));
-    // yScale.domain([0, 800]);
+    yScale.domain([0, Math.ceil(d3.extent(data, function(d) {
+    		if(d.SWE<=1) {
+    			return 1;
+    		} else if (d.SWE <= 10) {
+    			return 10;
+    		} else if (d.SWE <= 50) {
+    			return 50;
+    		} else {
+    			return d.SWE;
+    		}
+    	})[1] ) ]);
+    
 
+
+
+    // yScale.domain([0, 200]);
+	
 	graph.append("g")
 	      .attr("class", "x axis")
 	      .attr("transform", "translate(0," + height + ")")
@@ -170,15 +183,71 @@ my.makeSWEChart = function(feature) {
 	      .attr("class", "y axis")
 	      .call(yAxis)
 	    .append("text")
+	      .style("font-size", 10)
 	      .attr("transform", "rotate(-90)")
 	      .attr("y", 6)
 	      .attr("dy", ".71em")
 	      .style("text-anchor", "end")
-	      .text("Price ($)");
+	      .text("Max SWE (mm)");
 	graph.append("path")
 	      .datum(data)
 	      .attr("class", "line")
 	      .attr("d", line);
+	      
+	self.data = data;
+	self.graph = graph;
+	self.line = line;
+	self.margin = margin;
+	self.margins = margins;
+	self.width = width;
+	self.height = height;
+	self.xScale = xScale;
+	self.yScale = yScale;
+	self.xAxis = xAxis;
+	self.yAxis = yAxis;
+	self.svg = svg;
+};
+
+my.SWEGraph.prototype.resize = function() {
+	var self = this;
+	var padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
+	/* Find the new window dimensions */
+	self.width = parseInt(d3.select("#chartWindowContent").style("width")) - (self.margins.left + self.margins.right) - padding;
+	self.height = parseInt(d3.select("#chartWindowContent").style("height")) - (self.margins.top + self.margins.bottom) - padding;
+	
+	self.svg.attr("width", self.width + self.margin*2)
+					.attr("height", self.height + self.margin*2)
+					.append("g")
+					.attr("transform", "translate(" + self.margin + "," + self.margin + ")");
+	   
+	/* Update the range of the scale with new width/height */
+	self.xScale.range([0, self.width]).nice(d3.time.year);
+	self.yScale.range([self.height, 0]).nice();
+	   
+	  /* Update the axis with the new scale */
+	self.graph.select('.x.axis')
+	    .attr("transform", "translate(0," + self.height + ")")
+	    .call(self.xAxis);
+	   
+	self.graph.select('.y.axis')
+	    .call(self.yAxis);
+	   
+	  /* Force D3 to recalculate and update the line */
+	self.graph.selectAll('.line')
+	    .attr("d", self.line);
+	
+	self.xAxis.ticks(Math.max(self.width/50, 2));
+	self.yAxis.ticks(Math.max(self.height/50, 2));
+};
+
+my.makeSWEGraph = function(feature) {
+
+	// Only make the graph if the chart window exists.
+	// TODO is it a chart or a graph? Decide!
+	if($("#chartWindow").length) {
+		d3.select("#SWEchart").remove();
+		currentSWEChart = new my.SWEGraph(feature);
+	}
 };
 
 my.updateStoryWindow = function() {
@@ -198,9 +267,9 @@ my.updateStoryWindow = function() {
 
 my.makeChartWindow = function() {
 	var chartWindow = $(
-		"<div id='chartWindow' class='ui-widget-content resizable movable '>" + 
+		"<div id='chartWindow' class='ui-widget-content resizable movable'>" + 
 		  "<div id='chartTitleBar' class='movableWindowTitleBar'>" + 
-		    "<div id='chartTitleText' class='movableWindowTitleText'>Demo Chart</div>" + 
+		    "<div id='chartTitleText' class='movableWindowTitleText'>Max SWE by decade</div>" + 
 		    "<div id='closeChartWindow' class='closeWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
 		  "</div>" + 
 		  "<div id='chartWindowContent' class='resizableContent'>" + 
@@ -210,11 +279,21 @@ my.makeChartWindow = function() {
 
 	chartWindow.appendTo("body");
 
+	$("#chartWindowContent").height(function() {
+		var chartWindowHeight = $("#chartWindow").height(),
+			chartTitleBarHeight = $("#chartTitleBar").height(),
+			padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
+		return chartWindowHeight - (chartTitleBarHeight + (padding));
+	});
+
 	chartWindow.resizable({
 		minHeight: 200, 
-		minWidth: 200,
+		minWidth: 250,
+		maxWidth: 500,
+		maxHeight: 460,
 		resize: function(event, ui) {
 			// Set the height of the content to match the resized window.
+			currentSWEChart.resize();
 			$("#chartWindowContent").height(function() {
 				var chartWindowHeight = $("#chartWindow").height(),
 					chartTitleBarHeight = $("#chartTitleBar").height(),
@@ -240,7 +319,6 @@ my.makeChartWindow = function() {
 		chartWindow.remove();
 		// $("#info").show();
 	});
-
 };
 
 // remove popovers when the window is resized
@@ -294,6 +372,12 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 	my.showHideScenarioButtons(dataLayer);
 	my.updateTimePeriodLabels(dataLayer);
 	my.updateStoryWindow();
+	
+	if(dataLayer === "maxSWE") {
+		my.makeChartWindow();
+	} else {
+		$("#chartWindow").remove();
+	}
 });
 
 // Change the labels of the time period slider based on the currently selected
@@ -312,7 +396,7 @@ my.updateTimePeriodLabels = function(dataLayer) {
 		mid.text("2050");
 		late.text("2099");
 	}
-}
+};
 
 $("#timeRange").on("change", function() {
 	my.loadDataByGUI();
@@ -474,7 +558,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 
 my.init = function() {
 	my.makeStoryWindow();
-	my.makeChartWindow();
+	// my.makeChartWindow();
 	//my.showHideScenarioButtons("lulc");
 };
 

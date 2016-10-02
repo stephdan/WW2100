@@ -690,13 +690,13 @@
 	App.makeCitiesReferenceLayer = function(citiesJSON){
 		var cityMarkerOptions = {
 		    radius: 4,
-		    fillColor: "red",
-		    color: "red",
+		    // fillColor: "red",
+		    // color: "red",
 		    weight: 1,
 		    opacity: 1,
 		    fillOpacity: 1
-		};
-		var labels = [], labelsLayer, 
+		},
+			labels = [], 
 			citiesLayer = L.geoJson(citiesJSON, {
 				pointToLayer: function(feature, latlng) {
 				return L.circleMarker(latlng, cityMarkerOptions);
@@ -706,7 +706,7 @@
 					lng = feature.properties.longitude,
 					name = feature.properties.name;
 
-				labels.push( L.marker([lat,lng], {icon:createLabelIcon("textLabelclass", name)}));  //.addTo(App.map);
+				labels.push( L.marker([lat,lng], {icon:createLabelIcon("textLabelclass", name)}));
 			}
 		});
 		App.referenceLayers.cities = L.layerGroup(labels);
@@ -915,7 +915,11 @@
 
 	function mouseoverSWEFeature(e) {
 		highlightFeature(e);
-		App.GUI.makeSWEChart(e.target.feature);
+		App.GUI.makeSWEGraph(e.target.feature);
+		// TODO The reference layer is redrawn to keep it on top of the 
+		// SWE layer, which isn't great. It would be better if it was always
+		// on top, in a separate layer. Leaflet 0.x can't do this, I think.
+		App.addReferenceLayers();
 	}
 
 	function onEachSWEFeature(feature, layer) {
