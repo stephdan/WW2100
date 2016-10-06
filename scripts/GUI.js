@@ -246,6 +246,7 @@ my.makeSWEGraph = function(feature) {
 	// TODO is it a chart or a graph? Decide!
 	if($("#chartWindow").length) {
 		d3.select("#SWEchart").remove();
+		d3.select("#chartWindowContent").text("");
 		currentSWEChart = new my.SWEGraph(feature);
 	}
 };
@@ -272,10 +273,14 @@ my.makeChartWindow = function() {
 		    "<div id='chartTitleText' class='movableWindowTitleText'>Max SWE by decade</div>" + 
 		    "<div id='closeChartWindow' class='closeWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
 		  "</div>" + 
-		  "<div id='chartWindowContent' class='resizableContent'>" + 
+		  "<div id='chartWindowContent' class='resizableContent'>Hover over map features to see change in max SWE over time." + 
 		  "</div>" + 
 		"</div>"
 	);
+
+	chartWindow.css("left", function() {
+		return $(window).width() - 530;
+	});
 
 	chartWindow.appendTo("body");
 
@@ -285,6 +290,8 @@ my.makeChartWindow = function() {
 			padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
 		return chartWindowHeight - (chartTitleBarHeight + (padding));
 	});
+
+
 
 	chartWindow.resizable({
 		minHeight: 200, 
@@ -317,7 +324,7 @@ my.makeChartWindow = function() {
 
 	$("#closeChartWindow").click(function() {
 		chartWindow.remove();
-		// $("#info").show();
+		$("#showGraphButton").show();
 	});
 };
 
@@ -377,6 +384,7 @@ dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
 		my.makeChartWindow();
 	} else {
 		$("#chartWindow").remove();
+		$("#showGraphButton").hide();
 	}
 });
 
@@ -404,6 +412,11 @@ $("#timeRange").on("change", function() {
 
 $("#info").on("click", function() {
 	my.makeStoryWindow();
+	$(this).hide();
+});
+
+$("#showGraphButton").on("click", function() {
+	my.makeChartWindow();
 	$(this).hide();
 });
 
@@ -501,13 +514,6 @@ my.loadDataByGUI = function() {
 	}
 	App.addWW2100DataLayer(settings);
 };
-
-// This sets up the behavior of the info button
-$("#info").mouseenter(function() {
-	$(this).css("background-color", "rgb(235,235,235)");
-}).mouseleave(function() {
-	$(this).css("background-color", "");
-});
 
 // Checkboxes for adding/removing reference layers
 $("#citiesLayerCheckbox").on("click", function() {

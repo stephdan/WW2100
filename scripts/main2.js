@@ -922,11 +922,17 @@
 		App.addReferenceLayers();
 	}
 
+	function mouseoutSWEFeature(e) {
+		resetHighlight(e);
+		// remove swe graph
+		d3.select("#SWEchart").remove();
+	}
+
 	function onEachSWEFeature(feature, layer) {
 		if(App.settings.currentDataSettings.type==="maxSWE") {
 			layer.on({
 		        mouseover: mouseoverSWEFeature,
-		        mouseout: resetHighlight
+		        mouseout: mouseoutSWEFeature
 		    });
 		}
 	}

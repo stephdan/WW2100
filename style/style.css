@@ -286,6 +286,24 @@ select {
 	left: 46px;
 }
 
+#info:hover {
+	background-color: rgb(235,235,235);
+}
+
+#showGraphButton {
+	padding: 5px;
+	height: 30px;
+	width: 27px;
+	top: 10px;
+	right: 230px;
+	position: absolute;
+	z-index: 10;
+}
+
+#showGraphButton:hover {
+	background-color: rgb(235,235,235);
+}
+
 #infoIcon {
 	display: block;
 	margin: auto;
@@ -305,7 +323,6 @@ select {
     height: 200px;
     position: absolute;
 	top: 10px;
-	right: 230px;
 	z-index: 2;
 	overflow: hidden;
 }
