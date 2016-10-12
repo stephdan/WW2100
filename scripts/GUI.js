@@ -15,6 +15,12 @@ var layerSelectMenu,
 	my = {},
 	selectedScenario = "ref";
 
+// Helper function for determining if an element has overflow content.
+$.fn.overflown = function() {
+	var e = this[0];
+	return e.scrollHeight > e.clientHeight || e.scrollWidth > e.clientWidth;
+};
+
 // Enable popovers
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({html: true});
@@ -24,6 +30,30 @@ $(document).ready(function(){
 		// constrainment: "#map"
     // });
 });
+
+// remove popovers when the window is resized.
+$(window).on('resize', function () {
+    $(".explainerButton").blur();
+    
+    my.updateSidebarLayout();
+    
+});
+
+my.updateSidebarLayout = function() {
+	var sidebar = $("#dataSelectUIContainer");
+	
+	// The sidebar should never be taller than the window - 20px.
+	sidebar.css("max-height", function() {
+		return $(window).height() - 20;
+	});
+    
+    // If the sidebar is overflown, make it wider to make room for the scrollbar.
+    if(sidebar.overflown()) {
+    	sidebar.width(208);
+    } else {
+    	sidebar.width(188);
+    }
+};
 
 // $(".closeStoryWindow").click(function() {
 	// $("#storyWindow").hide();
@@ -332,10 +362,7 @@ my.makeChartWindow = function() {
 	});
 };
 
-// remove popovers when the window is resized
-$(window).on('resize', function () {
-    $(".explainerButton").blur();
-});
+
 
 // Require manual triggers for popovers so they don't appear when
 // scenario buttons are clicked.
@@ -568,6 +595,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 
 my.init = function() {
 	my.makeStoryWindow();
+	my.updateSidebarLayout();
 	// my.makeChartWindow();
 	//my.showHideScenarioButtons("lulc");
 };
