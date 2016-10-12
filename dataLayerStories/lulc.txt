@@ -1,57 +1,56 @@
-<p>Use the interactive map to view changes in land cover over time 
-  	for different modeling scenarios. Look for these major trends:</p>
+<p class="storyTitle">Land Cover</p>
+
+<p>Use the interactive map to view changes in land cover over time for 
+different modeling scenarios. Look for these major trends:</p>
   
   <label>Expansion of Cities</label>
   
   <ul>
   	<li>
-  		Population growth leads to expansion of cities and 
-  		conversion of lands from agricultural (yellow shading) and 
-  		forest (green shading) land uses to developed land uses 
-  		(purple).   Use the time slider bar, to compare the size of 
-  		cities in 2010, 2050, and 2099.   
+  		Population growth leads to densification and expansion of cities and 
+  		conversion of lands from agricultural (yellow shading) and forest 
+  		(green shading) land uses to developed land uses (purple). Use the time 
+  		slider bar, to compare the size of cities in 2010, 2050, and 2099.
   	</li>
   	<li>
-  		The extent of urbanization depends on the rate of 
-  		population and income growth, and land management policies.  
-  		Use the scenario buttons to explore the effect of different 
-  		assumptions about population growth. The Reference scenario 
-  		adopts population growth rates from the Oregon Office of 
-  		Economic Analysis (2011). Population more than doubles over 
-  		the century, rising from 2.41 million in 2010 to 5.37 million 
-  		in 2099. The Worst Case scenario assumes than many more 
-  		people move Willamette valley cities -- population nearly 
-  		quadruples to 8.25 million by 2099.
+  		The changes in urban spatial extent depends on rates of population and 
+  		income growth, land management policies, and land values. Use the 
+  		scenario buttons to explore the effect of different assumptions about 
+  		population growth.
   	</li>
   </ul>
   
+  <!-- This image is commented out because it is maybe not wanted.
   <img src="resources/lulc_refVSworst2.png" />
+  -->
   
-  <label>Changes in Forest Types:</label>
+  
+  <label>Changes in Upland Forests:</label>
   
   <ul>
   	<li>
-  		A warming climate leads to drier forests that are more 
-  		susceptible to wildfire.  Fire opens up lands to regrow into 
-  		new forest types better suited to warmer climate conditions. 
-  		Use the time slider bar to compare the types of forests that 
-  		extend over the Willamette Basin uplands over the 
-  		simulations. At high elevations, subalpine forests are 
-  		replaced by cool conifer forests. At mid-elevations, 
-  		Douglas-fir and western hemlock forest types shift to 
-  		mixed-conifer forest types.
+  		A warming climate leads to drier forests that are more susceptible to 
+  		wildfire. Fire opens up lands to  forest types that better suited to 
+  		warmer and drier climate conditions. Use the time slider bar to compare 
+  		the types of forests that extend over the Willamette Basin uplands. At 
+  		high elevations, subalpine forests are replaced by cool conifer 
+  		forests. At mid-elevations, Douglas-fir and western hemlock forest 
+  		types shift to mixed-conifer forest types.
   	</li>
   	<li>
-  		Forest changes are most extensive in simulations with 
-  		greater climate warming.  Use the scenario buttons to 
-  		compare changes in forest types between low (Low Climate 
-  		Scenario), moderate (Reference Scenario) and high climate 
-  		(High Climate Scenario) change scenarios.   Climate warming 
-  		and wildfire is most extensive in the high climate scenario 
-  		and leads to the most dramatic shifts in forest composition.
+  		Forest changes are most extensive in simulations with greater climate 
+  		warming. Use the scenario buttons to compare changes in forest types 
+  		between low, moderate (Reference Scenario) and high change climate 
+  		scenarios.
   	</li>
   </ul>
   
+  <!-- This image is commented out because it is maybe not wanted.
   <img src="resources/lulc_graph.png" />
+  -->
+  
+<!--
+<a href="">Learn more</a> about urban expansion and upland forest modeling.
+-->
   
 </div>

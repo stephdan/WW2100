@@ -1,0 +1,36 @@
+<p class="storyTitle">Evapotranspiration</p>
+
+<p>
+One of the ways that climate warming and land use change will affect the water 
+cycle in the Willamette Basin, is by changing evapotranspiration, the amount of 
+water vapor released from soils and plants into the atmosphere.  
+</p>
+
+<p>
+Changes in land use and climate conditions affect both land cover and ET - for 
+example a young forest with limited foliage will have lower ET than a mature 
+forest with dense foliage.  Use the interactive map to look for the following 
+trends:
+</p>
+
+<ul>
+  <li>
+  	Climate warming leads to a decline in ET from forested uplands.  Warmer 
+  	temperatures make forests more susceptible to forest fires, and the fires 
+  	reduce the extent of mature forests.  Recently burned and young forests 
+  	have a lower ET.  Changes in ET are most dramatic in the High Change 
+  	Climate scenario.  Lower ET from uplands forests could slightly increase 
+  	water supply to the Willamette Valley.
+  </li>
+  <li>
+  	Expansion of cities leads to a decline in ET in some parts of the 
+  	Willamette Valley.  ET in urban areas is usually lower than on agricultural 
+  	fields, because so much land area is covered by pavement and buildings.  In 
+  	some sub-basin the decline in ET could lead to higher streamflows.
+  </li>
+</ul>
+
+
+<!--
+<a href="">Learn more</a> about hydrologic modeling.
+-->

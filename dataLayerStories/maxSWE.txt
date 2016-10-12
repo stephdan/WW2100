@@ -1,23 +1,21 @@
+<p class="storyTitle">Max Snow Water Equivalent</p>
+
+
 <p>
-Changes in snowpack are highly sensitive to temperature. In the most plausible 
-scenarios, snowpack declines between 87 and 94 percent by 2099, and becomes 
-limited to the highest elevations. 
+Snowpack changes are highly sensitive to winter temperature. Warmer winters in 
+the Reference Case and High Climate Change scenarios lead to an 74-94 percent 
+reduction in snowpack by 2099.  Snowpack becomes limited to elevations above 
+1200 m.  Use the time slide bar to compare snowpack extent and depth in 2010, 
+2050, and 2099 for these two scenarios.
 </p>
 
 <p>
-Our results examine the maximum SWE over the January 1– April 1 period for each 
-year for the LowClim, Ref, HighClim, and FireSuppress scenarios. The LowClim 
-scenario, in which temperatures increase only slightly and winter precipitation 
-also slightly increases, shows an increase in seasonal max snow water equivalent 
-of about 41% for elevations above 1200 meters (3937 feet). Low elevation snow 
-(500- 1200 meters, or 1640-3937 feet) stays roughly the same throughout the nine 
-decades, with wide variance and no significant statistical differences for SWE 
-between the decades. The Ref scenario shows a steep decline in seasonal max SWE 
-at both high and low elevations (-74% and -93%, respectively). SWE declines even 
-more steeply in the HighClim scenario with a loss of 90% of SWE above 1200 meters 
-(3937 feet) and a loss of 94% of SWE at the 500-1200 meter (1640-3937 feet) 
-elevation zone. Hydrologic impacts indicate that the snowmelt contribution to 
-spring discharge is lost as snowfall converts to rainfall in winter. Remaining 
-snowpack melts earlier. In all but the LowClim scenario, we see an increase in 
-winter flows as a result of these declines in SWE.
+Interestingly, the Low Change Climate scenario shows a slight increase in total 
+snow. This is because a warmer atmosphere can deliver more precipitation and 
+the slight warming is not great enough to shift winter precipitation from snow 
+to rain. 
 </p>
+
+<!--
+<a href="">Learn more</a> about snowpack modeling.
+-->

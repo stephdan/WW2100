@@ -36,7 +36,7 @@ my.makeStoryWindow = function() {
 	var storyWindow = $(
 		"<div id='storyWindow' class='ui-widget-content resizable movable'>" + 
 		  "<div id='storyTitleBar' class='movableWindowTitleBar'>" + 
-		    "<div id='storyTitleText' class='movableWindowTitleText'>Demo Scenario</div>" + 
+		    "<div id='storyTitleText' class='movableWindowTitleText'>What To Look For</div>" + 
 		    "<div id='closeStoryWindow' class='closeWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
 		  "</div>" + 
 		  "<div id='storyWindowContent' class='resizableContent'>" + 
@@ -86,6 +86,23 @@ my.makeStoryWindow = function() {
 		storyWindow.remove();
 		$("#info").show();
 	});
+};
+
+my.updateStoryWindow = function() {
+	if( $("#storyWindow").length ) {
+		var storyTextFilePath = "dataLayerStories/" + dataTypeSelectMenu.val() + ".txt";
+	
+		$.get(storyTextFilePath)
+		    .done(function() { 
+		        $("#storyWindowContent").load(storyTextFilePath);
+		    }).fail(function() { 
+		         $("#storyWindowContent").load("dataLayerStories/doesNotExist.txt");
+		    });
+		
+		// Update the title text of the story box. 
+		// TODO Title will probably remain constant now, so this can be deleted.
+		//$("#storyTitleText").text($("#dataTypeSelect option:selected").text());
+	}
 };
 
 my.formatSWEdata = function(SWEdata) {
@@ -251,20 +268,7 @@ my.makeSWEGraph = function(feature) {
 	}
 };
 
-my.updateStoryWindow = function() {
-	if( $("#storyWindow").length ) {
-		var storyTextFilePath = "dataLayerStories/" + dataTypeSelectMenu.val() + ".txt";
-	
-		$.get(storyTextFilePath)
-		    .done(function() { 
-		        $("#storyWindowContent").load(storyTextFilePath);
-		    }).fail(function() { 
-		         $("#storyWindowContent").load("dataLayerStories/doesNotExist.txt");
-		    });
-		    
-		$("#storyTitleText").text($("#dataTypeSelect option:selected").text());
-	}
-};
+
 
 my.makeChartWindow = function() {
 	var chartWindow = $(

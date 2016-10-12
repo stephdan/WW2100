@@ -1,5 +1,12 @@
-Agricultural land value is influenced by agricultural productivity, 
-which is determined by characteristics such as soil quality and irrigation 
-water rights. Developed land value is affected by factors such as population 
-density and distance to the city center. Agricultural lands with irrigation 
-water rights tend to have higher land values.
+<p class="storyTitle">Land Value</p>
+
+The map of land value shows spatial differences between agricultural and 
+developed land values. Agricultural land value is influenced by agricultural 
+productivity, which is determined by characteristics such as soil quality and 
+irrigation water rights. Developed land value is affected by factors such as 
+population density and distance to the city center.  Use the time slider and 
+scenario buttons to compare how land values change over time and with different 
+scenario assumptions.  Land values in urban areas increase with population and 
+income growth.  Even though developed land values far exceed agricultural land 
+values, other factors, such as Urban Growth Boundaries, restrict the expansion 
+of cities.
