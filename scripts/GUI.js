@@ -1,19 +1,13 @@
-// NOTES -----------------------------------------------
-// how to remove single selectmenu option:
-//$("#layerSelect option[value='Pecan']").remove();
-// end NOTES -------------------------------------------
-
+/*
+ * This module contains all code pertaining to the graphical user interface.
+ */
 App.GUI = (function($){
 
 "use strict";
 
-var layerSelectMenu,
-	dataTypeSelectMenu,
-	scenarioSelectMenu,
-	testSelectMenu,
-	currentSWEChart,
-	my = {},
-	selectedScenario = "ref";
+var currentSWEChart,
+	selectedScenario,
+	my = {};
 
 // Helper function for determining if an element has overflow content.
 $.fn.overflown = function() {
@@ -21,24 +15,21 @@ $.fn.overflown = function() {
 	return e.scrollHeight > e.clientHeight || e.scrollWidth > e.clientWidth;
 };
 
-// Enable popovers
+// Enable bootstrap.js popovers
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({html: true});
-    // $(".resizable").resizable({
-		// minHeight: 200, 
-		// minWidth: 200,
-		// constrainment: "#map"
-    // });
 });
 
-// remove popovers when the window is resized.
+// Do stuff when the window is resized
 $(window).on('resize', function () {
+	// remove popovers
     $(".explainerButton").blur();
-    
+    // Ensure the sidebar is the correct height.
     my.updateSidebarLayout();
-    
 });
 
+// Sets the height and width of the sidebar based on the window height.
+// Increases the width slightly if the sidebar needs a scroll bar. 
 my.updateSidebarLayout = function() {
 	var sidebar = $("#dataSelectUIContainer");
 	
@@ -46,7 +37,6 @@ my.updateSidebarLayout = function() {
 	sidebar.css("max-height", function() {
 		return $(window).height() - 20;
 	});
-    
     // If the sidebar is overflown, make it wider to make room for the scrollbar.
     if(sidebar.overflown()) {
     	sidebar.width(208);
@@ -55,14 +45,10 @@ my.updateSidebarLayout = function() {
     }
 };
 
-// $(".closeStoryWindow").click(function() {
-	// $("#storyWindow").hide();
-	// $("#info").show();
-// })
-
-// Programmatically creating story windows.
-// Learned it from cartovis!
+// Create a movable/resizable window to hold text about the current data layer.
+// Inspired by cartovis.com
 my.makeStoryWindow = function() {
+	// Create the window html and append it to the page. 
 	var storyWindow = $(
 		"<div id='storyWindow' class='ui-widget-content resizable movable'>" + 
 		  "<div id='storyTitleBar' class='movableWindowTitleBar'>" + 
@@ -72,18 +58,18 @@ my.makeStoryWindow = function() {
 		  "<div id='storyWindowContent' class='resizableContent'>" + 
 		  "</div>" + 
 		"</div>"
-	);
-	
-	storyWindow.appendTo("body");
+	).appendTo("body");
 
+	// Set the window content height. It's made complicated by the fact that
+	// the window size is adjustable and the content is scrollable.
 	$("#storyWindowContent").height(function() {
 		var storyWindowHeight = $("#storyWindow").height(),
 			storyTitleBarHeight = $("#storyTitleBar").height(),
-			padding = $("#storyWindowContent").innerHeight() - $("#storyWindowContent").height();
-		
+			padding = $("#storyWindowContent").innerHeight() - $("#storyWindowContent").height();		
 		return storyWindowHeight - (storyTitleBarHeight + (padding));
 	});
 
+	// Make the window resizable
 	storyWindow.resizable({
 		minHeight: 200, 
 		minWidth: 200,
@@ -93,12 +79,12 @@ my.makeStoryWindow = function() {
 				var storyWindowHeight = $("#storyWindow").height(),
 					storyTitleBarHeight = $("#storyTitleBar").height(),
 					padding = $("#storyWindowContent").innerHeight() - $("#storyWindowContent").height();
-				
 				return storyWindowHeight - (storyTitleBarHeight + (padding));
 			});
 		}
 	});
 	
+	// Make the window draggable.
 	storyWindow.draggable({
 		containment: "parent",
 		handle: "#storyTitleBar",
@@ -110,38 +96,42 @@ my.makeStoryWindow = function() {
 		}
 	});
 
+	// Add text to the window.
 	my.updateStoryWindow();
-	    
+	
+	// Make the window closable by clicking the x.
 	$("#closeStoryWindow").click(function() {
 		storyWindow.remove();
 		$("#info").show();
 	});
 };
 
+// Updates the content of the story window based on current data settings.
+// Loads a text file from the dataLayerStories folder as html.
 my.updateStoryWindow = function() {
+	// Check if there is a window
 	if( $("#storyWindow").length ) {
-		var storyTextFilePath = "dataLayerStories/" + dataTypeSelectMenu.val() + ".txt";
+		// build a path to the correct .txt file
+		var storyTextFilePath = "dataLayerStories/" + $("#dataTypeSelect").val() + ".txt";
 	
+		// Load the .txt file, load it into the window as html. 
 		$.get(storyTextFilePath)
 		    .done(function() { 
 		        $("#storyWindowContent").load(storyTextFilePath);
 		    }).fail(function() { 
 		         $("#storyWindowContent").load("dataLayerStories/doesNotExist.txt");
 		    });
-		
-		// Update the title text of the story box. 
-		// TODO Title will probably remain constant now, so this can be deleted.
-		//$("#storyTitleText").text($("#dataTypeSelect option:selected").text());
 	}
 };
 
+// Format the SWEdata to be compatible with D3 in order to make a nice 
+// line graph.
 my.formatSWEdata = function(SWEdata) {
 	var newData = [],
 		year,
 		years = Object.keys(SWEdata),
 		yearSWEpair, 
 		i;
-
 	for (i = 0; i < years.length; i += 1) {
 		if(years[i] !== "huc") {
 			yearSWEpair = {
@@ -154,56 +144,74 @@ my.formatSWEdata = function(SWEdata) {
 	return newData;
 };
 
+// Constructor for a line graph of SWE data associated with the passed-in
+// feature. Creates and displays the chart. Is dependant on there being a
+// #chartWindowContent div element.
 my.SWEGraph = function (feature){
-	var self = this;
-	var data = my.formatSWEdata(feature.properties.SWEdata);
+	
+	var self, data, svg, margins, padding, width, height,
+		xScale, yScale, xAxis, yAxis, line, graph;
+	
+	// store "this" (the graph) in a variable to avoid weird d3 conflicts.
+	self = this;
+	
+	// Format the SWE data for d3
+	data = my.formatSWEdata(feature.properties.SWEdata);
 
-		// Append an svg to the chart window.
-	var svg = d3.select("#chartWindowContent")
+	// Append an svg to the chart window.
+	svg = d3.select("#chartWindowContent")
 				.append("svg")
 				.attr("id", "SWEchart");
 
-	var margin = 40,
-		margins = {top: 6, right: 24, bottom: 20, left: 40},
-		padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height(),
-	    width = parseInt(d3.select("#chartWindowContent").style("width")) - (margins.left + margins.right) - padding,
-	    height = parseInt(d3.select("#chartWindowContent").style("height")) - (margins.top + margins.bottom) -  padding;
+	// Margins around the graph to make room for labels
+	margins = {top: 6, right: 24, bottom: 20, left: 40};
+	
+	// The padding of the content window
+	padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
+	
+	// Chart width and height
+	width = parseInt(d3.select("#chartWindowContent").style("width")) - (margins.left + margins.right) - padding;
+	height = parseInt(d3.select("#chartWindowContent").style("height")) - (margins.top + margins.bottom) -  padding;
 
-	// Make a scale for the x-axis. Right now this is time. 
-	var xScale = d3.scale.linear().range([0, width]).nice(d3.time.year);
+	// Make a scale for the axes. 
+	xScale = d3.scale.linear().range([0, width]).nice(d3.time.year);
+	yScale = d3.scale.linear().range([height, 0]).nice();
 
-	var yScale = d3.scale.linear().range([height, 0]).nice();
-
-	var xAxis = d3.svg.axis()
+	// Create the axes
+	xAxis = d3.svg.axis()
 	    .scale(xScale)
 	    .orient("bottom")
 	    .tickFormat(d3.format("d"))
 	    .ticks(Math.max(width/50, 2));
-
-	var yAxis = d3.svg.axis()
+	yAxis = d3.svg.axis()
 	    .scale(yScale)
 	    .orient("left")
 	    .ticks(Math.max(height/50, 2));
 
-	var line = d3.svg.line()
+	// Create the line of the line graph
+	line = d3.svg.line()
 	    .x(function(d) { 
-	      // console.log(d);
 	      return xScale(d.year); 
 	    })
 	    .y(function(d) { 
 	      return yScale(d.SWE); 
 	    });
 
-	var graph = svg.attr("width", width + margin*2)
-					.attr("height", height + margin*2)
+	// Add and lay out the svg for the graph
+	graph = svg.attr("width", width + margins.left * 2)
+					.attr("height", height + margins.left * 2)
 					.append("g")
 					.attr("transform", "translate(" + margins.left + "," + margins.top + ")");
 
+	// Format the SWE data a bit more. Make sure the years is a number, and 
+	// that the SWE is in millimeters.
 	data.forEach(function(d) {
-      d.year = Number(d.year);
-      d.SWE = +d.SWE/100000;
+        d.year = Number(d.year);
+        d.SWE = +d.SWE/100000;
     });
 
+	// Set up the scales for the axes. The y axis is a little special, and
+	// depends on the maximum SWE value for this feature. 
 	xScale.domain(d3.extent(data, function(d) { return d.year; }));
     yScale.domain([0, Math.ceil(d3.extent(data, function(d) {
     		if(d.SWE<=1) {
@@ -217,11 +225,7 @@ my.SWEGraph = function (feature){
     		}
     	})[1] ) ]);
     
-
-
-
-    // yScale.domain([0, 200]);
-	
+    // Add the axes and line to the graph.
 	graph.append("g")
 	      .attr("class", "x axis")
 	      .attr("transform", "translate(0," + height + ")")
@@ -240,7 +244,9 @@ my.SWEGraph = function (feature){
 	      .datum(data)
 	      .attr("class", "line")
 	      .attr("d", line);
-	      
+	
+	// Expose the variables of this graph object.
+	// TODO There is probably a better way to do this.
 	self.data = data;
 	self.graph = graph;
 	self.line = line;
@@ -255,6 +261,11 @@ my.SWEGraph = function (feature){
 	self.svg = svg;
 };
 
+// Function for resizing the SWEGraph. It is dependent on a "#chartWindowContent"
+// div element.
+// TODO It might be better if the dimensions were passed in, which would allow
+// this function to be independant of the window. For example, I could change
+// the id of the window without breaking this. 
 my.SWEGraph.prototype.resize = function() {
 	var self = this;
 	var padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
@@ -287,8 +298,9 @@ my.SWEGraph.prototype.resize = function() {
 	self.yAxis.ticks(Math.max(self.height/50, 2));
 };
 
+// Create a new chart. Graph. Chart or graph?
+// TODO Is it a chart or a graph? Choose!
 my.makeSWEGraph = function(feature) {
-
 	// Only make the graph if the chart window exists.
 	// TODO is it a chart or a graph? Decide!
 	if($("#chartWindow").length) {
@@ -298,8 +310,8 @@ my.makeSWEGraph = function(feature) {
 	}
 };
 
-
-
+// Creates and adds a resizable/movable window to hold the SWE graph. 
+// Very similar to makeStoryWindow.
 my.makeChartWindow = function() {
 	var chartWindow = $(
 		"<div id='chartWindow' class='ui-widget-content resizable movable'>" + 
@@ -378,25 +390,31 @@ $(".scenarioExplainerButton").on("click", function() {
 	$(this).focus();
 });
 
+// Show the correct popover when an explainerButton gets focus. 
 $(".explainerButton").focusin(function() {
-	// Figure out which one this is
+	// Figure out which button this is
 	var id = $(this).prop("id");
 	// chop off the word explainer
 	var idWithoutExplainer = id.slice(0, id.length - 9);
 	
+	// Show the popover with the matching id
 	$("#" + idWithoutExplainer).popover("show");
 });
 
+// Hide the correct popover when an explainerButton loses focus. 
 $(".explainerButton").focusout(function() {
 	// Figure out which one this is
 	var id = $(this).prop("id");
 	// chop off the word explainer
 	var idWithoutExplainer = id.slice(0, id.length - 9);
-	
+	// Hide the popover with the matching id
 	$("#" + idWithoutExplainer).popover("hide");
 });
 
-dataTypeSelectMenu = $("#dataTypeSelect").on("change", function(event, ui) {
+// Do stuff when the "Select Data Layer" dropdown is changed.
+// Loads and displays the appropriate data layer, updates the scenario buttons,
+// and updates the story window. Creates a chart window if it's the SWE data.
+$("#dataTypeSelect").on("change", function(event, ui) {
 	var dataLayer = $(this).val();	
 	// If the currently selected scenario isn't used by this dataLayer, change
 	// it to the reference scenario by manually clicking the reference case
@@ -533,7 +551,7 @@ my.loadDataByGUI = function() {
 	var settings = {},
 		timeRangeSliderValue = $("#timeRange").val();
 	
-	settings.type = dataTypeSelectMenu.val();
+	settings.type = $("#dataTypeSelect").val();
 	settings.scenario = selectedScenario;
 	
 	if(timeRangeSliderValue === "1") {
@@ -594,6 +612,7 @@ my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
 };
 
 my.init = function() {
+	selectedScenario = "ref";
 	my.makeStoryWindow();
 	my.updateSidebarLayout();
 	// my.makeChartWindow();

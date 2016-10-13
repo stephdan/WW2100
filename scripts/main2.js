@@ -1,3 +1,37 @@
+/*
+ * Author: Daniel Stephen, daniel.macc.stephen@gmail.com
+ * Date: Summer/Fall, 2016, Oregon State University
+ * 
+ * This is an interactive leaflet map of output from the Willammette Water 2100 
+ * project. For more information visit http://water.oregonstate.edu/ww2100/
+ * 
+ * The following Javascript libaries/plugins/extensions are used in the 
+ * creation of this map:
+ * 
+ *    D3.js
+ *    TopoJSON.js
+ *    jQuery
+ *    jQueryUI
+ *    Bootstrap
+ *    leaflet.js (pre-1.0)
+ *    geojson-vt-dev.js (https://github.com/mapbox/geojson-vt)
+ *    L.CanvasTiles.js (origional author: Stanislav Sumbera, http://bl.ocks.org/sumbera/c67e5551b21c68dc8299)
+ * 
+ * The code is written in a similar pattern to the one described here:
+ *    http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
+ * 
+ * "App" is the primary namespace for the application, and requires several 
+ * modules/plugins, including:
+ * 
+ *    ColorUtils
+ *    App.GUI
+ *    App.buildTileLayer
+ * 
+ * The code is written similar to the pattern described here:
+ *     http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
+ * 
+ * Inspiration for the adjustable SWE chart came from Ryan Stanly's cartovis.com
+ */
 (function(){
 	"use strict";
 	
