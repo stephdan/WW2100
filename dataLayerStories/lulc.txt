@@ -48,9 +48,21 @@ different modeling scenarios. Look for these major trends:</p>
   <!-- This image is commented out because it is maybe not wanted.
   <img src="resources/lulc_graph.png" />
   -->
-  
-<!--
-<a href="">Learn more</a> about urban expansion and upland forest modeling.
--->
-  
+
+<p>
+<a target="_blank" 
+   href="http://inr.oregonstate.edu/ww2100/analysis-topic/population-income-land-use"
+     <span style="color: rgb(66,139,202);">Click here</span>
+</a> to learn more about land use, population, and development.
+</p>
+
+<p>
+<a target="_blank" 
+   href="http://inr.oregonstate.edu/ww2100/analysis-topic/upland-forest-change"
+     <span style="color: rgb(66,139,202);">Click here</span>
+</a> to learn more about upland forest modeling.
+</p>
+
+
+
 </div>

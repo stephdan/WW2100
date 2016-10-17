@@ -1,21 +1,24 @@
 <p class="storyTitle">Max Snow Water Equivalent</p>
 
-
 <p>
-Snowpack changes are highly sensitive to winter temperature. Warmer winters in 
-the Reference Case and High Climate Change scenarios lead to an 74-94 percent 
-reduction in snowpack by 2099.  Snowpack becomes limited to elevations above 
-1200 m.  Use the time slide bar to compare snowpack extent and depth in 2010, 
-2050, and 2099 for these two scenarios.
+This map show the maximum snow water equivalent (SWE), a measure of snowpack, 
+averaged by decade. Snowpack is highly sensitive to winter temperature. 
+Warmer winters in the Reference Case and High Climate Change scenarios lead to 
+an 74-94 percent reduction in snowpack during the 2090s. Snowpack becomes 
+limited to elevations above 1200 m. Use the time slide bar to compare snowpack 
+extent and depth in the 2010s, 2050s, and 2090s for these two scenarios.
 </p>
 
 <p>
-Interestingly, the Low Change Climate scenario shows a slight increase in total 
-snow. This is because a warmer atmosphere can deliver more precipitation and 
+Interestingly, the Low Climate Change scenario shows a slight increase in 
+max SWE. This is because a warmer atmosphere can deliver more precipitation and 
 the slight warming is not great enough to shift winter precipitation from snow 
 to rain. 
 </p>
 
-<!--
-<a href="">Learn more</a> about snowpack modeling.
--->
+<p>
+<a target="_blank" 
+   href="http://inr.oregonstate.edu/ww2100/analysis-topic/snow"
+     <span style="color: rgb(66,139,202);">Click here</span>
+</a> to learn more about snowpack modeling.
+</p>

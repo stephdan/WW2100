@@ -949,7 +949,7 @@
 
 	function mouseoverSWEFeature(e) {
 		highlightFeature(e);
-		App.GUI.makeSWEGraph(e.target.feature);
+		App.GUI.makeSWEChart(e.target.feature);
 		// TODO The reference layer is redrawn to keep it on top of the 
 		// SWE layer, which isn't great. It would be better if it was always
 		// on top, in a separate layer. Leaflet 0.x can't do this, I think.
@@ -958,7 +958,7 @@
 
 	function mouseoutSWEFeature(e) {
 		resetHighlight(e);
-		// remove swe graph
+		// remove SWEchart
 		d3.select("#SWEchart").remove();
 	}
 

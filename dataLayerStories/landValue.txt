@@ -1,5 +1,6 @@
 <p class="storyTitle">Land Value</p>
 
+<p>
 The map of land value shows spatial differences between agricultural and 
 developed land values. Agricultural land value is influenced by agricultural 
 productivity, which is determined by characteristics such as soil quality and 
@@ -10,3 +11,11 @@ scenario assumptions.  Land values in urban areas increase with population and
 income growth.  Even though developed land values far exceed agricultural land 
 values, other factors, such as Urban Growth Boundaries, restrict the expansion 
 of cities.
+</p>
+
+<p>
+<a target="_blank" 
+   href="http://inr.oregonstate.edu/ww2100/analysis-topic/agricultural-land-water-use"
+     <span style="color: rgb(66,139,202);">Click here</span>
+</a> to learn more about agricultural land, land values, and water use.
+</p>

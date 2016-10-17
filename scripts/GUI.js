@@ -40,8 +40,10 @@ my.updateSidebarLayout = function() {
     // If the sidebar is overflown, make it wider to make room for the scrollbar.
     if(sidebar.overflown()) {
     	sidebar.width(208);
+    	$("#showChartButton").css("right", 250);
     } else {
     	sidebar.width(188);
+    	$("#showChartButton").css("right", 230);
     }
 };
 
@@ -125,7 +127,7 @@ my.updateStoryWindow = function() {
 };
 
 // Format the SWEdata to be compatible with D3 in order to make a nice 
-// line graph.
+// line chart.
 my.formatSWEdata = function(SWEdata) {
 	var newData = [],
 		year,
@@ -144,15 +146,15 @@ my.formatSWEdata = function(SWEdata) {
 	return newData;
 };
 
-// Constructor for a line graph of SWE data associated with the passed-in
+// Constructor for a line chart of SWE data associated with the passed-in
 // feature. Creates and displays the chart. Is dependant on there being a
 // #chartWindowContent div element.
-my.SWEGraph = function (feature){
+my.SWEChart = function (feature){
 	
 	var self, data, svg, margins, padding, width, height,
-		xScale, yScale, xAxis, yAxis, line, graph;
+		xScale, yScale, xAxis, yAxis, line, chart;
 	
-	// store "this" (the graph) in a variable to avoid weird d3 conflicts.
+	// store "this" (the chart) in a variable to avoid weird d3 conflicts.
 	self = this;
 	
 	// Format the SWE data for d3
@@ -163,7 +165,7 @@ my.SWEGraph = function (feature){
 				.append("svg")
 				.attr("id", "SWEchart");
 
-	// Margins around the graph to make room for labels
+	// Margins around the chart to make room for labels
 	margins = {top: 6, right: 24, bottom: 20, left: 40};
 	
 	// The padding of the content window
@@ -171,7 +173,7 @@ my.SWEGraph = function (feature){
 	
 	// Chart width and height
 	width = parseInt(d3.select("#chartWindowContent").style("width")) - (margins.left + margins.right) - padding;
-	height = parseInt(d3.select("#chartWindowContent").style("height")) - (margins.top + margins.bottom) -  padding;
+	height = parseInt(d3.select("#chartWindowContent").style("height")) - (margins.top + margins.bottom) - padding;
 
 	// Make a scale for the axes. 
 	xScale = d3.scale.linear().range([0, width]).nice(d3.time.year);
@@ -188,7 +190,7 @@ my.SWEGraph = function (feature){
 	    .orient("left")
 	    .ticks(Math.max(height/50, 2));
 
-	// Create the line of the line graph
+	// Create the line of the line chart
 	line = d3.svg.line()
 	    .x(function(d) { 
 	      return xScale(d.year); 
@@ -197,8 +199,8 @@ my.SWEGraph = function (feature){
 	      return yScale(d.SWE); 
 	    });
 
-	// Add and lay out the svg for the graph
-	graph = svg.attr("width", width + margins.left * 2)
+	// Add and lay out the svg for the chart
+	chart = svg.attr("width", width + margins.left * 2)
 					.attr("height", height + margins.left * 2)
 					.append("g")
 					.attr("transform", "translate(" + margins.left + "," + margins.top + ")");
@@ -225,12 +227,12 @@ my.SWEGraph = function (feature){
     		}
     	})[1] ) ]);
     
-    // Add the axes and line to the graph.
-	graph.append("g")
+    // Add the axes and line to the chart.
+	chart.append("g")
 	      .attr("class", "x axis")
 	      .attr("transform", "translate(0," + height + ")")
 	      .call(xAxis);
-	graph.append("g")
+	chart.append("g")
 	      .attr("class", "y axis")
 	      .call(yAxis)
 	    .append("text")
@@ -240,17 +242,16 @@ my.SWEGraph = function (feature){
 	      .attr("dy", ".71em")
 	      .style("text-anchor", "end")
 	      .text("Max SWE (mm)");
-	graph.append("path")
+	chart.append("path")
 	      .datum(data)
 	      .attr("class", "line")
 	      .attr("d", line);
 	
-	// Expose the variables of this graph object.
+	// Expose the variables of this chart object.
 	// TODO There is probably a better way to do this.
 	self.data = data;
-	self.graph = graph;
+	self.chart = chart;
 	self.line = line;
-	self.margin = margin;
 	self.margins = margins;
 	self.width = width;
 	self.height = height;
@@ -261,56 +262,54 @@ my.SWEGraph = function (feature){
 	self.svg = svg;
 };
 
-// Function for resizing the SWEGraph. It is dependent on a "#chartWindowContent"
+// Function for resizing the SWEChart. It is dependent on a "#chartWindowContent"
 // div element.
 // TODO It might be better if the dimensions were passed in, which would allow
 // this function to be independant of the window. For example, I could change
 // the id of the window without breaking this. 
-my.SWEGraph.prototype.resize = function() {
+my.SWEChart.prototype.resize = function() {
 	var self = this;
 	var padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
 	/* Find the new window dimensions */
 	self.width = parseInt(d3.select("#chartWindowContent").style("width")) - (self.margins.left + self.margins.right) - padding;
 	self.height = parseInt(d3.select("#chartWindowContent").style("height")) - (self.margins.top + self.margins.bottom) - padding;
 	
-	self.svg.attr("width", self.width + self.margin*2)
-					.attr("height", self.height + self.margin*2)
+	self.svg.attr("width", self.width + self.margins.left + self.margins.right)
+					.attr("height", self.height + self.margins.top + self.margins.bottom)
 					.append("g")
-					.attr("transform", "translate(" + self.margin + "," + self.margin + ")");
+					.attr("transform", "translate(" + self.margins.top + "," + self.margins.left + ")");
 	   
 	/* Update the range of the scale with new width/height */
 	self.xScale.range([0, self.width]).nice(d3.time.year);
 	self.yScale.range([self.height, 0]).nice();
 	   
 	  /* Update the axis with the new scale */
-	self.graph.select('.x.axis')
+	self.chart.select('.x.axis')
 	    .attr("transform", "translate(0," + self.height + ")")
 	    .call(self.xAxis);
 	   
-	self.graph.select('.y.axis')
+	self.chart.select('.y.axis')
 	    .call(self.yAxis);
 	   
 	  /* Force D3 to recalculate and update the line */
-	self.graph.selectAll('.line')
+	self.chart.selectAll('.line')
 	    .attr("d", self.line);
 	
 	self.xAxis.ticks(Math.max(self.width/50, 2));
 	self.yAxis.ticks(Math.max(self.height/50, 2));
 };
 
-// Create a new chart. Graph. Chart or graph?
-// TODO Is it a chart or a graph? Choose!
-my.makeSWEGraph = function(feature) {
-	// Only make the graph if the chart window exists.
-	// TODO is it a chart or a graph? Decide!
+// Create a new chart.
+my.makeSWEChart = function(feature) {
+	// Only make the chart if the chart window exists.
 	if($("#chartWindow").length) {
 		d3.select("#SWEchart").remove();
 		d3.select("#chartWindowContent").text("");
-		currentSWEChart = new my.SWEGraph(feature);
+		currentSWEChart = new my.SWEChart(feature);
 	}
 };
 
-// Creates and adds a resizable/movable window to hold the SWE graph. 
+// Creates and adds a resizable/movable window to hold the SWEchart. 
 // Very similar to makeStoryWindow.
 my.makeChartWindow = function() {
 	var chartWindow = $(
@@ -325,7 +324,13 @@ my.makeChartWindow = function() {
 	);
 
 	chartWindow.css("left", function() {
+		var sidebar = $("#dataSelectUIContainer");
+		
+		if(sidebar.overflown()) {
+			return $(window).width() - 550;
+		}
 		return $(window).width() - 530;
+		
 	});
 
 	chartWindow.appendTo("body");
@@ -337,8 +342,6 @@ my.makeChartWindow = function() {
 		return chartWindowHeight - (chartTitleBarHeight + (padding));
 	});
 
-
-
 	chartWindow.resizable({
 		minHeight: 200, 
 		minWidth: 250,
@@ -346,7 +349,7 @@ my.makeChartWindow = function() {
 		maxHeight: 460,
 		resize: function(event, ui) {
 			// Set the height of the content to match the resized window.
-			currentSWEChart.resize();
+			
 			$("#chartWindowContent").height(function() {
 				var chartWindowHeight = $("#chartWindow").height(),
 					chartTitleBarHeight = $("#chartTitleBar").height(),
@@ -354,6 +357,10 @@ my.makeChartWindow = function() {
 				
 				return chartWindowHeight - (chartTitleBarHeight + (padding));
 			});
+			// Resize the Chart if it exists
+			if($("#SWEchart").length) {
+				currentSWEChart.resize();
+			}
 		}
 	});
 
@@ -370,7 +377,7 @@ my.makeChartWindow = function() {
 
 	$("#closeChartWindow").click(function() {
 		chartWindow.remove();
-		$("#showGraphButton").show();
+		$("#showChartButton").show();
 	});
 };
 
@@ -433,7 +440,7 @@ $("#dataTypeSelect").on("change", function(event, ui) {
 		my.makeChartWindow();
 	} else {
 		$("#chartWindow").remove();
-		$("#showGraphButton").hide();
+		$("#showChartButton").hide();
 	}
 });
 
@@ -464,7 +471,7 @@ $("#info").on("click", function() {
 	$(this).hide();
 });
 
-$("#showGraphButton").on("click", function() {
+$("#showChartButton").on("click", function() {
 	my.makeChartWindow();
 	$(this).hide();
 });
