@@ -43,6 +43,7 @@
 				<option value="lulc">Land Cover</option>
 				<option value="maxSWE">Snow Water Equivalent</option>
 				<option value="landValue">Land Value</option>
+				<option value="et">Evapotranspiration</option>
 			</select>
 		</div>
 		
@@ -106,7 +107,7 @@
 				 data-placement="left"
 				 data-container="body"
 				 class="btn btn-primary climateScenarioBtn scenarioButton 
-				        maxSWE" 
+				        maxSWE et" 
 				 id="lowClimButton">
 					<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
 					LowClim
@@ -131,7 +132,7 @@
 				 data-html=true
 				 data-container="body"
 				 class="btn btn-primary referenceScenarioBtn scenarioButton 
-				        lulc maxSWE landValue aridity active" 
+				        lulc maxSWE landValue et active" 
 				 id="refButton">
 					<input type="radio" name="options" id="refRadio" autocomplete="off" checked>
 					Reference Case
@@ -268,7 +269,7 @@
 			
 			<div class="checkbox">
 				<label><input type="checkbox" id="streamsLayerCheckbox" checked value="">
-					<div id="streamsIcon"></div> Rivers
+					<div id="streamsIcon"></div> Rivers, Water
 				</label>
 			</div>
 		</div>

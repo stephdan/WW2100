@@ -58,7 +58,7 @@
 	// just yet. It will depend on how snow gets structured. 
 	// var snowDataPath ="data/snowData/April1SWE_Ref_DecadalAvg_HUC_done.csv";
 	var snowDataPath ="data/snowData/SWE_highClim_decadalAvg_HUCs.csv";
-	console.log("Snow data: " + snowDataPath);
+	// console.log("Snow data: " + snowDataPath);
 	var snowData;
 	d3.csv(snowDataPath, function(d) {
 		snowData = d;
@@ -86,6 +86,19 @@
 		});	
 	};
 	
+	App.importEtData = function() {
+		var refPath = "data/etData/et_ref_decadalAvg.csv",
+			lowClimPath = "data/etData/et_lowClim_decadalAvg.csv";
+		
+		App.etData = {};
+		d3.csv(refPath, function(d) {
+			App.etData.ref = d;
+		});
+		d3.csv(lowClimPath, function(d) {
+			App.etData.lowClim = d;
+		});
+	};
+	
 	// Generates color palates for the different data layers and legends. 
 	// Change the settings in here to edit map and legend colors. 
 	// NOTE: changing the number of classes for each data layer will cause 
@@ -111,9 +124,9 @@
 			agLandValueHigh = [0,109,44],
 			agLandvalueClasses = 6,
 			
-			aridityLow =  [255,255,212],
-			aridityHigh = [140,45,4],
-			aridityClasses = 7;
+			etLow =  [254, 239,139],
+			etHigh = [18, 35,114],
+			etClasses = 6;
 		
 		// lulc is categorical, so each color is hard coded here rather 
 		// than generated as a ramp.
@@ -151,10 +164,10 @@
 					"string"
 					)
 				];
-		App.colorPalates.aridity = [ColorUtils.getColorRamp(
-					aridityLow,
-					aridityHigh,
-					aridityClasses,
+		App.colorPalates.et = [ColorUtils.getColorRamp(
+					etLow,
+					etHigh,
+					etClasses,
 					"string"
 				)];
 	};
@@ -224,15 +237,14 @@
 				"More than 2,500"
 			]
 		],
-		aridity: [
+		et: [
 			[
-				"Less than 0.005",
-				"0.005 to 0.01",
-				"0.01 to 0.1",
-				"0.1 to 0.5",
-				"0.5 to 1.0",
-				"1.0 to 1.5",
-				"More than 1.5"
+				"Less than 400",
+				"400 to 500",
+				"500 to 600",
+				"600 to 700",
+				"700 to 800",
+				"More than 800"
 			]
 		]
 	};
@@ -243,7 +255,7 @@
 		maxSWE: ["Average Maximum <br/>Snow Water <br/>Equivalent in mm"],
 		landValue: ["Developed Land Value <br/>$ per Acre",
 					"Agricultural Land Value <br/>$ per Acre"],
-		aridity: ["Aridity Index"]
+		et: ["Evapotranspiration <br/>in mm"]
 	};
 	
 	// Changes the opacity of the main data layer.
@@ -321,6 +333,7 @@
 		App.currentBasemap = newLayer;
 	};
 	
+	// Create a path to the correct json file based on current settings.
 	App.getPathToGeometry = function() {
 		var basePath = "data/geometry/dataLayers/",
 			dataPath,
@@ -331,6 +344,10 @@
 		
 		if(App.settings.currentDataSettings.type === "maxSWE") {
 			return "data/geometry/dataLayers/snow/wHuc12_simp.json";
+		}
+
+		if(App.settings.currentDataSettings.type === "et") {
+			return "data/geometry/dataLayers/et/hru_proj2.json";
 		}
 
 		if(date === "early") {
@@ -394,11 +411,7 @@
 			}
 			
 			if(settings.type === "maxSWE") {
-				// TODO It might be good to use this code in the event that you 
-				// don't want a particular data layer tiled. If you want features
-				// interactions, for example. Probably with snow, if anything. 
-				// Otherwise, this is obsolete. 
-				// Turn the geoJson into a leaflet layer
+				// SWE is an interactive layer and should not be tiled.
 				App.settings.useVectorTiles = false;
 				activeDataLayer = L.geoJson(importedJson, {
 					style: styleWW2100Layer,
@@ -504,7 +517,7 @@
 				break;
 			case "landValue": colorizerFunction = getLandValueColors;
 				break;
-			case "aridity" : colorizerFunction = getAridityColors;
+			case "et" : colorizerFunction = getEtColors;
 		}
 	    
 	    // for each feature in the json...
@@ -686,7 +699,7 @@
 			colors = App.colorPalates.aridity;
 		
 		if(isNaN(aridity)) {
-			console.log("Aridityis NaN!");
+			console.log("Aridity is NaN!");
 			return "rgb(100,100,100)"
 		}
 		switch (aridity) {
@@ -698,6 +711,57 @@
 			case 6: return colors[5];
 			case 7: return colors[6];
 		}
+	}
+	
+	function getEtColors(feature) {
+		var HRU_ID = feature.properties.HRU_ID,
+			colors = App.colorPalates.et[0],
+			et,
+			date = App.settings.currentDataSettings.date,
+			scenario = App.settings.currentDataSettings.scenario,
+			decade,
+			i;
+			
+		if(date === "early"){
+			decade = "2010";
+		} else if (date === "mid"){
+			decade = "2050";
+		} else {
+			decade = "2090";
+		}
+		
+		for(i = 0; i < App.etData[scenario].length; i += 1) {
+			if(HRU_ID === Number(App.etData[scenario][i].hru)) {
+				// Go ahead and bind the SWE data for all decades to the feature.
+				feature.properties.etData = App.etData[scenario][i];
+				et = App.etData[scenario][i][decade];
+				break;
+			}
+		}
+		
+		if(isNaN(et)) {
+			console.log("et is NaN!");
+			return "rgb(100,100,100)";
+		}
+		if(et <= 400) {
+			return colors[0];
+		}
+		if(et <= 500) {
+			return colors[1];
+		}
+		if(et <= 600) {
+			return colors[2];
+		}
+		if(et <= 700) {
+			return colors[3];
+		}
+		if(et <= 800) {
+			return colors[4];
+		}
+		if(et > 800) {
+			return colors[5];
+		}
+		console.log("color problems!")
 	}
 	
 	function createLabelIcon(labelClass,labelText){
@@ -999,6 +1063,7 @@
 		App.GUI.init();
 		App.initColorsPalates();
 		App.importSnowData();
+		App.importEtData();
 		App.initReferenceLayers(function(){
 			App.GUI.loadDataByGUI();
 		});
