@@ -27,10 +27,6 @@
  *    App.GUI
  *    App.buildTileLayer
  * 
- * The code is written similar to the pattern described here:
- *     http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
- * 
- * Inspiration for the adjustable SWE chart came from Ryan Stanly's cartovis.com
  */
 (function(){
 	"use strict";
@@ -63,11 +59,8 @@
 	d3.csv(snowDataPath, function(d) {
 		snowData = d;
 	});
-	
-	App.getSnowData = function() {
-		return snowData;
-	};
 
+	// Import CSV files containing SWE data and store it.
 	App.importSnowData = function() {
 		var refPath =      "data/snowData/SWE_ref_decadalAvg_HUCs.csv",
 			lowClimPath =  "data/snowData/SWE_lowClim_decadalAvg_HUCs.csv",
@@ -86,17 +79,62 @@
 		});	
 	};
 	
+	// Import CSV files containing evapotranspiration data and store it.
+	// Convert the imported data to Map objects for improved performance.
 	App.importEtData = function() {
 		var refPath = "data/etData/et_ref_decadalAvg.csv",
-			lowClimPath = "data/etData/et_lowClim_decadalAvg.csv";
+			lowClimPath = "data/etData/et_lowClim_decadalAvg.csv",
+			fireSuppressPath = "data/etData/et_fireSuppress_decadalAvg.csv",
+			highClimPath = "data/etData/et_highClim_decadalAvg.csv",
+			managedPath = "data/etData/et_managed_decadalAvg.csv",
+			econExtremePath = "data/etData/et_econExtreme_decadalAvg.csv";
 		
 		App.etData = {};
 		d3.csv(refPath, function(d) {
-			App.etData.ref = d;
+			App.etData.ref = App.mapEtData(d);
 		});
 		d3.csv(lowClimPath, function(d) {
-			App.etData.lowClim = d;
+			App.etData.lowClim = App.mapEtData(d);
 		});
+		d3.csv(fireSuppressPath, function(d) {
+			App.etData.fireSuppress = App.mapEtData(d);
+		});
+		d3.csv(highClimPath, function(d) {
+			App.etData.highClim = App.mapEtData(d);
+		});
+		d3.csv(managedPath, function(d) {
+			App.etData.managed = App.mapEtData(d);
+		});
+		d3.csv(econExtremePath, function(d) {
+			App.etData.econExtreme = App.mapEtData(d);
+		});
+	};
+	
+	// Convert the imported et data into a Map object. Search for et values with
+	// Map.get(HRU_ID). Better performance than 
+	// looping over d to find the matching HRU_ID (10 ms vs 5 second) . 
+	App.mapEtData = function(d) {
+		var etMap = new Map(),
+			i,
+			key,
+			value;
+			
+		for(i = 0; i < d.length; i += 1) {
+			key = Number(d[i].hru);
+			value = {
+				"2010": d[i]["2010"],
+				"2020": d[i]["2020"],
+				"2030": d[i]["2030"],
+				"2040": d[i]["2040"],
+				"2050": d[i]["2050"],
+				"2060": d[i]["2060"],
+				"2070": d[i]["2070"],
+				"2080": d[i]["2080"],
+				"2090": d[i]["2090"]
+			};
+			etMap.set(key, value);
+		}
+		return etMap;
 	};
 	
 	// Generates color palates for the different data layers and legends. 
@@ -218,25 +256,6 @@
 				"More than 2,500"
 			]
 		],
-		devLandVal: [
-			[
-				"Less than 250,000",
-				"250,001 - 500,000",
-				"500,001 - 750,000",
-				"750,001 - 1,000,000",
-				"More than 1,000,000"
-			]
-		],
-		agLandVal: [
-			[
-				"Less than 500",
-				"501 to 1,000",
-				"1,001 to 1,500",
-				"1,501 to 2,000",
-				"2,001 to 2,500",
-				"More than 2,500"
-			]
-		],
 		et: [
 			[
 				"Less than 400",
@@ -252,10 +271,10 @@
 	// A legend title for each of the data layers
 	App.legendTitles = {
 		lulc: ["Landcover and Forest Type"],
-		maxSWE: ["Average Maximum <br/>Snow Water <br/>Equivalent in mm"],
+		maxSWE: ["Average Yearly<br/>Maximum Snow Water<br/>Equivalent in mm"],
 		landValue: ["Developed Land Value <br/>$ per Acre",
 					"Agricultural Land Value <br/>$ per Acre"],
-		et: ["Evapotranspiration <br/>in mm"]
+		et: ["Average Yearly<br/>Evapotranspiration<br/>in mm"]
 	};
 	
 	// Changes the opacity of the main data layer.
@@ -730,14 +749,7 @@
 			decade = "2090";
 		}
 		
-		for(i = 0; i < App.etData[scenario].length; i += 1) {
-			if(HRU_ID === Number(App.etData[scenario][i].hru)) {
-				// Go ahead and bind the SWE data for all decades to the feature.
-				feature.properties.etData = App.etData[scenario][i];
-				et = App.etData[scenario][i][decade];
-				break;
-			}
-		}
+		et = App.etData[scenario].get(HRU_ID)[decade];
 		
 		if(isNaN(et)) {
 			console.log("et is NaN!");

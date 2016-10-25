@@ -1,15 +1,14 @@
-/*
- * This module contains all code pertaining to the graphical user interface.
- */
+
+// This module contains all code pertaining to the graphical user interface.
 App.GUI = (function($){
 
 "use strict";
 
-var currentSWEChart,
-	selectedScenario,
-	my = {};
+var currentSWEChart, // More than one function needs access to this.
+	selectedScenario, // Same here
+	my = {}; // returned at the end of the module. 
 
-// Helper function for determining if an element has overflow content.
+// Helper function for determining if an html element has overflow content.
 $.fn.overflown = function() {
 	var e = this[0];
 	return e.scrollHeight > e.clientHeight || e.scrollWidth > e.clientWidth;
@@ -19,6 +18,10 @@ $.fn.overflown = function() {
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({html: true});
 });
+
+// Require manual triggers for popovers so they don't appear when
+// scenario buttons are clicked.
+$(".scenarioButton").popover({trigger: "manual"});
 
 // Do stuff when the window is resized
 $(window).on('resize', function () {
@@ -37,6 +40,7 @@ my.updateSidebarLayout = function() {
 	sidebar.css("max-height", function() {
 		return $(window).height() - 20;
 	});
+	
     // If the sidebar is overflown, make it wider to make room for the scrollbar.
     if(sidebar.overflown()) {
     	sidebar.width(208);
@@ -101,7 +105,8 @@ my.makeStoryWindow = function() {
 	// Add text to the window.
 	my.updateStoryWindow();
 	
-	// Make the window closable by clicking the x.
+	// Make the window closable by clicking the x. Show the button for
+	// opening it again.
 	$("#closeStoryWindow").click(function() {
 		storyWindow.remove();
 		$("#info").show();
@@ -116,7 +121,7 @@ my.updateStoryWindow = function() {
 		// build a path to the correct .txt file
 		var storyTextFilePath = "dataLayerStories/" + $("#dataTypeSelect").val() + ".txt";
 	
-		// Load the .txt file, load it into the window as html. 
+		// Get the .txt file, load it into the window as html. 
 		$.get(storyTextFilePath)
 		    .done(function() { 
 		        $("#storyWindowContent").load(storyTextFilePath);
@@ -205,7 +210,7 @@ my.SWEChart = function (feature){
 					.append("g")
 					.attr("transform", "translate(" + margins.left + "," + margins.top + ")");
 
-	// Format the SWE data a bit more. Make sure the years is a number, and 
+	// Format the SWE data a bit more. Make sure the years are numbers, and 
 	// that the SWE is in millimeters.
 	data.forEach(function(d) {
         d.year = Number(d.year);
@@ -248,7 +253,7 @@ my.SWEChart = function (feature){
 	      .attr("d", line);
 	
 	// Expose the variables of this chart object.
-	// TODO There is probably a better way to do this.
+	// TODO It doesn't have to be this way.
 	self.data = data;
 	self.chart = chart;
 	self.line = line;
@@ -315,7 +320,7 @@ my.makeChartWindow = function() {
 	var chartWindow = $(
 		"<div id='chartWindow' class='ui-widget-content resizable movable'>" + 
 		  "<div id='chartTitleBar' class='movableWindowTitleBar'>" + 
-		    "<div id='chartTitleText' class='movableWindowTitleText'>Max SWE by decade</div>" + 
+		    "<div id='chartTitleText' class='movableWindowTitleText'>Average Max SWE by decade</div>" + 
 		    "<div id='closeChartWindow' class='closeWindow'><span class='ui-icon ui-icon-close'></span></div>" + 
 		  "</div>" + 
 		  "<div id='chartWindowContent' class='resizableContent'>Hover over map features to see change in max SWE over time." + 
@@ -381,16 +386,10 @@ my.makeChartWindow = function() {
 	});
 };
 
-
-
-// Require manual triggers for popovers so they don't appear when
-// scenario buttons are clicked.
-$(".scenarioButton").popover({trigger: "manual"});
-
 // Add focus to a scenarioButtonExplainer when it's clicked.
 // FIXME The buttons already get focus in Firefox, but not in chrome. Maybe
 // it would be better to figure out why they're not getting focus in chrome. 
-$(".scenarioExplainerButton").on("click", function() {
+$(".explainerButton").on("click", function() {
 	if($(this).is(":focus")) {
 		return;
 	}
@@ -442,6 +441,7 @@ $("#dataTypeSelect").on("change", function(event, ui) {
 		$("#chartWindow").remove();
 		$("#showChartButton").hide();
 	}
+	my.updateSidebarLayout();
 });
 
 // Change the labels of the time period slider based on the currently selected
@@ -451,7 +451,7 @@ my.updateTimePeriodLabels = function(dataLayer) {
 		mid = $("#midTimePeriodLabel"),
 		late = $("#lateTimePeriodLabel");
 
-	if(dataLayer === "maxSWE") {
+	if(dataLayer === "maxSWE" || dataLayer === "et") {
 		early.text("2010s");
 		mid.text("2050s");
 		late.text("2090s");
@@ -462,98 +462,47 @@ my.updateTimePeriodLabels = function(dataLayer) {
 	}
 };
 
+// When the time slider changes, update the map
 $("#timeRange").on("change", function() {
 	my.loadDataByGUI();
 });
 
+//When the info button is clicked, open the story window
 $("#info").on("click", function() {
 	my.makeStoryWindow();
 	$(this).hide();
 });
 
+// When the chart button is clicked, show the SWE chart.
 $("#showChartButton").on("click", function() {
 	my.makeChartWindow();
 	$(this).hide();
 });
 
+// When the base layer selector changes, change the base layer
 $("#baseLayerSelect").on("change", function(event, ui) {
 	App.setBaseLayer($(this).val());
 });
 
 
-// SCENARIO BUTTONS ------------------------------------------------------------
-// TODO these can be consolidated into a single event listener. Later.
-
-$("#lowClimButton").on("click", function() {
-	if(selectedScenario !== "lowClim") {
-		selectedScenario = "lowClim";
+// When a scenario button is clicked, load the correct data to the map.
+$(".scenarioButton").on("click", function() {
+	// Which button is it?
+	var id = $(this)[0].id,
+		scenario = id.slice(0, -6);
+	console.log(scenario);
+	if(selectedScenario !== scenario) {
+		selectedScenario = scenario;
 		my.loadDataByGUI();
 	}
 });
 
-$("#refButton").on("click", function() {
-	if(selectedScenario !== "ref") {
-		selectedScenario = "ref";
-		my.loadDataByGUI();
-	}
-});
-
-$("#econExtremeButton").on("click", function() {
-	if(selectedScenario !== "econExtreme") {
-		selectedScenario = "econExtreme";
-		my.loadDataByGUI();
-	}
-});
-
-$("#highPopButton").on("click", function() {
-	if(selectedScenario !== "highPop") {
-		selectedScenario = "highPop";
-		my.loadDataByGUI();
-	}
-});
-
-$("#fireSuppressButton").on("click", function() {
-	if(selectedScenario !== "fireSuppress") {
-		selectedScenario = "fireSuppress";
-		my.loadDataByGUI();
-	}
-});
-
-$("#highClimButton").on("click", function() {
-	if(selectedScenario !== "highClim") {
-		selectedScenario = "highClim";
-		my.loadDataByGUI();
-	}
-});
-
-$("#econExtremeButton").on("click", function() {
-	if(selectedScenario !== "econExtreme") {
-		selectedScenario = "econExtreme";
-		my.loadDataByGUI();
-	}
-});
-
-$("#urbExpandButton").on("click", function() {
-	if(selectedScenario !== "urbanExpand") {
-		selectedScenario = "urbanExpand";
-		my.loadDataByGUI();
-	}
-});
-
-$("#managedButton").on("click", function() {
-	if(selectedScenario !== "managed") {
-		selectedScenario = "managed";
-		my.loadDataByGUI();
-	}
-});
-
-// end scenario buttons -------------------------------------------------------
-
-
+// Change opacity when the opacity slider changes.
 $("#opacitySlider").on("input", function() {
 	App.setDataLayerOpacity($(this).val());
 });
 
+// Load the correct data layer based on current GUI settings. 
 my.loadDataByGUI = function() {
 	var settings = {},
 		timeRangeSliderValue = $("#timeRange").val();
@@ -571,28 +520,32 @@ my.loadDataByGUI = function() {
 	App.addWW2100DataLayer(settings);
 };
 
-// Checkboxes for adding/removing reference layers
+// Checkboxes for adding/removing cities reference layer
 $("#citiesLayerCheckbox").on("click", function() {
 	App.settings.showCities = $(this).prop("checked");
 	App.addReferenceLayers();
 });
 
-// Checkboxes for adding/removing reference layers
+// Checkboxes for adding/removing streams reference layer
 $("#streamsLayerCheckbox").on("click", function() {
 	App.settings.showStreams = $(this).prop("checked");
 	App.addReferenceLayers();
 });
 
+// Hide the scenario button with the matching id
 my.hideButtonById = function(buttonId) {
 	var button = $("#" + buttonId);	
 	button.hide();	
 };
 
+// Show the scenario button with the matching id
 my.showButtonById = function(buttonId) {
 	var button = $("#" + buttonId);	
 	button.show();	
 };
 
+// Show or hide the correct scenario buttons based on the type of data 
+// currently on display.
 my.showHideScenarioButtons = function(type) {
 	// Show and hide buttons based on the current scenario
 	$(".scenarioButton").each(function(i) {
@@ -608,22 +561,11 @@ my.showHideScenarioButtons = function(type) {
 	});
 };
 
-my.showHideButtons = function(showTheseButtons, hideTheseButtons) {
-	var i;
-	for(i = 0; i < showThese.length; i += 1) {
-		my.showButtonById(showTheseButtons[i]);
-	}
-	for(i = 0; i < hideThese.length; i += 1) {
-		my.hideButtonById(hideTheseButtons[i]);
-	}
-};
-
+// Initialize the GUI
 my.init = function() {
 	selectedScenario = "ref";
 	my.makeStoryWindow();
 	my.updateSidebarLayout();
-	// my.makeChartWindow();
-	//my.showHideScenarioButtons("lulc");
 };
 
 return my;

@@ -2,7 +2,7 @@
 
 <p>
 One of the ways that climate warming and land use change will affect the water 
-cycle in the Willamette Basin, is by changing evapotranspiration, the amount of 
+cycle in the Willamette Basin, is by changing evapotranspiration (ET), the amount of 
 water vapor released from soils and plants into the atmosphere.  
 </p>
 
