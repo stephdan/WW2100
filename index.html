@@ -10,22 +10,25 @@
 	<link rel="stylesheet" href="lib/jquery-ui-1.11.4/jquery-ui.min.css">
 	<link rel="stylesheet" href="lib/bootstrap-3.3.6-dist/css/bootstrap.css">
 	
-    <!-- d3 for SVG manipulation, d3-queue for asynchronous json imports-->
-    <!-- TODO d3 isn't actually used for anything except json import -->
+    <!-- d3 for SVG manipulation, chart creation, and topojson, 
+    	d3-queue for asynchronous json imports-->
     <script src="lib/d3/d3.js"></script>
     <script src="https://d3js.org/d3-queue.v2.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
 
+	<!-- jQuery, jQueryUI, and bootstrap imports -->
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="lib/bootstrap-3.3.6-dist/js/bootstrap.js"></script>
     
+    <!-- Custom styling -->
     <link rel="stylesheet" href="style/style.css" />
 
-    <!-- Leaflet provides the map and tile service -->
+    <!-- Leaflet for the map and tile service. Leaflet-providers for making
+    	different tilesets easier to add -->
     <link rel="stylesheet" href="lib/leaflet/leaflet.css"/>
     <script src="lib/leaflet/leaflet.js"></script>
-	<script src="lib/leaflet-providers.js"></script> <!-- Easy basemap get -->
+	<script src="lib/leaflet-providers.js"></script> 
 </head>
 
 <body>
@@ -36,8 +39,8 @@
 	<!-- Sidebar UI containing dropdowns, button etc for data selection -->
 	<div id="dataSelectUIContainer" class="uiBox">
 		
+		<!-- Dropdown for selecting data layers -->
 		<p class="UIHeader">Select Data Layer</p>
-			
 		<div class="selectorContainer UIElementContainer">
 			<select name="dataTypeSelect" id="dataTypeSelect" class="form-control">
 				<option value="lulc">Land Cover</option>
@@ -47,6 +50,7 @@
 			</select>
 		</div>
 		
+		<!-- Header for time selection slider -->
         <div>
             <p class="UIHeader" id="selectTimePeriodHeader"
                     data-toggle="popover"
@@ -61,7 +65,8 @@
                     id="selectTimePeriodHeaderExplainer"
             </button>
         </div>
-		
+        
+        <!-- Time selection slider -->
 		<div class="sliderContainer UIElementContainer">
 			<div class="stepLabels" style="text-align: center">
 				<span id="earlyTimePeriodLabel" style="float: left">2010</span>
@@ -77,6 +82,7 @@
 			</datalist>
 		</div>
 		
+		<!-- Header for scenario button section -->
 		<div>
 			<p class="UIHeader" id="compareScenariosHeader"
 					data-toggle="popover"
@@ -87,13 +93,12 @@
 					data-container="body">
 				Compare Scenarios
 			</p>
-			
 			<button class="glyphicon glyphicon-question-sign explainerButton headerExplainerButton"
 					id="compareScenariosHeaderExplainer"
 			</button>
 		</div>
 		
-		<!-- start scenario buttons -->
+		<!-- Scenario buttons -->
 		<div class="scenarioButtonsContainer UIElementContainer">
 			<div data-toggle="buttons">
 				<label 
@@ -254,9 +259,11 @@
 			</div>
 		</div> <!-- end scenario buttons -->
 		
+		<!-- Reference layer checkboxes section -->
 		<p class="UIHeader">Reference Layers</p>
 
 		<div class="referenceLayerCheckboxContainer">
+			
 			<div class="checkbox" style="margin-top: 0px">
 				<label><input type="checkbox" id="citiesLayerCheckbox" checked value="">
 					<div id="citiesIcon">
@@ -266,7 +273,7 @@
 					</div> Cities
 				</label>
 			</div>	
-			
+
 			<div class="checkbox">
 				<label><input type="checkbox" id="streamsLayerCheckbox" checked value="">
 					<div id="streamsIcon"></div> Rivers, Water
@@ -274,14 +281,14 @@
 			</div>
 		</div>
 
+		<!-- Opacity slider -->
 		<p class="UIHeader">Adjust Opacity</p>
-		
 		<div class="sliderContainer UIElementContainer">
 			<input type="range" id="opacitySlider"/ min="0", max="1" value="0.8" step="0.01">
 		</div>
 		
+		<!-- Basemap dropdown selector -->
 		<p class="UIHeader">Select Base Layer</p>
-		
 		<div class="selectorContainer UIElementContainer">
 			<select name="baseLayerSelect" id="baseLayerSelect" class="form-control">
 				<option class="basemap" value="Esri_WorldTerrain">Terrain</option>
@@ -293,12 +300,12 @@
 		
 	</div> <!--End sidebar UI -->
 	
-	<div id="legendAndInfoButtonContainer">
-		<!-- Container for the legend -->
-		<div id="legendContainer" class="uiBox">
-		</div>
+
+	<!-- Container for the legend -->
+	<div id="legendContainer" class="uiBox">
 	</div>
-	
+
+	<!-- info button -->
 	<div id="info" style="display: none;">
 		<!-- The i is totally just 3 svg rectangles and a circle 
 			arranged in an i shape -->
@@ -310,16 +317,17 @@
 		</svg>
 	</div>
 	
+	<!-- button for showing the SWE chart -->
 	<div id="showChartButton" class="uiBox" style="display: none;">
 		<span class='glyphicon glyphicon-stats'></span>
 	</div>
 
-
+	<!-- Loading message. Remain hidden unless something is being loaded. -->
 	<div id="loading" class="uiBox hidden">Loading data, please wait...</div>
 	
-	<!-- Main scripts, they initialize the App -->
+	<!-- Main scripts, they initialize the App when imported -->
 	<script src="scripts/ColorUtils.js"></script>
-    <script src="scripts/main2.js"></script>
+    <script src="scripts/main.js"></script>
     <script src="scripts/buildTileLayer.js"></script>
     <script src="scripts/geojson-vt-dev.js"></script>
     <script src="scripts/L.CanvasTiles.js"></script>

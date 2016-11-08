@@ -67,13 +67,6 @@ body, html {
 	margin-bottom: 10px;
 }
 
-#legendAndInfoButtonContainer {
-	position: absolute;
-	left: 10px;
-	bottom: 10px;
-	z-index: 2;
-}
-
 #loading {
 	position: absolute;
 	top: 20px;
@@ -88,6 +81,10 @@ body, html {
 
 #legendContainer {
 	display: inline-block;
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
+	z-index: 2;
 }
 
 #legendItemContainer {
