@@ -39,7 +39,7 @@
 	
 	// Various app settings shared throughout the code. They get altered by 
 	// GUI interactions mostly. 
-	App.settings = {
+	var settings = {
 		showReferenceLayers: true,
 		showCities: true,
 		showStreams: true,
@@ -269,15 +269,15 @@
 	function setDataLayerOpacity(opacity) {
 		
 		if(opacity) {
-			App.settings.dataLayerOpacity = opacity;
+			settings.dataLayerOpacity = opacity;
 		}
 
 		// The function for changing opacity of the data layer depends on 
 		// whether vector tiles are used. 
-		if(App.settings.useVectorTiles){
-			activeDataLayer.setOpacity(App.settings.dataLayerOpacity);
+		if(settings.useVectorTiles){
+			activeDataLayer.setOpacity(settings.dataLayerOpacity);
 		} else {
-			activeDataLayer.setStyle({fillOpacity: App.settings.dataLayerOpacity})
+			activeDataLayer.setStyle({fillOpacity: settings.dataLayerOpacity})
 		}
 	}
 
@@ -344,16 +344,16 @@
 	function getPathToGeometry() {
 		var basePath = "data/geometry/dataLayers/",
 			dataPath,
-			type = App.settings.currentDataSettings.type,
-			scenario = App.settings.currentDataSettings.scenario,
-			date = App.settings.currentDataSettings.date,
+			type = settings.currentDataSettings.type,
+			scenario = settings.currentDataSettings.scenario,
+			date = settings.currentDataSettings.date,
 			decade;
 		
-		if(App.settings.currentDataSettings.type === "maxSWE") {
+		if(settings.currentDataSettings.type === "maxSWE") {
 			return "data/geometry/dataLayers/snow/wHuc12_simp.json";
 		}
 
-		if(App.settings.currentDataSettings.type === "et") {
+		if(settings.currentDataSettings.type === "et") {
 			return "data/geometry/dataLayers/et/hru_proj2.json";
 		}
 
@@ -374,15 +374,15 @@
 	// leaflet map and configures the legend. 
 	// Ensures only one ww2100 data layer is loaded at a time, and overlays
 	// the reference layers on top. Called when GUI settings are changed.
-	// settings: {type, date, scenario}
-	function addWW2100DataLayer(settings) {
+	// dataSettings: {type, date, scenario}
+	function addWW2100DataLayer(dataSettings) {
 		
 		// Show the loading message.
 		$("#loading").removeClass("hidden");
 				
 		// Names the leaflet layer the combination of the settings. This 
 		// reference is needed to remove the layer later. 
-		var layerToAdd = settings.type + settings.date + settings.scenario,
+		var layerToAdd = dataSettings.type + dataSettings.date + dataSettings.scenario,
 			layer,
 			pathToGeometry,
 			key;
@@ -397,7 +397,7 @@
 		}
 		
 		// Other functions need the settings, too!
-		App.settings.currentDataSettings = settings;
+		settings.currentDataSettings = dataSettings;
 		
 		// Import the json data layer saved at pathToGeometry
 		d3.json(getPathToGeometry(), function(error, importedJson) {
@@ -417,9 +417,9 @@
 				}
 			}
 			
-			if(settings.type === "maxSWE") {
+			if(dataSettings.type === "maxSWE") {
 				// SWE is an interactive layer and should not be tiled.
-				App.settings.useVectorTiles = false;
+				settings.useVectorTiles = false;
 				activeDataLayer = L.geoJson(importedJson, {
 					style: styleWW2100Layer,
 					// raise up to 1 to increase performance, while adding 
@@ -429,7 +429,7 @@
 					onEachFeature: onEachSWEFeature
 				});
 			} else {
-				App.settings.useVectorTiles = true;
+				settings.useVectorTiles = true;
 				// Assign a color property to each feature.
 				colorizeFeatures(importedJson);
 
@@ -470,7 +470,7 @@
 			// The next two variables may never change, so could be hardcoded below later
 			stroke = false;		
 		
-		switch(App.settings.currentDataSettings.type){
+		switch(settings.currentDataSettings.type){
 			case "lulc": fillColor = getlulcColor(feature);
 				break;
 			case "maxSWE": fillColor = getSnowWaterEquivalentColor(feature);
@@ -486,7 +486,7 @@
 		return {
 			fillColor: fillColor,
 			stroke: stroke,
-			fillOpacity: App.settings.dataLayerOpacity
+			fillOpacity: settings.dataLayerOpacity
 		};
 	}
 	
@@ -498,7 +498,7 @@
 
 	    var i, colorizerFunction;
 	    
-	    switch(App.settings.currentDataSettings.type){
+	    switch(settings.currentDataSettings.type){
 			case "lulc": colorizerFunction = getlulcColor;
 				break;
 			case "maxSWE": colorizerFunction = getSnowWaterEquivalentColor;
@@ -576,8 +576,8 @@
 		var hucID = feature.properties.HUC12,
 			colors = App.colorPalates.maxSWE[0],
 			maxSWE,
-			date = App.settings.currentDataSettings.date,
-			scenario = App.settings.currentDataSettings.scenario,
+			date = settings.currentDataSettings.date,
+			scenario = settings.currentDataSettings.scenario,
 			decade,
 			i;
 			
@@ -704,8 +704,8 @@
 		var HRU_ID = feature.properties.HRU_ID,
 			colors = App.colorPalates.et[0],
 			et,
-			date = App.settings.currentDataSettings.date,
-			scenario = App.settings.currentDataSettings.scenario,
+			date = settings.currentDataSettings.date,
+			scenario = settings.currentDataSettings.scenario,
 			decade,
 			i;
 			
@@ -827,11 +827,11 @@
 	function addReferenceLayers() {
 		clearReferenceLayers();
 
-		if(App.settings.showStreams) {
+		if(settings.showStreams) {
 			App.referenceLayers.streams.addTo(App.map);
 			App.referenceLayers.openWater.addTo(App.map);
 		}
-		if(App.settings.showCities) {
+		if(settings.showCities) {
 			App.referenceLayers.cities.addTo(App.map);
 		}
 	}
@@ -878,7 +878,7 @@
 			maxLabelWidth = 0,
 			labelSpacer = 10,
 			
-			dataType = App.settings.currentDataSettings.type,
+			dataType = settings.currentDataSettings.type,
 			titles = App.legendTitles[dataType],
 			colors = App.colorPalates[dataType],
 			labels = App.legendLabels[dataType],
@@ -945,8 +945,8 @@
 // Event listeners for snow layer pointer interations --------------------------
 	function highlightFeature(e) {
 	    var layer = e.target,
-	    	scenario = App.settings.currentDataSettings.scenario,
-	    	date = App.settings.currentDataSettings.date,
+	    	scenario = settings.currentDataSettings.scenario,
+	    	date = settings.currentDataSettings.date,
 	    	decade,
 	    	maxSWE,
 	    	allDecades,
@@ -1004,7 +1004,7 @@
 	}
 
 	function onEachSWEFeature(feature, layer) {
-		if(App.settings.currentDataSettings.type==="maxSWE") {
+		if(settings.currentDataSettings.type==="maxSWE") {
 			layer.on({
 		        mouseover: mouseoverSWEFeature,
 		        mouseout: mouseoutSWEFeature
@@ -1054,6 +1054,7 @@
 	App.addWW2100DataLayer = addWW2100DataLayer;
 	App.addReferenceLayers = addReferenceLayers;
 	App.init = init;
+	App.settings = settings;
 
 }()); // END App------------------------------------------------
 
