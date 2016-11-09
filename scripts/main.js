@@ -17,8 +17,8 @@
  *    geojson-vt-dev.js (https://github.com/mapbox/geojson-vt)
  *    L.CanvasTiles.js (origional author: Stanislav Sumbera, http://bl.ocks.org/sumbera/c67e5551b21c68dc8299)
  * 
- * The code is written in a similar pattern to the one described here:
- *    http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
+ * The code is written in the Revealing Module Pattern described here:
+ *    https://addyosmani.com/resources/essentialjsdesignpatterns/book/#revealingmodulepatternjavascript
  * 
  * "App" is the primary namespace for the application, and requires several 
  * modules/plugins, including:
@@ -31,10 +31,8 @@
 (function(){
 	"use strict";
 	
-	// Establish a global namespace
 	var App = {},
-		activeDataLayer,
-		cachedJsonLayers = {};
+		activeDataLayer;
 	
 	// Assign global variable
 	window.App = App;
@@ -49,19 +47,9 @@
 		useVectorTiles: true,
 		currentDataSettings: ""
 	};
-		
-	// TODO these snowData things should be stored elsewhere, but not sure where
-	// just yet. It will depend on how snow gets structured. 
-	// var snowDataPath ="data/snowData/April1SWE_Ref_DecadalAvg_HUC_done.csv";
-	var snowDataPath ="data/snowData/SWE_highClim_decadalAvg_HUCs.csv";
-	// console.log("Snow data: " + snowDataPath);
-	var snowData;
-	d3.csv(snowDataPath, function(d) {
-		snowData = d;
-	});
 
 	// Import CSV files containing SWE data and store it.
-	App.importSnowData = function() {
+	function importSnowData() {
 		var refPath =      "data/snowData/SWE_ref_decadalAvg_HUCs.csv",
 			lowClimPath =  "data/snowData/SWE_lowClim_decadalAvg_HUCs.csv",
 			highClimPath = "data/snowData/SWE_highClim_decadalAvg_HUCs.csv";
@@ -77,11 +65,11 @@
 		d3.csv(highClimPath, function(d) {
 			App.snowData.highClim = d;
 		});	
-	};
+	}
 	
 	// Import CSV files containing evapotranspiration data and store it.
 	// Convert the imported data to Map objects for improved performance.
-	App.importEtData = function() {
+	function importEtData() {
 		var refPath = "data/etData/et_ref_decadalAvg.csv",
 			lowClimPath = "data/etData/et_lowClim_decadalAvg.csv",
 			fireSuppressPath = "data/etData/et_fireSuppress_decadalAvg.csv",
@@ -91,29 +79,29 @@
 		
 		App.etData = {};
 		d3.csv(refPath, function(d) {
-			App.etData.ref = App.mapEtData(d);
+			App.etData.ref = mapEtData(d);
 		});
 		d3.csv(lowClimPath, function(d) {
-			App.etData.lowClim = App.mapEtData(d);
+			App.etData.lowClim = mapEtData(d);
 		});
 		d3.csv(fireSuppressPath, function(d) {
-			App.etData.fireSuppress = App.mapEtData(d);
+			App.etData.fireSuppress = mapEtData(d);
 		});
 		d3.csv(highClimPath, function(d) {
-			App.etData.highClim = App.mapEtData(d);
+			App.etData.highClim = mapEtData(d);
 		});
 		d3.csv(managedPath, function(d) {
-			App.etData.managed = App.mapEtData(d);
+			App.etData.managed = mapEtData(d);
 		});
 		d3.csv(econExtremePath, function(d) {
-			App.etData.econExtreme = App.mapEtData(d);
+			App.etData.econExtreme = mapEtData(d);
 		});
-	};
+	}
 	
 	// Convert the imported et data into a Map object. Search for et values with
 	// Map.get(HRU_ID). Better performance than 
 	// looping over d to find the matching HRU_ID (10 ms vs 5 second) . 
-	App.mapEtData = function(d) {
+	function mapEtData(d) {
 		var etMap = new Map(),
 			i,
 			key,
@@ -135,14 +123,14 @@
 			etMap.set(key, value);
 		}
 		return etMap;
-	};
+	}
 	
 	// Generates color palates for the different data layers and legends. 
 	// Change the settings in here to edit map and legend colors. 
 	// NOTE: changing the number of classes for each data layer will cause 
 	// an error unless the appropriate adjustments are made to legendLabels.
 	// See legendLabels comments below. 
-	App.initColorsPalates = function(){
+	function initColorsPalates(){
 		
 		App.colorPalates = {};
 		
@@ -208,7 +196,7 @@
 					etClasses,
 					"string"
 				)];
-	};
+	}
 	
 	// Labels for the legend are hardcoded here. The number of labels has to 
 	// match the number of color classes for each data layer 
@@ -278,7 +266,7 @@
 	};
 	
 	// Changes the opacity of the main data layer.
-	App.setDataLayerOpacity = function(opacity) {
+	function setDataLayerOpacity(opacity) {
 		
 		if(opacity) {
 			App.settings.dataLayerOpacity = opacity;
@@ -291,10 +279,10 @@
 		} else {
 			activeDataLayer.setStyle({fillOpacity: App.settings.dataLayerOpacity})
 		}
-	};
+	}
 
 	// Creates the leaflet map and configures the available base layers.
-	App.addMap = function() {
+	function addMap() {
 		
 		// Enable using topojson in leaflet. 
 		// TODO not tested yet.
@@ -341,19 +329,19 @@
 		// Make a place to store data layers
 		App.mapLayers = {};
 		//L.control.scale().addTo(App.map);
-	};
+	}
 
 	// Changes the baselayer of the leaflet map. Called when GUI settings
 	// are changed.
-	App.setBaseLayer = function(layerName) {
+	function setBaseLayer(layerName) {
 		var newLayer = App.basemapLayers[layerName];
 		App.map.removeLayer(App.currentBasemap);
 		newLayer.addTo(App.map);
 		App.currentBasemap = newLayer;
-	};
+	}
 	
 	// Create a path to the correct json file based on current settings.
-	App.getPathToGeometry = function() {
+	function getPathToGeometry() {
 		var basePath = "data/geometry/dataLayers/",
 			dataPath,
 			type = App.settings.currentDataSettings.type,
@@ -379,7 +367,7 @@
 
 		dataPath = type + "/" + type + "_" + scenario + decade + ".json";
 		return basePath + dataPath;
-	};
+	}
 	
 	// Imports ww2100 data layer as json, creates a leaflet layer from the 
 	// json, styles the layer according to data type, then adds it to the
@@ -387,7 +375,7 @@
 	// Ensures only one ww2100 data layer is loaded at a time, and overlays
 	// the reference layers on top. Called when GUI settings are changed.
 	// settings: {type, date, scenario}
-	App.addWW2100DataLayer = function(settings) {
+	function addWW2100DataLayer(settings) {
 		
 		// Show the loading message.
 		$("#loading").removeClass("hidden");
@@ -412,12 +400,12 @@
 		App.settings.currentDataSettings = settings;
 		
 		// Import the json data layer saved at pathToGeometry
-		d3.json(App.getPathToGeometry(), function(error, importedJson) {
+		d3.json(getPathToGeometry(), function(error, importedJson) {
 			if(error) {
 				alert("There is currently no data for this setting. Soon to come!"); 
 				$("#loading").addClass("hidden");
-				App.clearMapLayers();
-				App.addReferenceLayers();
+				clearMapLayers();
+				addReferenceLayers();
 				throw new Error("Problem reading csv");
 			}
 			
@@ -443,7 +431,7 @@
 			} else {
 				App.settings.useVectorTiles = true;
 				// Assign a color property to each feature.
-				App.colorizeFeatures(importedJson);
+				colorizeFeatures(importedJson);
 
 				// Add the json as a vector tile layer. Much better performance
 				// than a regular json layer. 
@@ -454,44 +442,24 @@
 				activeDataLayer.setZIndex(2);
 
 				// Set the opacity of the data layer to the current opacity setting
-				App.setDataLayerOpacity();
+				setDataLayerOpacity();
 			}
 
-				
-			
-			
-			
-			
-			
-			
 			// Clear the map just before adding new features. 
-			App.clearMapLayers();
-			
-			
+			clearMapLayers();
 			
 			// layerToAdd is just a string that happens to be a key in mapLayers
 			App.mapLayers[layerToAdd] = activeDataLayer.addTo(App.map);
 			// Add the reference layers on TOP of the data layer.
-			App.addReferenceLayers();
+			addReferenceLayers();
 			// Hide the loading message.
 			$("#loading").addClass("hidden");
 		});	
 		// no need to wait for the data to load before making the lengend.
 		// That's why this is outside of the above import function, which 
 		// runs asynchronously.  
-		App.configureLegend();
-	};
-	
-	// Remove the specified data layer from the map. 
-	// TODO This isn't used anywhere. Mostly just for debug.
-	App.removeDataLayerFromMap = function(layerToRemove) {
-		if(App.mapLayers.hasOwnProperty(layerToRemove)) {
-			App.map.removeLayer(App.mapLayers[layerToRemove]);
-			delete App.mapLayers[layerToRemove];
-		} else {
-			console.log(layerToRemove + " layer does not exist");
-		}
-	};
+		configureLegend();
+	}
 	
 	// Styles individual feature polygons based on the data type. More specifically,
 	// returns styling instructions in a format that Leaflet can use.
@@ -512,6 +480,7 @@
 			case "agLandVal": fillColor = getAgriculturalLandValueColors(feature);
 				break;
 			case "aridity" : fillColor = getAridityColors(feature);
+				break;
 		}
 
 		return {
@@ -525,7 +494,7 @@
 	 * Adds a color property to each feature based on other property values.
 	 * @param {Object} data : geojson polygon map features 
 	 */
-	App.colorizeFeatures = function(data) {
+	function colorizeFeatures(data) {
 
 	    var i, colorizerFunction;
 	    
@@ -537,16 +506,15 @@
 			case "landValue": colorizerFunction = getLandValueColors;
 				break;
 			case "et" : colorizerFunction = getEtColors;
+				break;
 		}
-	    
+		
 	    // for each feature in the json...
 	    for (i = 0; i < data.features.length; i+=1) {
 			// add a color property.
 	        data.features[i].properties.color = colorizerFunction(data.features[i]);
-
 	    }
-
-	};
+	}
 	
 	
 	// Returns a color based on the lcCombined parameter of the provided 
@@ -797,7 +765,7 @@
 				});
 	}
 	
-	App.makeCitiesReferenceLayer = function(citiesJSON){
+	function makeCitiesReferenceLayer(citiesJSON){
 		var cityMarkerOptions = {
 		    radius: 4,
 		    // fillColor: "red",
@@ -820,9 +788,9 @@
 			}
 		});
 		App.referenceLayers.cities = L.layerGroup(labels);
-	};
+	}
 		
-	App.makeStreamsReferenceLayer = function(streamsJSON) {
+	function makeStreamsReferenceLayer(streamsJSON) {
 		var streamsStyle = {
 		    "color": "rgb(88,147,169)",
 		    "weight": 2,
@@ -832,9 +800,9 @@
 			style: streamsStyle
 		});
 		App.referenceLayers.streams = streamsLayer;
-	};
+	}
 	
-	App.makeOpenWaterReferenceLayer = function(openWaterJSON) {
+	function makeOpenWaterReferenceLayer(openWaterJSON) {
 		var openWaterStyle = {
 		    "color": "rgb(88,147,169)",
 		    "weight": 0,
@@ -844,10 +812,20 @@
 			style: openWaterStyle
 		});
 		App.referenceLayers.openWater = openWaterLayer;
-	};
+	}
 	
-	App.addReferenceLayers = function() {
-		App.clearReferenceLayers();
+	function clearReferenceLayers() {
+		// Loop through the App.referenceLayers, removing each one from the map.
+		var layer;
+		for(layer in App.referenceLayers) {
+			if(App.referenceLayers.hasOwnProperty(layer)) {
+				App.map.removeLayer(App.referenceLayers[layer]);
+			}
+		}
+	}
+	
+	function addReferenceLayers() {
+		clearReferenceLayers();
 
 		if(App.settings.showStreams) {
 			App.referenceLayers.streams.addTo(App.map);
@@ -856,22 +834,12 @@
 		if(App.settings.showCities) {
 			App.referenceLayers.cities.addTo(App.map);
 		}
-	};
-	
-	App.clearReferenceLayers = function() {
-		// Loop through the App.referenceLayers, removing each one from the map.
-		var layer;
-		for(layer in App.referenceLayers) {
-			if(App.referenceLayers.hasOwnProperty(layer)) {
-				App.map.removeLayer(App.referenceLayers[layer]);
-			}
-		}
-	};
+	}
 	
 	// Uses d3_queue to synchronously import json files. 
 	// TODO Could import json when App inits and just load that json, rather
 	// than always importing this data.
-	App.importReferenceLayers = function(callback) {
+	function importReferenceLayers(callback) {
 		var dataPaths = {
 			cities: "data/geometry/referenceLayers/cities.json",
 			streams: "data/geometry/referenceLayers/streams1.json",
@@ -883,10 +851,10 @@
 			.defer(d3.json, dataPaths.streams)
 			.defer(d3.json, dataPaths.openWater)
 			.awaitAll(callback);
-	};
+	}
 	
 	// Removes all json layers from the leaflet map.
-	App.clearMapLayers = function() {
+	function clearMapLayers() {
 		// Loop through the App.mapLayers, removing each one from the map.
 		var layer;
 		for(layer in App.mapLayers) {
@@ -895,9 +863,9 @@
 			}
 		}
 		App.mapLayers = {};
-	};
+	}
 	
-	App.configureLegend = function() {
+	function configureLegend() {
 		var legendContainer = d3.select("#legendContainer"),
 			legendItemContainer,
 			legendSection,
@@ -972,12 +940,9 @@
 					return maxLabelWidth + rectWidth + labelSpacer;
 				});
 		}
-	};
+	}
 
 // Event listeners for snow layer pointer interations --------------------------
-
-
-
 	function highlightFeature(e) {
 	    var layer = e.target,
 	    	scenario = App.settings.currentDataSettings.scenario,
@@ -1029,7 +994,7 @@
 		// TODO The reference layer is redrawn to keep it on top of the 
 		// SWE layer, which isn't great. It would be better if it was always
 		// on top, in a separate layer. Leaflet 0.x can't do this, I think.
-		App.addReferenceLayers();
+		addReferenceLayers();
 	}
 
 	function mouseoutSWEFeature(e) {
@@ -1048,18 +1013,18 @@
 	}
 
 	// Cache reference vector layers
-	App.initReferenceLayers = function(callback) {
+	function initReferenceLayers(callback) {
 		App.referenceLayers = {};
 		// Import reference layer json, make layers out of them, store them.
-		App.importReferenceLayers(function(error, data) {
+		importReferenceLayers(function(error, data) {
 			if (error) {throw error;}
 			
 			var citiesJSON = data[0],
 				streamsJSON = data[1],
 				openWaterJSON = data[2];
-			App.makeCitiesReferenceLayer(citiesJSON);
-			App.makeStreamsReferenceLayer(streamsJSON);
-			App.makeOpenWaterReferenceLayer(openWaterJSON);
+			makeCitiesReferenceLayer(citiesJSON);
+			makeStreamsReferenceLayer(streamsJSON);
+			makeOpenWaterReferenceLayer(openWaterJSON);
 			callback();
 		});
 	}
@@ -1070,22 +1035,25 @@
 	/**
 	 * This stuff happens when the app starts.
 	 */
-	App.init = function () {
-		App.addMap();
+	function init() {
+		addMap();
 		App.GUI.init();
-		App.initColorsPalates();
-		App.importSnowData();
-		App.importEtData();
-		App.initReferenceLayers(function(){
+		initColorsPalates();
+		importSnowData();
+		importEtData();
+		initReferenceLayers(function(){
 			App.GUI.loadDataByGUI();
 		});
-	};
-	
-	// This is some debug stuff
-	App.getActiveDataLayer = function() {
-		return activeDataLayer;
 	}
 
+	/*
+	 * Make some functions and variables public. 
+	 */
+	App.setDataLayerOpacity = setDataLayerOpacity;
+	App.setBaseLayer = setBaseLayer;
+	App.addWW2100DataLayer = addWW2100DataLayer;
+	App.addReferenceLayers = addReferenceLayers;
+	App.init = init;
 
 }()); // END App------------------------------------------------
 
