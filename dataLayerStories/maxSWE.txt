@@ -1,7 +1,7 @@
 <p class="storyTitle">Max Snow Water Equivalent</p>
 
 <p>
-This map show the maximum snow water equivalent (SWE), a measure of snowpack, 
+This map shows the maximum snow water equivalent (SWE), a measure of snowpack, 
 averaged by decade. Snowpack is highly sensitive to winter temperature. 
 Warmer winters in the Reference Case and High Climate Change scenarios lead to 
 an 74-94 percent reduction in snowpack during the 2090s. Snowpack becomes 
