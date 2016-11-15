@@ -1,3 +1,9 @@
+/*
+ * Allows leaflet to display vector tile layers created by App.buildTileLayer,
+ * a module added by the buildTileLayer.js script.
+ * origional author: Stanislav Sumbera, 
+ * http://bl.ocks.org/sumbera/c67e5551b21c68dc8299)
+ */
 L.CanvasTiles =  L.TileLayer.Canvas.extend({
     
     initialize: function (userDrawFunc, options,callContext) {
@@ -112,12 +118,7 @@ L.CanvasTiles =  L.TileLayer.Canvas.extend({
                 }
              );
         }
-
-
-        // console.timeEnd('process');
-
-      
-    },
+    }
 
     
 });

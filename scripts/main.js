@@ -26,22 +26,24 @@
  *    ColorUtils
  *    App.GUI
  *    App.buildTileLayer
- * 
  */
 (function(){
 	
 "use strict";
 
 // initialize local variables
-var App = {},
+var App = {}, // App is the namespace for this application.
 	map,
 	activeDataLayer,
 	snowData = {},
 	etData = {},
 	colorPalates = {},
-
-	// Various app settings shared throughout the code. They get altered by 
-	// GUI interactions mostly. 
+	legendLabels,
+	legendTitles,
+	basemapLayers,
+	currentBasemap,
+	mapLayers = {},
+	referenceLayers = {},
 	settings = {
 		showReferenceLayers: true,
 		showCities: true,
@@ -49,19 +51,14 @@ var App = {},
 		dataLayerOpacity: 0.8,
 		useVectorTiles: true,
 		currentDataSettings: ""
-	},
-	legendLabels,
-	legendTitles,
-	basemapLayers,
-	currentBasemap,
-	mapLayers = {},
-	referenceLayers = {};
-
-
-// Assign global reference to this app.
+	};
+	
+// Assign global variable referencing this app in order to make it public.
 window.App = App;
 
-// Import CSV files containing SWE data and store it.
+/*
+ * Import CSV files containing SWE data and store it.
+ */
 function importSnowData() {
 	var refPath =      "data/snowData/SWE_ref_decadalAvg_HUCs.csv",
 		lowClimPath =  "data/snowData/SWE_lowClim_decadalAvg_HUCs.csv",
@@ -78,8 +75,40 @@ function importSnowData() {
 	});	
 }
 
-// Import CSV files containing evapotranspiration data and store it.
-// Convert the imported data to Map objects for improved performance.
+/*
+ * Convert the imported et data into a Map object. Search for et values with
+ * Map.get(HRU_ID). Better performance than 
+ * looping over the data to find a matching HRU_ID (10 milliseconds vs 5 second). 
+ */
+function mapEtData(d) {
+	var etMap = new Map(),
+		i,
+		key,
+		value;
+		
+	for(i = 0; i < d.length; i += 1) {
+		key = Number(d[i].hru);
+		value = {
+			"2010": d[i]["2010"],
+			"2020": d[i]["2020"],
+			"2030": d[i]["2030"],
+			"2040": d[i]["2040"],
+			"2050": d[i]["2050"],
+			"2060": d[i]["2060"],
+			"2070": d[i]["2070"],
+			"2080": d[i]["2080"],
+			"2090": d[i]["2090"]
+		};
+		etMap.set(key, value);
+	}
+	return etMap;
+}
+
+
+/*
+ * Import CSV files containing evapotranspiration data and store it.
+ * Convert the imported data to Map objects for improved performance.
+ */
 function importEtData() {
 	var refPath = "data/etData/et_ref_decadalAvg.csv",
 		lowClimPath = "data/etData/et_lowClim_decadalAvg.csv",
@@ -108,38 +137,13 @@ function importEtData() {
 	});
 }
 
-// Convert the imported et data into a Map object. Search for et values with
-// Map.get(HRU_ID). Better performance than 
-// looping over d to find the matching HRU_ID (10 ms vs 5 second) . 
-function mapEtData(d) {
-	var etMap = new Map(),
-		i,
-		key,
-		value;
-		
-	for(i = 0; i < d.length; i += 1) {
-		key = Number(d[i].hru);
-		value = {
-			"2010": d[i]["2010"],
-			"2020": d[i]["2020"],
-			"2030": d[i]["2030"],
-			"2040": d[i]["2040"],
-			"2050": d[i]["2050"],
-			"2060": d[i]["2060"],
-			"2070": d[i]["2070"],
-			"2080": d[i]["2080"],
-			"2090": d[i]["2090"]
-		};
-		etMap.set(key, value);
-	}
-	return etMap;
-}
-
-// Generates color palates for the different data layers and legends. 
-// Change the settings in here to edit map and legend colors. 
-// NOTE: changing the number of classes for each data layer will cause 
-// an error unless the appropriate adjustments are made to legendLabels.
-// See legendLabels comments below. 
+/*
+ * Generates color palates for the different data layers and legends. 
+ * Change the settings in here to edit map and legend colors. 
+ * NOTE: changing the number of classes for each data layer will cause 
+ * an error unless the appropriate adjustments are made to legendLabels.
+ * See legendLabels comments below. 
+ */
 function initColorsPalates(){
 	
 	// Colors for generating color ramps; low color, high color,
@@ -177,7 +181,7 @@ function initColorsPalates(){
 				"rgb(206,238,255)", // subalpine forest (fmh)
 				"rgb(88,147,169)" // Open water
 			]];
-	// Set the color palette for snow
+	// Set the color palette for the other data layers
 	colorPalates.maxSWE = [ColorUtils.getColorRamp(
 				snowLow, 
 				snowHigh, 
@@ -206,9 +210,12 @@ function initColorsPalates(){
 			)];
 }
 
-// Labels for the legend are hardcoded here. The number of labels has to 
-// match the number of color classes for each data layer 
-// generated in initColorPalettes.
+/*
+ * Labels for the legend are hardcoded here. The number of labels has to 
+ * match the number of color classes for each data layer 
+ * generated in initColorPalettes. Using two dimensional arrays allows multiple
+ * groups of labels, like with landValue.
+ */
 legendLabels = {
 	lulc: [
 		[
@@ -264,7 +271,10 @@ legendLabels = {
 	]
 };
 
-// A legend title for each of the data layers
+/*
+ * A legend title for each of the data layers is hardcoded here.
+ * Uses arrays to allow multiple titles in one legend, like with landValue
+ */
 legendTitles = {
 	lulc: ["Landcover and Forest Type"],
 	maxSWE: ["Average Yearly<br/>Maximum Snow Water<br/>Equivalent in mm"],
@@ -273,14 +283,14 @@ legendTitles = {
 	et: ["Average Yearly<br/>Evapotranspiration<br/>in mm"]
 };
 
-// Changes the opacity of the main data layer.
+/*
+ * Changes the opacity of the main data layer.
+ */
 function setDataLayerOpacity(opacity) {
-	
 	if(opacity) {
 		settings.dataLayerOpacity = opacity;
 	}
-
-	// The function for changing opacity of the data layer depends on 
+	// The function name for changing opacity of the data layer depends on 
 	// whether vector tiles are used. 
 	if(settings.useVectorTiles){
 		activeDataLayer.setOpacity(settings.dataLayerOpacity);
@@ -289,11 +299,12 @@ function setDataLayerOpacity(opacity) {
 	}
 }
 
-// Creates the leaflet map and configures the available base layers.
+/*
+ * Creates the leaflet map and configures the available base layers.
+ */
 function addMap() {
 	
 	// Enable using topojson in leaflet. 
-	// TODO not tested yet.
 	L.TopoJSON = L.GeoJSON.extend({  
 	  addData: function(jsonData) {    
 	    if (jsonData.type === "Topology") {
@@ -317,8 +328,6 @@ function addMap() {
 	
 	// A selection of basemaps to choose from using the very handy 
 	// leaflet-oroviders.js
-	// TODO These options are not needed UNLESS users will have the ability
-	// to change the basemap.
 	basemapLayers = {
 			Esri_WorldTerrain: L.tileLayer.provider('Esri.WorldTerrain'),
 			ESRI_grayBasemap: L.tileLayer.provider('Esri.WorldGrayCanvas'),
@@ -337,8 +346,10 @@ function addMap() {
 
 }
 
-// Changes the baselayer of the leaflet map. Called when GUI settings
-// are changed.
+/*
+ * Changes the baselayer of the leaflet map. Called when GUI settings
+ * are changed.
+ */
 function setBaseLayer(layerName) {
 	var newLayer = basemapLayers[layerName];
 	map.removeLayer(currentBasemap);
@@ -346,7 +357,9 @@ function setBaseLayer(layerName) {
 	currentBasemap = newLayer;
 }
 
-// Create a path to the correct json file based on current settings.
+/*
+ * Create a path to the correct json file based on current settings.
+ */
 function getPathToGeometry() {
 	var basePath = "data/geometry/dataLayers/",
 		dataPath,
@@ -358,7 +371,6 @@ function getPathToGeometry() {
 	if(settings.currentDataSettings.type === "maxSWE") {
 		return "data/geometry/dataLayers/snow/wHuc12_simp.json";
 	}
-
 	if(settings.currentDataSettings.type === "et") {
 		return "data/geometry/dataLayers/et/hru_proj2.json";
 	}
@@ -375,12 +387,14 @@ function getPathToGeometry() {
 	return basePath + dataPath;
 }
 
-// Imports ww2100 data layer as json, creates a leaflet layer from the 
-// json, styles the layer according to data type, then adds it to the
-// leaflet map and configures the legend. 
-// Ensures only one ww2100 data layer is loaded at a time, and overlays
-// the reference layers on top. Called when GUI settings are changed.
-// dataSettings: {type, date, scenario}
+/*
+ * Imports ww2100 data layer as json, creates a leaflet layer from the 
+ * json, styles the layer according to data type, then adds it to the
+ * leaflet map and configures the legend. 
+ * Ensures only one ww2100 data layer is loaded at a time, and overlays
+ * the reference layers on top. Called when GUI settings are changed.
+ * dataSettings: {type, date, scenario}
+ */
 function addWW2100DataLayer(dataSettings) {
 	
 	// Show the loading message.
@@ -402,7 +416,7 @@ function addWW2100DataLayer(dataSettings) {
 		}
 	}
 	
-	// Other functions need the settings, too!
+	// save the settings globally
 	settings.currentDataSettings = dataSettings;
 	
 	// Import the json data layer saved at pathToGeometry
@@ -416,19 +430,19 @@ function addWW2100DataLayer(dataSettings) {
 		}
 		
 		// If the json is topojson, convert it to geojson
-		// console.log(importedJson.type);
 		if(importedJson.type === "Topology") {
 			for(key in importedJson.objects) {
 				importedJson = topojson.feature(importedJson, importedJson.objects[key]);
 			}
 		}
 		
+		// Create the polygons. If the data is not maxSWE, use vector tiles.
+		// Otherwise, use normal leaflet polygon rendering.
 		if(dataSettings.type === "maxSWE") {
-			// SWE is an interactive layer and should not be tiled.
 			settings.useVectorTiles = false;
 			activeDataLayer = L.geoJson(importedJson, {
 				style: styleWW2100Layer,
-				// raise up to 1 to increase performance, while adding 
+				// raise smoothFactor up to 1 to increase performance, while adding 
 				// weird gaps between polygons. 
 				smoothFactor: 0,
 				// This adds event listeners to each feature
@@ -467,14 +481,14 @@ function addWW2100DataLayer(dataSettings) {
 	configureLegend();
 }
 
-// Styles individual feature polygons based on the data type. More specifically,
-// returns styling instructions in a format that Leaflet can use.
-// TODO obsolete when using vector tiles. Might could delete this, unless
-// I want layers with polygon interactions. 
+/*
+ * Styles individual feature polygons based on the data type. More specifically,
+ * returns styling instructions in a format that Leaflet can use. Currently, 
+ * this is only used when viewing maxSWE data. All other data layers use vector 
+ * tiles, which are styled using colorizeFeatures(). 
+ */
 function styleWW2100Layer(feature){
-	var fillColor,
-		// The next two variables may never change, so could be hardcoded below later
-		stroke = false;		
+	var fillColor;		
 	
 	switch(settings.currentDataSettings.type){
 		case "lulc": fillColor = getlulcColor(feature);
@@ -485,20 +499,19 @@ function styleWW2100Layer(feature){
 			break;
 		case "agLandVal": fillColor = getAgriculturalLandValueColors(feature);
 			break;
-		case "aridity" : fillColor = getAridityColors(feature);
-			break;
 	}
 
 	return {
 		fillColor: fillColor,
-		stroke: stroke,
+		stroke: false,
 		fillOpacity: settings.dataLayerOpacity
 	};
 }
 
-/**
+/*
  * Adds a color property to each feature based on other property values.
- * @param {Object} data : geojson polygon map features 
+ * This is used to style vector tiles, and its a bit different from
+ * the function styleWW2100Layer, which is used to style untiled polygons.
  */
 function colorizeFeatures(data) {
 
@@ -515,16 +528,14 @@ function colorizeFeatures(data) {
 			break;
 	}
 	
-    // for each feature in the json...
     for (i = 0; i < data.features.length; i+=1) {
-		// add a color property.
         data.features[i].properties.color = colorizerFunction(data.features[i]);
     }
 }
 
-
-// Returns a color based on the lcCombined parameter of the provided 
-// lulc feature 
+/**
+ * Returns an rgb color based on the lcCombined parameter of the input feature
+ */
 function getlulcColor(feature) {
 	var colors = colorPalates.lulc[0];
 	switch (feature.properties.lcCombined) {
@@ -576,9 +587,10 @@ function getlulcColor(feature) {
     return "rgb(100,100,100)";
 }
 
-// Assign a color to the provided feature based on its SWE value.
+/*
+ * returns an rgb color based on the SWE value of the input feature.
+ */
 function getSnowWaterEquivalentColor(feature) {
-	// Get the snowWaterEquivalent value of that catchment
 	var hucID = feature.properties.HUC12,
 		colors = colorPalates.maxSWE[0],
 		maxSWE,
@@ -629,6 +641,9 @@ function getSnowWaterEquivalentColor(feature) {
 	}
 }
 
+/*
+ * Returns an rgb color based on the land value of the input feature.
+ */
 function getLandValueColors(feature) {
 	// If MEAN_DEV_V is > 0
 	var agVal = feature.properties.MEAN_AG_VA,
@@ -686,26 +701,9 @@ function getLandValueColors(feature) {
 	}
 }
 
-function getAridityColors(feature){
-	// Get the snowWaterEquivalent value of that catchment
-	var aridity = Number(feature.properties.aridClass),
-		colors = colorPalates.aridity;
-	
-	if(isNaN(aridity)) {
-		console.log("Aridity is NaN!");
-		return "rgb(100,100,100)"
-	}
-	switch (aridity) {
-		case 1: return colors[0];
-		case 2: return colors[1];
-		case 3: return colors[2];
-		case 4: return colors[3];
-		case 5: return colors[4];	
-		case 6: return colors[5];
-		case 7: return colors[6];
-	}
-}
-
+/*
+ * Returns an rgb based on the et value of the provided feature
+ */
 function getEtColors(feature) {
 	var HRU_ID = feature.properties.HRU_ID,
 		colors = colorPalates.et[0],
@@ -750,6 +748,10 @@ function getEtColors(feature) {
 	console.log("color problems!")
 }
 
+/*
+ * Creates a small black point symbol and text label for the cities reference
+ * layer.
+ */
 function createLabelIcon(labelClass,labelText){
 	
 	var html,
@@ -761,7 +763,6 @@ function createLabelIcon(labelClass,labelText){
 	
 	svgCircle = "<circle cx='5' cy='15' fill='black' r='3'>";
 	
-	//html = "<div><svg><circle cx='5' cy='5' fill='black' r='5'>"  + svgText + "</svg></div>";
 	html = "<div><svg width='100' height='20'>"  + svgText  + svgCircle + "</svg></div>";
 	
 	return L.divIcon({ 
@@ -771,6 +772,9 @@ function createLabelIcon(labelClass,labelText){
 			});
 }
 
+/*
+ * Create a cities reference layer based on the provided geojson.
+ */
 function makeCitiesReferenceLayer(citiesJSON){
 	var cityMarkerOptions = {
 	    radius: 4,
@@ -793,9 +797,12 @@ function makeCitiesReferenceLayer(citiesJSON){
 			labels.push( L.marker([lat,lng], {icon:createLabelIcon("textLabelclass", name)}));
 		}
 	});
-	referenceLayers.cities = L.layerGroup(labels);
+	return L.layerGroup(labels);
 }
-	
+
+/*
+ * Creates a streams reference layer based on the provided geojson
+ */
 function makeStreamsReferenceLayer(streamsJSON) {
 	var streamsStyle = {
 	    "color": "rgb(88,147,169)",
@@ -805,9 +812,12 @@ function makeStreamsReferenceLayer(streamsJSON) {
 	var streamsLayer = L.geoJson(streamsJSON, {
 		style: streamsStyle
 	});
-	referenceLayers.streams = streamsLayer;
+	return streamsLayer;
 }
 
+/*
+ * Creates an open water reference layer based on the provided geojson
+ */
 function makeOpenWaterReferenceLayer(openWaterJSON) {
 	var openWaterStyle = {
 	    "color": "rgb(88,147,169)",
@@ -817,11 +827,13 @@ function makeOpenWaterReferenceLayer(openWaterJSON) {
 	var openWaterLayer = L.geoJson(openWaterJSON, {
 		style: openWaterStyle
 	});
-	referenceLayers.openWater = openWaterLayer;
+	return openWaterLayer;
 }
 
+/*
+ * Removes the reference layers from the map.
+ */
 function clearReferenceLayers() {
-	// Loop through the referenceLayers, removing each one from the map.
 	var layer;
 	for(layer in referenceLayers) {
 		if(referenceLayers.hasOwnProperty(layer)) {
@@ -830,9 +842,12 @@ function clearReferenceLayers() {
 	}
 }
 
+/*
+ * Adds the reference layers to the map.
+ * Which layers are added depends on the current settings.
+ */
 function addReferenceLayers() {
 	clearReferenceLayers();
-
 	if(settings.showStreams) {
 		referenceLayers.streams.addTo(map);
 		referenceLayers.openWater.addTo(map);
@@ -842,9 +857,10 @@ function addReferenceLayers() {
 	}
 }
 
-// Uses d3_queue to synchronously import json files. 
-// TODO Could import json when App inits and just load that json, rather
-// than always importing this data.
+/*
+ * Imports the reference layer json. The callback function is called by
+ * d3_queue.queue, and the data is available in the callback. 
+ */
 function importReferenceLayers(callback) {
 	var dataPaths = {
 		cities: "data/geometry/referenceLayers/cities.json",
@@ -859,7 +875,9 @@ function importReferenceLayers(callback) {
 		.awaitAll(callback);
 }
 
-// Removes all json layers from the leaflet map.
+/*
+ * Removes all json layers from the leaflet map.
+ */
 function clearMapLayers() {
 	// Loop through the mapLayers, removing each one from the map.
 	var layer;
@@ -871,6 +889,10 @@ function clearMapLayers() {
 	mapLayers = {};
 }
 
+/*
+ * Sets up and displays the legend. The contents of the legend depends on the 
+ * current settings.
+ */
 function configureLegend() {
 	var legendContainer = d3.select("#legendContainer"),
 		legendItemContainer,
@@ -927,7 +949,8 @@ function configureLegend() {
 			.attr("fill", function(d, i) {
 				return d;
 			});
-			
+		
+		// Add text labels to the color swatches
 		legendItem.append("text")
 			.style("font-size", labelSizePx + "px")
 			.style("font-family", "Tahoma, Geneva, sans-serif")
@@ -941,43 +964,21 @@ function configureLegend() {
 			.each(function(d) {
 				maxLabelWidth = this.getBBox().width > maxLabelWidth ? this.getBBox().width : maxLabelWidth;
 			});
-			
+		
+		// Adjust the width of the legend svg feature
 		legendSection.attr("width", function() {
 				return maxLabelWidth + rectWidth + labelSpacer;
 			});
 	}
 }
 
-// Event listeners for snow layer pointer interations --------------------------
+/*
+ * Highlight the provided map feature. e is an event object, which contains
+ * a reference (target) to a map feature.
+ */
 function highlightFeature(e) {
     var layer = e.target,
-    	scenario = settings.currentDataSettings.scenario,
-    	date = settings.currentDataSettings.date,
-    	decade,
-    	maxSWE,
-    	allDecades,
-    	hucID = e.target.feature.properties.HUC12,
     	i;
-
-    // console.log(e.target.feature.properties);
-	// console.log(snowData);
-	if(date === "early"){
-		decade = "2010";
-	} else if (date === "mid"){
-		decade = "2050";
-	} else {
-		decade = "2090";
-	}
-
-	for(i = 0; i < snowData[scenario].length; i += 1) {
-		if(hucID === snowData[scenario][i].huc) {
-			allDecades = snowData[scenario][i]
-			maxSWE = snowData[scenario][i][decade]/100000;
-			break;
-		}
-	}
-
-	// console.log(allDecades);
 
     layer.setStyle({
 		stroke: true,
@@ -990,10 +991,17 @@ function highlightFeature(e) {
     }
 }
 
+/*
+ * remove highlight from map feature. e is an event object, which contains 
+ * a reference (target) to a map feature.
+ */
 function resetHighlight(e) {
     activeDataLayer.resetStyle(e.target);
 }
 
+/*
+ * Mousing over a SWE feature highlights it and creates a SWE chart.
+ */
 function mouseoverSWEFeature(e) {
 	highlightFeature(e);
 	App.GUI.makeSWEChart(e.target.feature);
@@ -1002,13 +1010,20 @@ function mouseoverSWEFeature(e) {
 	// on top, in a separate layer. Leaflet 0.x can't do this, I think.
 	addReferenceLayers();
 }
-
+ 
+/*
+ * Mousing out of a SWE feature removes the highlight and removes the SWE chart.
+ */
 function mouseoutSWEFeature(e) {
 	resetHighlight(e);
 	// remove SWEchart
 	d3.select("#SWEchart").remove();
 }
 
+/*
+ * Add event listeners to map features. Currently, this is only called when 
+ * the maxSWE datalayer is selected. 
+ */
 function onEachSWEFeature(feature, layer) {
 	if(settings.currentDataSettings.type==="maxSWE") {
 		layer.on({
@@ -1018,7 +1033,9 @@ function onEachSWEFeature(feature, layer) {
 	}
 }
 
-// Cache reference vector layers
+/*
+ * Cache reference vector layers
+ */
 function initReferenceLayers(callback) {
 	// Import reference layer json, make layers out of them, store them.
 	importReferenceLayers(function(error, data) {
@@ -1027,25 +1044,22 @@ function initReferenceLayers(callback) {
 		var citiesJSON = data[0],
 			streamsJSON = data[1],
 			openWaterJSON = data[2];
-		makeCitiesReferenceLayer(citiesJSON);
-		makeStreamsReferenceLayer(streamsJSON);
-		makeOpenWaterReferenceLayer(openWaterJSON);
+		referenceLayers.cities = makeCitiesReferenceLayer(citiesJSON);
+		referenceLayers.streams = makeStreamsReferenceLayer(streamsJSON);
+		referenceLayers.openWater = makeOpenWaterReferenceLayer(openWaterJSON);
 		callback();
 	});
 }
 
-
-// END Event listeners ---------------------------------------------------------
-
 /**
- * This stuff happens when the app starts.
+ * Initialize the application. 
  */
 function init() {
 	addMap();
-	App.GUI.init();
 	initColorsPalates();
 	importSnowData();
 	importEtData();
+	App.GUI.init();
 	initReferenceLayers(function(){
 		App.GUI.loadDataByGUI();
 	});
@@ -1063,7 +1077,9 @@ App.settings = settings;
 
 }()); // END App------------------------------------------------
 
-// Launch the app
+/*
+ * Launch the app
+ */
 $(document).ready(function() {
 	"use strict";
 	App.init();
