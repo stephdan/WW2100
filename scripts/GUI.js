@@ -540,7 +540,7 @@ function init() {
 	
 	// When the time slider changes, update the map
 	$("#timeRange").on("change", function() {
-		updateMap();
+		loadDataByGUI();
 	});
 	
 	//When the info button is clicked, open the story window
@@ -560,7 +560,6 @@ function init() {
 		App.setBaseLayer($(this).val());
 	});
 	
-	
 	// When a scenario button is clicked, load the correct data to the map.
 	$(".scenarioButton").on("click", function() {
 			// Get the id of the button
@@ -570,7 +569,7 @@ function init() {
 		// If this scenario isn't already selected, load it.
 		if(selectedScenario !== scenario) {
 			selectedScenario = scenario;
-			updateMap();
+			loadDataByGUI();
 		}
 	});
 	
