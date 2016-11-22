@@ -611,7 +611,7 @@ function getSnowWaterEquivalentColor(feature) {
 		if(hucID === snowData[scenario][i].huc) {
 			// Go ahead and bind the SWE data for all decades to the feature.
 			feature.properties.SWEdata = snowData[scenario][i];
-			maxSWE = snowData[scenario][i][decade]/100000;
+			maxSWE = snowData[scenario][i][decade]/10000;
 			break;
 		}
 	}
@@ -621,22 +621,22 @@ function getSnowWaterEquivalentColor(feature) {
 		return "rgb(100,100,100)";
 	}
 
-	if(maxSWE <= 0.5) {
+	if(maxSWE <= 25) {
 		return colors[0];
 	}
-	if(maxSWE <= 1.0) {
+	if(maxSWE <= 50) {
 		return colors[1];
 	}
-	if(maxSWE <= 5.0) {
+	if(maxSWE <= 100) {
 		return colors[2];
 	}
-	if(maxSWE <= 10.0) {
+	if(maxSWE <= 200) {
 		return colors[3];
 	}
-	if(maxSWE <= 50.0) {
+	if(maxSWE <= 300) {
 		return colors[4];
 	}
-	if(maxSWE > 50.0) {
+	if(maxSWE > 300) {
 		return colors[5];
 	}
 }
