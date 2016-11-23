@@ -166,7 +166,7 @@ function SWEChart(feature){
 				.attr("id", "SWEchart");
 
 	// Margins around the chart to make room for labels
-	margins = {top: 6, right: 24, bottom: 20, left: 40};
+	margins = {top: 6, right: 24, bottom: 20, left: 50};
 	
 	// The padding of the content window
 	padding = $("#chartWindowContent").innerHeight() - $("#chartWindowContent").height();
@@ -209,7 +209,7 @@ function SWEChart(feature){
 	// that the SWE is in millimeters.
 	data.forEach(function(d) {
         d.year = Number(d.year);
-        d.SWE = +d.SWE/100000;
+        d.SWE = +d.SWE;
     });
 
 	// Set up the scales for the axes. The y axis is a little special, and
