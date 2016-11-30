@@ -216,12 +216,12 @@ function SWEChart(feature){
 	// depends on the maximum SWE value for this feature. 
 	xScale.domain(d3.extent(data, function(d) { return d.year; }));
     yScale.domain([0, Math.ceil(d3.extent(data, function(d) {
-			if(d.SWE<=1) {
-				return 1;
-			} else if (d.SWE <= 10) {
-				return 10;
-			} else if (d.SWE <= 50) {
-				return 50;
+			if(d.SWE<=25) {
+				return 25;
+			} else if (d.SWE <= 100) {
+				return 100;
+			} else if (d.SWE <= 500) {
+				return 500;
 			} else {
 				return d.SWE;
 			}

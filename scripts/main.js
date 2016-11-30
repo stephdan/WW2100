@@ -54,8 +54,7 @@ var App = {}, // App is the namespace for this application.
 		currentDataSettings: ""
 	},
 	
-	SWE_breaksTest = 3,
-	unitDivider = 100000;
+	SWE_breaksTest = 2;
 	
 // Assign global variable referencing this app in order to make it public.
 window.App = App;
@@ -69,15 +68,15 @@ function mapMaxSWEData(d) {
 	for(i = 0; i < d.length; i += 1) {
 		key = Number(d[i].huc);
 		value = {
-			"2010": d[i]["2010"]/unitDivider,
-			"2020": d[i]["2020"]/unitDivider,
-			"2030": d[i]["2030"]/unitDivider,
-			"2040": d[i]["2040"]/unitDivider,
-			"2050": d[i]["2050"]/unitDivider,
-			"2060": d[i]["2060"]/unitDivider,
-			"2070": d[i]["2070"]/unitDivider,
-			"2080": d[i]["2080"]/unitDivider,
-			"2090": d[i]["2090"]/unitDivider
+			"2010": d[i]["2010"],
+			"2020": d[i]["2020"],
+			"2030": d[i]["2030"],
+			"2040": d[i]["2040"],
+			"2050": d[i]["2050"],
+			"2060": d[i]["2060"],
+			"2070": d[i]["2070"],
+			"2080": d[i]["2080"],
+			"2090": d[i]["2090"]
 		};
 		sweMap.set(key, value);
 	}
@@ -264,12 +263,12 @@ function initLegendLabels() {
 	if(SWE_breaksTest === 1) {
 		legendLabels.maxSWE = [
 			[
-				"0.0 to 0.5",
-				"0.5 to 1.0",
-				"1.0 to 5.0",
-				"5.0 to 10.0",
-				"10.0 to 50.0",
-				"50.0 and above"
+				"0 to 0.5",
+				"0.5 to 1",
+				"1 to 5",
+				"5 to 10",
+				"10 to 50",
+				"50 and above"
 			]
 		]
 	}
@@ -290,10 +289,10 @@ function initLegendLabels() {
 	if(SWE_breaksTest === 3) {
 		legendLabels.maxSWE = [
 			[
-				"0 to 1.0",
-				"1.0 to 5.0",
-				"5.0 to 10.0",
-				"10.0 to 50.0",
+				"0 to 1",
+				"1 to 5",
+				"5 to 10",
+				"10 to 50",
 				"50 to 100",
 				"100 and up"
 			]
@@ -323,10 +322,10 @@ function initLegendLabels() {
 		],
 		[
 			"Less than 500",
-			"501 to 1,000",
-			"1,001 to 1,500",
-			"1,501 to 2,000",
-			"2,001 to 2,500",
+			"500 to 1,000",
+			"1,000 to 1,500",
+			"1,500 to 2,000",
+			"2,000 to 2,500",
 			"More than 2,500"
 		]
 	];
