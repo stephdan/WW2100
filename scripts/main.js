@@ -235,6 +235,8 @@ function initColorsPalates(){
 				etClasses,
 				"string"
 			)];
+			
+	console.log(colorPalates);
 }
 
 /*
@@ -280,8 +282,8 @@ function initLegendLabels() {
 				"25 to 50",
 				"50 to 100",
 				"100 to 200",
-				"200 to 300",
-				"300 and above"
+				"200 to 400",
+				"400 and above"
 			]
 		]
 	}
@@ -809,10 +811,10 @@ function getSnowWaterEquivalentColor(feature) {
 		if(maxSWE <= 200) {
 			return colors[3];
 		}
-		if(maxSWE <= 300) {
+		if(maxSWE <= 400) {
 			return colors[4];
 		}
-		if(maxSWE > 300) {
+		if(maxSWE > 400) {
 			return colors[5];
 		}
 	}
