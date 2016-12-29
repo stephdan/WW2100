@@ -32,7 +32,7 @@
 "use strict";
 
 // initialize local variables
-var App = {}, // App is the namespace for this application.
+var App = {}, // App is the global namespace for this application.
 	map,
 	activeDataLayer,
 	snowData = {},
@@ -52,21 +52,30 @@ var App = {}, // App is the namespace for this application.
 		dataLayerOpacity: 0.8,
 		useVectorTiles: true,
 		currentDataSettings: ""
-	},
-	
-	SWE_breaksTest = 2;
+	};
 	
 // Assign global variable referencing this app in order to make it public.
 window.App = App;
 
-function mapMaxSWEData(d) {
+/*
+ * Convert imported maxSWE and ET data into a handy Map object to speed up
+ * performance.  
+ */
+function mapImportedData(d, type) {
 	var sweMap = new Map(),
 		i,
 		key,
+		arealUnit,
 		value;
 
+	if (type === "maxSWE") {
+		arealUnit = "huc";
+	} else {
+		arealUnit = "hru"
+	}
+
 	for(i = 0; i < d.length; i += 1) {
-		key = Number(d[i].huc);
+		key = Number(d[i][arealUnit]);
 		value = {
 			"2010": d[i]["2010"],
 			"2020": d[i]["2020"],
@@ -92,45 +101,15 @@ function importSnowData() {
 		highClimPath = "data/snowData/SWE_highClim_decadalAvg_HUCs.csv";
 	
 	d3.csv(refPath, function(d) {
-		snowData.ref = mapMaxSWEData(d);
+		snowData.ref = mapImportedData(d, "maxSWE");
 	});
 	d3.csv(lowClimPath, function(d) {
-		snowData.lowClim = mapMaxSWEData(d);
+		snowData.lowClim = mapImportedData(d, "maxSWE");
 	});
 	d3.csv(highClimPath, function(d) {
-		snowData.highClim = mapMaxSWEData(d);
+		snowData.highClim = mapImportedData(d, "maxSWE");
 	});	
 }
-
-/*
- * Convert the imported et data into a Map object. Search for et values with
- * Map.get(HRU_ID). Better performance than 
- * looping over the data to find a matching HRU_ID (10 milliseconds vs 5 second). 
- */
-function mapEtData(d) {
-	var etMap = new Map(),
-		i,
-		key,
-		value;
-		
-	for(i = 0; i < d.length; i += 1) {
-		key = Number(d[i].hru);
-		value = {
-			"2010": d[i]["2010"],
-			"2020": d[i]["2020"],
-			"2030": d[i]["2030"],
-			"2040": d[i]["2040"],
-			"2050": d[i]["2050"],
-			"2060": d[i]["2060"],
-			"2070": d[i]["2070"],
-			"2080": d[i]["2080"],
-			"2090": d[i]["2090"]
-		};
-		etMap.set(key, value);
-	}
-	return etMap;
-}
-
 
 /*
  * Import CSV files containing evapotranspiration data and store it.
@@ -145,22 +124,22 @@ function importEtData() {
 		econExtremePath = "data/etData/et_econExtreme_decadalAvg.csv";
 	
 	d3.csv(refPath, function(d) {
-		etData.ref = mapEtData(d);
+		etData.ref = mapImportedData(d, "et");
 	});
 	d3.csv(lowClimPath, function(d) {
-		etData.lowClim = mapEtData(d);
+		etData.lowClim = mapImportedData(d, "et");
 	});
 	d3.csv(fireSuppressPath, function(d) {
-		etData.fireSuppress = mapEtData(d);
+		etData.fireSuppress = mapImportedData(d, "et");
 	});
 	d3.csv(highClimPath, function(d) {
-		etData.highClim = mapEtData(d);
+		etData.highClim = mapImportedData(d, "et");
 	});
 	d3.csv(managedPath, function(d) {
-		etData.managed = mapEtData(d);
+		etData.managed = mapImportedData(d, "et");
 	});
 	d3.csv(econExtremePath, function(d) {
-		etData.econExtreme = mapEtData(d);
+		etData.econExtreme = mapImportedData(d, "et");
 	});
 }
 
@@ -262,58 +241,17 @@ function initLegendLabels() {
 		]
 	];
 
-	if(SWE_breaksTest === 1) {
-		legendLabels.maxSWE = [
-			[
-				"0 to 0.5",
-				"0.5 to 1",
-				"1 to 5",
-				"5 to 10",
-				"10 to 50",
-				"50 and above"
-			]
+	legendLabels.maxSWE = [
+		[
+			"0 to 25",
+			"25 to 50",
+			"50 to 100",
+			"100 to 200",
+			"200 to 400",
+			"400 and above"
 		]
-	}
-
-	if(SWE_breaksTest === 2) {
-		legendLabels.maxSWE = [
-			[
-				"0 to 25",
-				"25 to 50",
-				"50 to 100",
-				"100 to 200",
-				"200 to 400",
-				"400 and above"
-			]
-		]
-	}
-
-	if(SWE_breaksTest === 3) {
-		legendLabels.maxSWE = [
-			[
-				"0 to 1",
-				"1 to 5",
-				"5 to 10",
-				"10 to 50",
-				"50 to 100",
-				"100 and up"
-			]
-		]
-	}
-
-	if(SWE_breaksTest === 4) {
-		legendLabels.maxSWE = [
-			[
-				"0 to 10",
-				"10 to 50",
-				"50 to 100",
-				"100 to 300",
-				"300 to 500",
-				"500 and up"
-			]
-		]
-	}
-
+	];
+	
 	legendLabels.landValue = [
 		[
 			"Less than 250,000",
@@ -344,77 +282,6 @@ function initLegendLabels() {
 	];
 }
 
-
-// legendLabels = {
-// 	lulc: [
-// 		[
-// 			"Urban/Developed",
-// 			"Agriculture",
-// 			"Unforested",
-// 			"Subtropical Mixed Forest",
-// 			"Temperate Warm Mixed Forest",
-// 			"Cool Mixed Forest",
-// 			"Maritime Needleleaf Forest",
-// 			"Temperate Needleleaf",
-// 			"Moist Temperate Needleleaf Forest",
-// 			"Subalpine Forest",
-// 			"Open Water"
-// 		]
-// 	],
-// 	maxSWE: [
-// 		// [
-// 		// 	"0.0 to 0.5",
-// 		// 	"0.5 to 1.0",
-// 		// 	"1.0 to 5.0",
-// 		// 	"5.0 to 10.0",
-// 		// 	"10.0 to 50.0",
-// 		// 	"50.0 and above"
-// 		// ]
-// 		// [
-// 		// 	"0 to 25",
-// 		// 	"25 to 50",
-// 		// 	"50 to 100",
-// 		// 	"100 to 200",
-// 		// 	"200 to 300",
-// 		// 	"300 and above"
-// 		// ]
-// 		[
-// 			"0 to 1.0",
-// 			"1.0 to 5.0",
-// 			"5.0 to 10.0",
-// 			"10.0 to 50.0",
-// 			"50 to 100",
-// 			"100 and up"
-// 		]
-// 	],
-// 	landValue: [
-// 		[
-// 			"Less than 250,000",
-// 			"250,001 - 500,000",
-// 			"500,001 - 750,000",
-// 			"750,001 - 1,000,000",
-// 			"More than 1,000,000"
-// 		],
-// 		[
-// 			"Less than 500",
-// 			"501 to 1,000",
-// 			"1,001 to 1,500",
-// 			"1,501 to 2,000",
-// 			"2,001 to 2,500",
-// 			"More than 2,500"
-// 		]
-// 	],
-// 	et: [
-// 		[
-// 			"Less than 400",
-// 			"400 to 500",
-// 			"500 to 600",
-// 			"600 to 700",
-// 			"700 to 800",
-// 			"More than 800"
-// 		]
-// 	]
-// };
 
 /*
  * A legend title for each of the data layers is hardcoded here.
@@ -753,6 +620,8 @@ function getSnowWaterEquivalentColor(feature) {
 	}
 	
 	// TODO this loop is incredibly inefficient compared to using a Map. 
+	// However, Map objects may have compatibility issues, so this code might
+	// be needed later.
 	// for(i = 0; i < snowData[scenario].length; i += 1) {
 	// 	if(hucID === snowData[scenario][i].huc) {
 	// 		// Go ahead and bind the SWE data for all decades to the feature.
@@ -762,7 +631,6 @@ function getSnowWaterEquivalentColor(feature) {
 	// 	}
 	// }
 	
-
 	feature.properties.SWEdata = snowData[scenario].get(Number(hucID));
 
 	if(!feature.properties.SWEdata) {
@@ -772,97 +640,24 @@ function getSnowWaterEquivalentColor(feature) {
 
 	maxSWE = feature.properties.SWEdata[decade];
 
-	// if(isNaN(maxSWE)) {
-	// 	console.log("maxSWE is NaN!");
-	// 	return "rgb(100,100,100)";
-	// }
-
-	if(SWE_breaksTest === 1) {
-		if(maxSWE <= 0.5) {
-			return colors[0];
-		}
-		if(maxSWE <= 1) {
-			return colors[1];
-		}
-		if(maxSWE <= 5) {
-			return colors[2];
-		}
-		if(maxSWE <= 10) {
-			return colors[3];
-		}
-		if(maxSWE <= 50) {
-			return colors[4];
-		}
-		if(maxSWE > 50) {
-			return colors[5];
-		}
+	if(maxSWE <= 25) {
+		return colors[0];
 	}
-
-	if(SWE_breaksTest === 2) {
-		if(maxSWE <= 25) {
-			return colors[0];
-		}
-		if(maxSWE <= 50) {
-			return colors[1];
-		}
-		if(maxSWE <= 100) {
-			return colors[2];
-		}
-		if(maxSWE <= 200) {
-			return colors[3];
-		}
-		if(maxSWE <= 400) {
-			return colors[4];
-		}
-		if(maxSWE > 400) {
-			return colors[5];
-		}
+	if(maxSWE <= 50) {
+		return colors[1];
 	}
-
-	if(SWE_breaksTest === 3) {
-		if(maxSWE <= 1) {
-			return colors[0];
-		}
-		if(maxSWE <= 5) {
-			return colors[1];
-		}
-		if(maxSWE <= 10) {
-			return colors[2];
-		}
-		if(maxSWE <= 50) {
-			return colors[3];
-		}
-		if(maxSWE <= 100) {
-			return colors[4];
-		}
-		if(maxSWE > 100) {
-			return colors[5];
-		}
+	if(maxSWE <= 100) {
+		return colors[2];
 	}
-	
-	if(SWE_breaksTest === 4) {
-		if(maxSWE <= 10) {
-			return colors[0];
-		}
-		if(maxSWE <= 50) {
-			return colors[1];
-		}
-		if(maxSWE <= 100) {
-			return colors[2];
-		}
-		if(maxSWE <= 300) {
-			return colors[3];
-		}
-		if(maxSWE <= 500) {
-			return colors[4];
-		}
-		if(maxSWE > 500) {
-			return colors[5];
-		}
+	if(maxSWE <= 200) {
+		return colors[3];
 	}
-	
-
-
+	if(maxSWE <= 400) {
+		return colors[4];
+	}
+	if(maxSWE > 400) {
+		return colors[5];
+	}
 }
 
 /*
@@ -1002,8 +797,6 @@ function createLabelIcon(labelClass,labelText){
 function makeCitiesReferenceLayer(citiesJSON){
 	var cityMarkerOptions = {
 	    radius: 4,
-	    // fillColor: "red",
-	    // color: "red",
 	    weight: 1,
 	    opacity: 1,
 	    fillOpacity: 1

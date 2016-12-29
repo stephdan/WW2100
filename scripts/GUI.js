@@ -38,7 +38,6 @@ function updateSidebarLayout() {
 
 /*
  * Create a movable/resizable window to hold text about the current data layer.
- * Inspired by cartovis.com
  */
 function makeStoryWindow() {
 	// Create the window html and append it to the page. 
@@ -146,7 +145,7 @@ function formatSWEdata(SWEdata) {
 
 /*
  * Constructor for a line chart of SWE data associated with the passed-in
- * feature. Creates and displays the chart. Is dependant on there being a
+ * feature. Creates and displays the chart. Is requires the existence of a
  * #chartWindowContent div element.
  */
 function SWEChart(feature){
@@ -263,10 +262,8 @@ function SWEChart(feature){
 }
 
 
-// TODO It would be better if this wasn't dependent on the existance of a 
-// specific div id.
 /*
- * Function for resizing the SWEChart. It is dependent on a 
+ * Function for resizing the SWEChart. It is dependent on the existence of a 
  * "#chartWindowContent" div element.
  */
 SWEChart.prototype.resize = function() {
@@ -466,7 +463,6 @@ function loadDataByGUI() {
  * currently on display.
  */
 function showHideScenarioButtons(type) {
-	// Show and hide buttons based on the current scenario
 	$(".scenarioButton").each(function(i) {
 		var id = $(this).prop("id");
 		
@@ -592,6 +588,7 @@ function init() {
 
 	// Set the starting scenario to ref
 	selectedScenario = "ref";
+	
 	makeStoryWindow();
 	updateGUI();
 }

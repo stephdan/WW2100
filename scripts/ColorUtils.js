@@ -1,7 +1,7 @@
 /*
- * Some functions for managing color info.
+ * Some functions for managing color data.
  */
-ColorUtils = (function() {
+var ColorUtils = (function() {
 	
 "use strict";
 
